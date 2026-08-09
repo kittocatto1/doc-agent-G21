@@ -1,0 +1,17 @@
+Header
+------------------------------
+Member Name: Anisa Binte Asad 
+Student Number: 2105036 
+Sections Led: 
+
+Full Conversation
+------------------------------
+Me: what is p95 latency , short answer with example
+
+AI: p95 latency = the response time that 95% of your requests are faster than (and 5% are slower). It's a tail-latency metric — it tells you about your worst typical case, not the average.
+
+**Example:** if you run 100 queries against your FAISS index and sort the latencies, the p95 is the 95th value in that sorted list. So if 95 queries return in under 280ms and the remaining 5 take longer, your p95 latency is ~280ms — even if your *average* latency is much lower, say 50ms, because a few slow outlier queries don't get averaged away.
+
+That's why it's a better scalability metric than a simple average: it catches the queries that hit worst-case behavior (e.g., a query landing in a dense region of the HNSW graph) rather than being hidden by all the fast, typical ones.
+
+Me: 
