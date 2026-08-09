@@ -1,18 +1,11 @@
 #!/usr/bin/env bash
 # A1 — fetch or recreate your scanned corpus into data/raw/
-# IMPLEMENT: download/prepare your corpus (public-domain / openly licensed).
-set -euo pipefail
-echo "TODO: fetch corpus into data/raw/"
-#!/usr/bin/env bash
-
-# A1 — fetch or recreate your scanned corpus into data/raw/
-
 set -euo pipefail
 
 RAW_DIR="data/raw"
 mkdir -p "$RAW_DIR"
 
-# Subset for A2 (14 issues, 1975-1993). Extend this array toward the
+# Subset for A2 (15 issues, 1975-1993). Extend this array toward the
 # full 176-issue byte-magazine-YYYY-MM set for later milestones.
 ISSUES=(
   "byte-magazine-1975-09"
