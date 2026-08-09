@@ -1,7 +1,8 @@
 # Stage 0 — problem statement (one per group). Set by assignment.
-group_id: "G00"
-domain: "almanacs/panjika"
-data_speciality: "degraded-scans"   # ONE hard corpus property (English is not one)
-primary_nfr: "reproducible"
-nfr_target: "p95 latency <= 300ms"   # your concrete committed target
-corpus: {min_pages: 300, min_words: 60000, source_url: "", license: ""}
+group_id: "G21"
+domain: "retro-computing/tech journalism"
+data_speciality: "multi-column reading order"   
+primary_nfr: "scalable"
+nfr_target: "p95 latency <= 1.5s across full corpus"   # your concrete committed target
+corpus: {min_pages: 300, min_words: 60000, source_url: "https://archive.org/details/byte-magazine", license: "Internet Archive; permitted for educational use"}
+
