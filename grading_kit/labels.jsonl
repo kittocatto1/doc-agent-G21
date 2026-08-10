@@ -41,3 +41,29 @@ Much of the construction has to be done by following the component placement dia
 
 
 The 008A documentation provides only a brief definition of each software instruction. No information describing the circuit operation of the CPU is provided. A brief description of circuit operation is provided for the parallel interface kit and cassette adapter kit. Only a small amount of information is provided on the use and operation of the computer. Although the 008A documentation does include complete circuit diagrams with IC pinouts, absolutely no troubleshooting information is included. Logic circuit troubleshooting can be followed on the circuit diagram after you have checked wiring and component placement, but test points and voltages should be given on the power supply. Test points and waveforms should be given for devices such as a cassette tape adapter. Even in the"}
+
+
+{"page_id": "byte-magazine-1978-07_p013", "text": "DESIGNERS BEWARE: SOME 2716 CONFUSION
+
+I just came across a very untidy situation involving read only memory numbers which may be of interest to a great number of readers. We are all familiar by now with the advantages of the 2716 erasable read only memory; however, everyone should be aware that while the Intel version (and possibly others) requires only a single +5 V supply, Texas Instruments makes a similar device with identical memory organization, number TMS2716 that requires ±5 V and +12 V supplies. This part is designed to be pin compatible with the older 2708s. Texas Instruments has another part labeled TMS2516 which is pin compatible with an Intel type 2716, requiring only a +5 V supply. While this is assuredly somewhat bizarre, there seems to be argument amongst the two companies as to who claimed the name 2716 first. It is definitely something that many will be in need to be aware of.
+
+David Marke
+Solar Dynamics Ltd
+3904 Warehouse Row, Suite C
+Austin TX 78704
+
+
+HOW TO STAY IN CIRCULATION
+
+I was somewhat astonished (an understatement) to find, wrapped in the splendor of the March 1978 (I think) plain brown BYTE wrapper, an April 1978 Playboy. Now don't get me wrong, I enjoy looking at lovely ladies; in fact it is one of my most time consuming hobbies. However, I can pick up Hef's rag anywhere in Ottawa, and right now my computer needs more tips on operating than I do. So, if you would, I'd appreciate an issue of BYTE that matches the enclosed mailing sticker. Thank you.
+
+Kevin Szabo
+Box 86, Hillcrest Dr
+RR #1, Manotick
+Ontario CANADA K0A 2N0
+
+WHERE TO GET TECO
+
+Carl Helmers' editorial in the March 1978 BYTE, page 6, was interesting to me, since the LSI-11 can run the RT11 operating system, for which there is a version of real TECO (a superset of the old PDP6/PDP10 TECO) with most or all of the features he wants, plus ability to use floppies, etc. Sources for said TECO are available from DECUS for a minimal charge. I've worked on the
+
+Continued on page 120"}
