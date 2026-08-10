@@ -188,4 +188,86 @@ There are many materials which function as photoconductors. The simplest are bul
 42 April 1982 © BYTE Publications Inc"}
 
 
+{"page_id": "byte-magazine-1983-11_p441", "text": "use of <, <=, >, >=, ==, !=, etc. for comparison expressions
+
+string data type
+
+quoted character strings and character constants
+
+define statement for symbolic constants
+
+include statement for source-file inclusion
+
+macro preprocessor for textual manipulation
+
+RATFOR code is often easier to read and understand than the corresponding section of code as normally written in C. For example, the two following fragments of code each copy a string from one buffer to another:
+
+# RATFOR version
+
+for (i=1; from(i) != EOS; i=i+1)
+  to(i) = from(i)
+to(i) = EOS
+
+/* C version */
+
+char *t=to, *f=from;
+while (*t++ = *f++);
+
+One could argue that a good C compiler sometimes produces faster code, but in large programs the readability of the RATFOR style is often an advantage over the more terse C style.
+
+ACOS
+Amdahl
+Apollo
+AN/UYK
+Burroughs
+CDC
+Cray
+Data General
+DEC
+FACOM
+GEC
+HP
+HITAC
+Honeywell
+IBM
+Intel
+Interdata
+Modcomp
+Multics
+NCR
+Perkin-Elmer
+Prime
+Rolm
+SEL
+Tandem
+Univac
+Wang
+Xerox
+Machines running CP/M
+Machines running MS-DOS
+Machines running Unix
+
+Table 3: A partial list of manufacturers on whose machines the Software Tools package has been implemented to varying degrees of sophistication.
+
+ment of Energy. Since its inception in 1978, the group has become an international body performing the following functions:
+
+establishing and publishing standards for the primitives and tools and supporting an ongoing standards committee
+
+collecting and distributing information on current developments to avoid duplication of effort
+
+collecting and evaluating new utilities, extensions, and variants
+
+holding semiannual meetings in conjunction with the Usenix Unix users group
+
+publishing a newsletter and software catalog
+
+distributing tapes containing collections of utilities from different organizations
+
+Much of the tools' source code is now in the public domain and freely distributed. The primitives, however, are generally developed, licensed, and maintained by vendors.
+
+The standardization procedure used by the tools group is unusual. New utilities are collected and distributed early in their development phase, allowing users to experiment with new ideas and reject those that prove unportable or functionally undesirable. Code sharing also allows users and developers to glean ideas from new offerings and incorporate them into their own developments. As ideas are distilled and utilities enhanced or extended, the utilities are redistributed, and those receiving popular support are eventually returned to the tools group. There they pass to the Implementers Committee,"}
+
+
+
+
 
