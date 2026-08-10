@@ -6,7 +6,7 @@ from pdf2image import convert_from_path
 from ..contracts import Page
 
 RAW_DIR = Path("data/raw")
-PAGE_DIR = Path("data/raw/pages")
+PAGE_DIR = Path("data/interim/pages")
 
 
 def load_pages(cfg: dict) -> list[Page]:
