@@ -14,4 +14,1746 @@ AI: p95 latency = the response time that 95% of your requests are faster than (a
 
 That's why it's a better scalability metric than a simple average: it catches the queries that hit worst-case behavior (e.g., a query landing in a dense region of the HNSW graph) rather than being hidden by all the fast, typical ones.
 
+Me: allenai/olmOCR-2-7B-1025 and Qwen2-VL-2B-Instruct, which of these two model is better for dealing with a multi column and table/figure heavy larger corpus ?
+
+AI: Based on what's actually documented about these two models, this isn't close — olmOCR-2-7B-1025 is built specifically for your exact failure modes.
+
+Why olmOCR-2-7B wins on capability:
+
+It's fine-tuned via GRPO reinforcement learning specifically to boost performance at math equations, tables, and other tricky OCR cases. 
+alphaXiv
+Its training explicitly includes unit-test rewards for Natural Reading Order — ensuring correct sequential text flow and Table Accuracy — sampling random cells to verify positions and values. "Natural reading order" is literally your data speciality (multi-column) as a training objective.
+This is a release of the olmOCR model that's fine tuned from Qwen2.5-VL-7B-Instruct using the olmOCR-mix-1025 dataset — a much larger, more diverse training set (267,962 pages from over 100,000 PDFs sampled from diverse sources) than Qwen2-VL-2B ever saw for document-specific OCR. 
+alphaXiv
+It scores 82.4 on the olmOCR-bench evaluation, demonstrating strong performance on challenging OCR tasks including mathematical equations, tables, and complex document layouts — the exact task profile of BYTE pages (code listings, sidebars, tables, schematics).
+Qwen2-VL-2B-Instruct, by contrast, is a general-purpose small VLM — Qwen2-VL-2B features a 600M vision encoder and a 1.5B language model — not specifically tuned for document reading-order or table extraction at all.
+
+Why Qwen2-VL-2B is still in your comparison at all — it's the scalability lever:
+olmOCR-2-7B is a 7B model; Qwen2-VL-2B is 2B. That's your real trade-off, and it maps directly onto your scalable NFR:
+
+7B costs more VRAM/latency per page. At ~45k full-corpus pages, that compute cost compounds — relevant to whatever ingestion-time budget you're implicitly working with (even though your NFR's 1.5s target is query-time, not OCR-build-time, a 7B model still makes your dev-subset OCR pass slower this week).
+Note also: the team used the 72B teacher model rather than 7B, which improved performance by 11.8 points overall on olmOCR-Bench, with particularly strong gains on multi-column pages (+22.2) — meaning even within the olmOCR family, multi-column performance scales strongly with model size. That's a signal in favor of bigger models generally for your speciality, not evidence that 2B is competitive.
+
+Recommendation: use olmOCR-2-7B-1025 as your primary/benchmarked choice — it's purpose-built for exactly your data speciality (multi-column + tables), which directly strengthens Section 3's "why this model" justification. Keep Qwen2-VL-2B-Instruct as your fast/cheap fallback comparison point in the benchmark table, so your design_choices.md shows you actually traded off accuracy vs. compute rather than picking blind — that's the "one real trade-off" the form wants, and it's honest given your 4-day timeline (7B inference will be slower on your subset).
+
+One practical note: olmOCR-2-7B is designed to run through the olmOCR toolkit (via VLLM that can handle millions of documents at scale) rather than bare transformers. Worth checking your GPU access can handle that before locking it in as your Day 2 pick. 
+alphaXiv
+
+
+Me: But since the time is limited for this project and we have to deal with 224 issues, don't you think using Instruct-2B is better? As it is a light weight model, very short answer
+
+AI: Fair point , yes, Qwen2-VL-2B is the more realistic pick for actually getting through your subset in time.
+
+Me: But is it said the the Qwen2B model is better at capturing tables and multi column at all? This is not because of comparison with the other 7B model but since we are already making an accuracy tradeoff i want to know whether Qwen2B can even do those tasks
+
+AI: Good pushback — and honestly, I don't have direct published benchmark numbers for Qwen2-VL-**2B** specifically on tables/multi-column layout. What I found instead is evidence that should make you cautious, not reassured:
+
+**No direct evidence it's good at this — and some evidence pointing the other way:**
+- OmniDocBench found that most VLMs fail to recognize when dealing with newspapers, while pipeline tools achieve significantly better performance — and BYTE pages are structurally close to newspaper layout (dense multi-column, mixed with ads/sidebars). That's a warning sign for *any* general VLM, 2B included.
+- Within the Qwen2/2.5-VL family specifically, multi-column performance scales heavily with model size: the earlier citation showed a 72B teacher model improving multi-column scores by **+22.2 points** over the 7B version. That's a steep size-dependence on *exactly* your speciality — and 2B is smaller still than the 7B point on that curve. There's no published number for 2B, but the trend line doesn't favor it.
+- The general finding across sources: general-purpose VLMs demonstrate stronger generalization on unusual layouts, but that's a relative statement against pipeline tools — not evidence the 2B-scale model specifically handles multi-column/table structure well.
+
+**Honest answer: unproven, and the indirect evidence leans toward real risk**, not just "smaller = a bit weaker." Since I can't confirm this from published benchmarks either way, the responsible move — and the one your assignment explicitly wants (Section 3 asks for reproduced, benchmarked evidence, not assumed capability) — is to test Qwen2-VL-2B against your own held-out labelled BYTE pages *before* locking it in. If its F1 on genuinely multi-column pages is close to olmOCR-2-7B's, you have real justification for the lightweight choice. If it collapses specifically on multi-column pages (vs. doing fine on single-column ones), that's your evidence to either keep 7B or add a region-splitting preprocessing step so the 2B model only ever sees single-column crops.
+
+Me: but can you find evidence that the 7B model does pretty well in the OCR tasks of multi column and table figure heavy corpus? 
+also approximate how much time it will need to scan 224 issues
+
+AI: Now I have real numbers — and they answer both questions clearly.
+
+**Yes — strong direct evidence olmOCR-2-7B excels specifically at your two problem areas:**
+
+Per-category gains on olmOCR-Bench, olmOCR-2-7B-1025 achieves improvements of +19.7 (ArXiv), +14.8 (Old Scans Math), **+22.6 (Tables)**, **+16.1 (Multi-column)**, and +27.1 (Long Text) percentage points — Tables and Multi-column are literally its two largest documented gains. That's about as direct as evidence gets: it's not just "does OCR well," it's specifically strongest on your exact two failure modes.
+
+**And this also answers your last question about the 2B model, with real numbers:** a same-scale comparison table shows **Qwen3-VL-2B scoring 51.2 on Multi-column**, versus **Qwen3-VL-4B at 88.8** — a ~38-point collapse at the 2B tier, on the exact category you care about (this is Qwen3-VL not Qwen2-VL, so treat it as a same-family proxy rather than your exact model, but it's a much more direct data point than anything found earlier, and it strongly reinforces the caution from last time). Small VLMs cratering specifically on multi-column, while other categories degrade far less, looks like a real, reproducible pattern — not just family-size scaling in general.
+
+**Time estimate for 224 issues:****Throughput data found:** OlmOCR-2 scores 82.4 at 1.78 pages/sec (153,792 pages/day) benchmarked on a single H100 via vLLM. AI2 also states the FP8 build runs about 3,400 output tokens/sec on a single H100, fast enough that the release post quotes "10,000 pages for less than $2," with a batch estimate around $176–190 per million pages on rented GPUs.
+
+**Estimate for your corpus, using the 1.78 pages/sec figure (single H100, OCR inference only):**
+
+| Scope | Pages (per your A1 estimate) | Pure OCR compute time |
+|---|---|---|
+| Full 224 issues | ~45,000–50,000 | ~7–8 hours |
+| Your A2 dev subset (10–15 issues) | ~1,500–3,000 | ~14–28 minutes |
+
+**Important caveat — this is inference-only, not your real wall-clock time.** That 1.78 pages/sec figure assumes pages are already rendered as images and queued efficiently. Your actual pipeline also has to:
+- Download PDFs/JP2 sets from Internet Archive (200+ GB for the full run — bandwidth-bound, likely hours on its own)
+- Render pages to images at the right resolution
+- Run layout detection *before* OCR (a separate stage, separate compute)
+- Handle retries/rotation on failed pages
+
+A realistic multiplier for full end-to-end wall time is **2–4x the pure-OCR number** — so the full 224-issue run is more like **15–30 hours** all-in, not 7–8. For your subset, that's roughly **1–2 hours** end-to-end, which is exactly why the subset strategy from the original plan is the right call — the full run is a genuine multi-day compute job on its own, completely separate from your 4-day deadline.
+
+This is also good, citable evidence for `design_choices.md`: you can now write your subset-vs-full-corpus trade-off with an actual number attached ("full corpus ≈ 15–30h compute alone, infeasible in a 4-day sprint; subset ≈ 1–2h") instead of a vague "it's too big" — that specificity is exactly what the rubric rewards.
+
+Me: """
+BYTE Magazine OCR pipeline (single page / page range / full PDF) — local, open-weight OCR.
+
+Kaggle notebook setup (run once, in a notebook cell):
+    !pip install -q pymupdf opencv-python-headless bitsandbytes accelerate
+    !pip install -q "transformers>=4.49" --upgrade
+    # Notebook Settings -> Accelerator -> GPU (T4 x2 or P100) -- required for
+    # practical inference speed with a 7B vision-language model.
+    # No internet/API key needed: OCR runs fully locally, satisfying the
+    # sovereign/self-hosted deployment requirement.
+
+OCR model: allenai/olmOCR-2-7B-1025 (Apache-2.0, open-weight), a Qwen2.5-VL-7B
+model fine-tuned specifically for document OCR (reading order, tables, code,
+mixed layouts) -- see chat for full justification vs. Tesseract/TrOCR/Donut.
+Loaded once with 4-bit quantization by default so it fits Kaggle's free GPU.
+
+Design notes (carried over from the preprocessing pipeline, unchanged):
+    - No blind deskewing: each page is INSPECTED for skew; rotation only
+      applied if the measured angle exceeds SKEW_THRESHOLD_DEG. BYTE scans
+      are generally well-aligned, so most pages will show "deskewed: False".
+    - No blind denoising / contrast enhancement: both are gated by a
+      lightweight measurement of the page itself.
+    - No cropping, no column-splitting, no binarization, ever. The OCR model
+      receives the full, unmodified-geometry page and is explicitly
+      instructed to read multi-column layouts in correct order -- this
+      pipeline does not implement Stage 2 (Layout) yet.
+
+Three modes (pick one via CONFIG below, or CLI flags):
+    "single" -> OCR one page. Useful for quickly testing the pipeline or
+                inspecting prompt/preprocessing behavior on one page.
+    "range"  -> OCR a specific list/range of pages. Useful for benchmarking
+                a handful of representative pages (e.g., one per decade)
+                before committing to an OCR model or settings.
+    "all"    -> OCR every page in the PDF, once the pipeline is validated.
+
+All three modes reuse the exact same preprocessing + OCR functions, and the
+OCR model is loaded ONCE and reused across every page in the run.
+"""
+
+import argparse
+import math
+import os
+
+import cv2
+import fitz  # PyMuPDF
+import numpy as np
+import torch
+from PIL import Image
+from transformers import AutoProcessor, BitsAndBytesConfig, Qwen2_5_VLForConditionalGeneration
+
+
+# --------------------------------------------------------------------------
+# Config — edit this for quick notebook use, or override via CLI flags
+# (CLI flags take priority; see build_config() below).
+# --------------------------------------------------------------------------
+DEFAULT_CONFIG = {
+    "pdf_path": "/kaggle/input/datasets/birotihs/cse429-byte-01/magazine.pdf",       # path to the scanned PDF
+    "mode": "range",              # "single" | "range" | "all"
+    "page": 12,                    # used when mode == "single" (1-indexed)
+    "page_spec": "1-30",      # used when mode == "range"; comma list + ranges
+    "dpi": 300,                    # rendering resolution
+    "skew_threshold_deg": 0.5,     # only rotate if estimated skew exceeds this
+    "noise_threshold": 4.0,        # only denoise if estimated noise sigma exceeds this
+    "contrast_threshold": 45.0,    # only run CLAHE if grayscale std is below this
+    "ocr_model_id": "allenai/olmOCR-2-7B-1025",
+    "use_4bit_quant": True,        # keeps VRAM usage ~6GB; fits Kaggle's free GPU
+    "max_new_tokens": 4096,        # generation cap per page; raise for very dense pages
+    "max_image_longest_side": 1288,  # olmOCR's documented expected input scale --
+                                      # feeding it a raw 300 DPI page (thousands of
+                                      # patches) causes the vision encoder's
+                                      # quadratic self-attention to OOM.
+    "output_dir": "/kaggle/working/ocr_output",  # default Kaggle-writable path
+}
+
+
+# --------------------------------------------------------------------------
+# OCR model loading — call ONCE, reuse across all pages in a run.
+# --------------------------------------------------------------------------
+def load_ocr_model(model_id: str, use_4bit_quant: bool = True):
+    """
+    Load the local OCR model + processor once. Reusing this across pages
+    (instead of reloading per page) is what makes "range"/"all" modes
+    practical -- model load time dwarfs a single page's inference time.
+    """
+    if not torch.cuda.is_available():
+        print(
+            "WARNING: no GPU detected. A 7B vision-language model will be "
+            "extremely slow on CPU. On Kaggle, enable Settings -> Accelerator -> GPU."
+        )
+
+    quant_config = None
+    if use_4bit_quant and torch.cuda.is_available():
+        quant_config = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_compute_dtype=torch.bfloat16,
+            bnb_4bit_quant_type="nf4",
+            bnb_4bit_use_double_quant=True,
+        )
+
+    print(f"Loading OCR model: {model_id} (4-bit quant: {use_4bit_quant})...")
+    model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
+        model_id,
+        quantization_config=quant_config,
+        torch_dtype=torch.bfloat16,
+        device_map="auto",
+    ).eval()
+
+    # olmOCR shares Qwen2.5-VL-7B-Instruct's processor/tokenizer.
+    processor = AutoProcessor.from_pretrained("Qwen/Qwen2.5-VL-7B-Instruct")
+
+    print("OCR model loaded.")
+    return model, processor
+
+
+# --------------------------------------------------------------------------
+# Page extraction
+# --------------------------------------------------------------------------
+def extract_page_as_image(pdf_path: str, page_number: int, dpi: int = 300) -> np.ndarray:
+    """Render one PDF page (1-indexed) to a BGR image array."""
+    doc = fitz.open(pdf_path)
+    if not (1 <= page_number <= doc.page_count):
+        doc.close()
+        raise ValueError(f"page_number={page_number} out of range (PDF has {doc.page_count} pages).")
+
+    page = doc[page_number - 1]
+    zoom = dpi / 72
+    pix = page.get_pixmap(matrix=fitz.Matrix(zoom, zoom))
+
+    img = np.frombuffer(pix.samples, dtype=np.uint8).reshape(pix.height, pix.width, pix.n)
+    if pix.n == 4:
+        img = cv2.cvtColor(img, cv2.COLOR_RGBA2BGR)
+    elif pix.n == 3:
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+
+    doc.close()
+    return img
+
+
+def get_pdf_page_count(pdf_path: str) -> int:
+    doc = fitz.open(pdf_path)
+    count = doc.page_count
+    doc.close()
+    return count
+
+
+# --------------------------------------------------------------------------
+# Preprocessing — each step inspects the page first, and only acts if needed.
+# Nothing here crops, splits columns, or binarizes. (Unchanged from before.)
+# --------------------------------------------------------------------------
+def measure_skew_angle(image: np.ndarray) -> float:
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) if image.ndim == 3 else image
+    _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+    coords = np.column_stack(np.where(thresh > 0))
+    if coords.shape[0] < 50:
+        return 0.0
+    angle = cv2.minAreaRect(coords)[-1]
+    if angle < -45:
+        angle = 90 + angle
+    return -angle
+
+
+def deskew_if_needed(image: np.ndarray, threshold_deg: float) -> tuple[np.ndarray, bool]:
+    angle = measure_skew_angle(image)
+    if abs(angle) <= threshold_deg:
+        return image, False
+    (h, w) = image.shape[:2]
+    rot_matrix = cv2.getRotationMatrix2D((w // 2, h // 2), angle, 1.0)
+    rotated = cv2.warpAffine(image, rot_matrix, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
+    return rotated, True
+
+
+def estimate_noise_sigma(image: np.ndarray) -> float:
+    """Fast noise-level estimate (Immerkaer's method). Higher = noisier."""
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) if image.ndim == 3 else image
+    H, W = gray.shape
+    M = np.array([[1, -2, 1], [-2, 4, -2], [1, -2, 1]], dtype=np.float64)
+    conv = cv2.filter2D(gray.astype(np.float64), -1, M)
+    return np.sum(np.abs(conv)) * math.sqrt(0.5 * math.pi) / (6 * (W - 2) * (H - 2))
+
+
+def denoise_if_needed(image: np.ndarray, threshold: float) -> tuple[np.ndarray, bool]:
+    sigma = estimate_noise_sigma(image)
+    if sigma <= threshold:
+        return image, False
+    if image.ndim == 3:
+        result = cv2.fastNlMeansDenoisingColored(image, None, h=5, hColor=5, templateWindowSize=7, searchWindowSize=21)
+    else:
+        result = cv2.fastNlMeansDenoising(image, None, h=5, templateWindowSize=7, searchWindowSize=21)
+    return result, True
+
+
+def measure_contrast(image: np.ndarray) -> float:
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) if image.ndim == 3 else image
+    return float(gray.std())
+
+
+def enhance_contrast_if_needed(image: np.ndarray, threshold: float) -> tuple[np.ndarray, bool]:
+    contrast = measure_contrast(image)
+    if contrast >= threshold:
+        return image, False
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    if image.ndim == 3:
+        lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
+        l, a, b = cv2.split(lab)
+        result = cv2.cvtColor(cv2.merge((clahe.apply(l), a, b)), cv2.COLOR_LAB2BGR)
+    else:
+        result = clahe.apply(image)
+    return result, True
+
+
+def preprocess_page(image: np.ndarray, config: dict) -> tuple[np.ndarray, dict]:
+    """Inspect-then-act preprocessing. Returns the image plus a log of what fired."""
+    log = {}
+    image, log["deskewed"] = deskew_if_needed(image, config["skew_threshold_deg"])
+    image, log["denoised"] = denoise_if_needed(image, config["noise_threshold"])
+    image, log["contrast_enhanced"] = enhance_contrast_if_needed(image, config["contrast_threshold"])
+    return image, log
+
+
+# --------------------------------------------------------------------------
+# OCR via the local olmOCR model — same function used regardless of mode
+# --------------------------------------------------------------------------
+OCR_PROMPT = (
+    "This is a full, unmodified scanned page from a 1970s-1990s computer "
+    "magazine (BYTE Magazine). It may use a 2-3 column layout, with code "
+    "listings, tables, figures, captions, and advertisements.\n\n"
+    "Transcribe ALL text on the page, reading in correct order: "
+    "top-to-bottom within each column, left column before right column. "
+    "Preserve code listings verbatim, including indentation. For "
+    "figures/tables/ads, transcribe any caption or label text and skip "
+    "non-text visual content. Do not summarize, reorder, or omit anything."
+)
+
+
+def resize_for_ocr(image: np.ndarray, max_longest_side: int) -> np.ndarray:
+    """
+    Downscale so the longest side matches max_longest_side, preserving aspect
+    ratio. This does NOT touch the preprocessed/saved image elsewhere in the
+    pipeline -- it only affects what's fed to the OCR model, following
+    olmOCR's documented expected input scale (longest dim = 1288px). Feeding
+    a raw 300 DPI page instead produces thousands of vision-encoder patches
+    and causes an out-of-memory error in self-attention (quadratic cost).
+    """
+    h, w = image.shape[:2]
+    longest = max(h, w)
+    if longest <= max_longest_side:
+        return image  # already small enough; upscaling would just waste compute
+    scale = max_longest_side / longest
+    new_w, new_h = int(round(w * scale)), int(round(h * scale))
+    return cv2.resize(image, (new_w, new_h), interpolation=cv2.INTER_AREA)
+
+
+def run_local_ocr(image: np.ndarray, model, processor, max_new_tokens: int, max_longest_side: int) -> str:
+    """Send one full page image to the locally-loaded OCR model, return transcribed text."""
+    image = resize_for_ocr(image, max_longest_side)
+    rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) if image.ndim == 3 else image
+    pil_image = Image.fromarray(rgb_image)
+
+    messages = [{"role": "user", "content": [{"type": "image"}, {"type": "text", "text": OCR_PROMPT}]}]
+    chat_text = processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+
+    inputs = processor(text=[chat_text], images=[pil_image], padding=True, return_tensors="pt")
+    inputs = {k: v.to(model.device) for k, v in inputs.items()}
+
+    with torch.no_grad():
+        generated_ids = model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=False)
+
+    # Strip the input prompt tokens, keep only newly generated text.
+    trimmed_ids = [out_ids[len(in_ids):] for in_ids, out_ids in zip(inputs["input_ids"], generated_ids)]
+    output_text = processor.batch_decode(trimmed_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)
+    return output_text[0]
+
+
+# --------------------------------------------------------------------------
+# Page selection (shared by "single" / "range" / "all")
+# --------------------------------------------------------------------------
+def parse_page_spec(spec: str, total_pages: int) -> list[int]:
+    """Parse a page spec like "1,5,10-12" into a sorted list of unique page numbers."""
+    pages = set()
+    for part in spec.split(","):
+        part = part.strip()
+        if not part:
+            continue
+        if "-" in part:
+            start, end = part.split("-")
+            pages.update(range(int(start), int(end) + 1))
+        else:
+            pages.add(int(part))
+    return sorted(p for p in pages if 1 <= p <= total_pages)
+
+
+def get_page_list(config: dict) -> list[int]:
+    """Resolve the page list to process based on the selected mode."""
+    total_pages = get_pdf_page_count(config["pdf_path"])
+    if config["mode"] == "single":
+        return [config["page"]]
+    elif config["mode"] == "range":
+        return parse_page_spec(config["page_spec"], total_pages)
+    elif config["mode"] == "all":
+        return list(range(1, total_pages + 1))
+    else:
+        raise ValueError(f"Unknown mode: {config['mode']!r} (expected 'single', 'range', or 'all')")
+
+
+# --------------------------------------------------------------------------
+# Per-page processing (extract -> preprocess -> OCR), reused by every mode
+# --------------------------------------------------------------------------
+def process_page(pdf_path: str, page_number: int, config: dict, model, processor) -> dict:
+    image = extract_page_as_image(pdf_path, page_number, dpi=config["dpi"])
+    processed_image, preprocess_log = preprocess_page(image, config)
+    text = run_local_ocr(
+        processed_image, model, processor,
+        max_new_tokens=config["max_new_tokens"],
+        max_longest_side=config["max_image_longest_side"],
+    )
+    return {"page": page_number, "text": text, "preprocessing_applied": preprocess_log}
+
+
+# --------------------------------------------------------------------------
+# Orchestration
+# --------------------------------------------------------------------------
+def run(config: dict) -> list[dict]:
+    os.makedirs(config["output_dir"], exist_ok=True)
+
+    # Load once, reuse for every page -- critical for "range"/"all" modes.
+    model, processor = load_ocr_model(config["ocr_model_id"], config["use_4bit_quant"])
+
+    page_list = get_page_list(config)
+    print(f"Mode: {config['mode']} | Pages to process: {page_list}")
+
+    results = []
+    for page_number in page_list:
+        print(f"\nProcessing page {page_number}...")
+        result = process_page(config["pdf_path"], page_number, config, model, processor)
+        print(f"  Preprocessing applied: {result['preprocessing_applied']}")
+
+        out_path = os.path.join(config["output_dir"], f"page_{page_number:04d}.txt")
+        with open(out_path, "w", encoding="utf-8") as f:
+            f.write(result["text"])
+        print(f"  Saved: {out_path}")
+
+        results.append(result)
+
+    return results
+
+
+# --------------------------------------------------------------------------
+# CLI — optional; overrides DEFAULT_CONFIG. Safe to ignore in a notebook
+# (just edit DEFAULT_CONFIG above and call run(DEFAULT_CONFIG) directly).
+# Uses parse_known_args so it won't crash on Jupyter/Kaggle's own kernel args.
+# --------------------------------------------------------------------------
+def build_config() -> dict:
+    parser = argparse.ArgumentParser(description="BYTE Magazine local OCR pipeline")
+    parser.add_argument("--pdf", dest="pdf_path")
+    parser.add_argument("--mode", choices=["single", "range", "all"])
+    parser.add_argument("--page", type=int)
+    parser.add_argument("--page-spec", dest="page_spec")
+    parser.add_argument("--dpi", type=int)
+    parser.add_argument("--output-dir", dest="output_dir")
+    parser.add_argument("--no-quant", dest="use_4bit_quant", action="store_false")
+    args, _unknown = parser.parse_known_args()
+
+    config = dict(DEFAULT_CONFIG)
+    for key, value in vars(args).items():
+        if value is not None:
+            config[key] = value
+    return config
+
+
+if __name__ == "__main__":
+    cfg = build_config()
+    run(cfg)
+I used this code to run the OCR, also pls can you tell me for the vectored database is it necessary to also save the page numbers in the OCR? and for this particular code ran on kaggle it took around 40 mins for completion of scanning 12 pages , so pls recalculate the time or try to find things in the code that would make this process faster
+
+AI: **1. Page numbers in the vector DB — yes, absolutely necessary.**
+
+This isn't optional for your project — it's structurally required:
+- Your own A1 schema (Section 3) already includes `page_num`, `doc_id`, `chunk_id`, `reading_order_idx` as per-chunk fields — you designed this correctly back in A1.
+- The `cite` tool in the fixed agent interface exists specifically to attach the source page to the answer — without page numbers in your index, `cite()` has nothing to attach.
+- Grounding/citation accuracy is graded (Section 5's evidence, and E14 in eval/metrics.py) — an answer with no traceable page reference can't be scored as grounded.
+- Practically: store `page_num` (and ideally `doc_id`/issue identifier) as metadata on every chunk in `index/chunk.py` and `index/store.py`, not just the embedding vector — FAISS itself doesn't carry metadata, so you need a parallel lookup (dict/dataframe/sqlite) mapping vector ID → `{doc_id, page_num, chunk_id, reading_order_idx}`.
+
+**2. Why 40 minutes for 12 pages, and the recalculated full-corpus time**
+
+40 min ÷ 12 pages = **~200 sec/page**, versus the 1.78 pages/sec (≈0.56 sec/page) H100+vLLM benchmark from earlier — you're running **~350x slower** than that reference number. That gap is fully explained by your code, and it's fixable. Three real bottlenecks:
+
+- **`load_in_4bit` (bitsandbytes/NF4) is a memory-saving trick, not a speed trick.** It keeps VRAM low enough to fit Kaggle's free GPU, but bnb 4-bit *inference* dequantizes weights on-the-fly during generation, which is genuinely slow — commonly 3–10x slower than bf16 for autoregressive decoding on the same hardware. You need this on Kaggle's T4/P100 (16GB) to fit a 7B model at all, but it's a major cost.
+- **No vLLM / no batching.** Your loop calls `model.generate()` once per page (batch size 1) using plain HuggingFace `transformers`. The 1.78 pages/sec H100 figure came from **vLLM**, which uses continuous batching and PagedAttention to keep the GPU saturated across many pages simultaneously — bare HF `generate()` in a for-loop leaves most of the GPU idle between forward passes.
+- **Hardware gap.** Kaggle's free T4/P100 is roughly 10–15x slower than an H100 for this kind of workload even before the above two factors.
+
+**Recalculated full-corpus estimate at your measured 200 sec/page:**
+
+| Scope | Pages | Time at current rate |
+|---|---|---|
+| Full 224 issues | ~45,000–50,000 | **~104–116 days** |
+| Your dev subset (10–15 issues) | ~1,500–3,000 | **~3.5–7 days** |
+
+Your subset alone now exceeds your entire 4-day deadline on Kaggle's free GPU as configured. This needs fixing before Day 2/3, not after.
+
+**What will actually make this faster, ranked by impact:**
+
+1. **Switch off bnb 4-bit if VRAM allows, or move to a quantization format with fast inference kernels (AWQ/GPTQ/FP8), not bnb-NF4.** bnb-NF4 is optimized for QLoRA *training* memory savings, not generation speed. If your Kaggle GPU is P100 (16GB) or T4×2, check whether bf16 fits (7B model ≈14GB in bf16) — that alone could be several times faster than 4-bit bnb, even with less headroom.
+2. **Batch multiple pages per `generate()` call** instead of looping one page at a time — `processor(...)` already accepts lists of images; feeding e.g. 4–8 pages per batch will use the GPU far more efficiently than one at a time, since attention/matmul throughput scales sub-linearly with batch size on modern GPUs.
+3. **Use the actual olmOCR toolkit (vLLM-backed) instead of raw `transformers.generate()`**, if you can get it running in the Kaggle environment — this is what produced the 1.78 pages/sec H100 number, and vLLM's continuous batching would help even on a weaker GPU, just proportionally less than on H100.
+4. **Cap `max_new_tokens` closer to what pages actually need.** 4096 is a hard ceiling; if your held-out labelled pages show most transcriptions finish well under that (check actual generated token counts), lowering it reduces worst-case decode time per page without losing text.
+5. **Seriously consider renting a cloud GPU for the OCR run instead of Kaggle's free tier.** Given the earlier citation — a batch estimate around $176–190 per million pages on rented GPUs — even your full 45–50k page corpus would cost under $10 on a rented H100 with the proper vLLM pipeline, and finish in the ~7–8 hours estimated earlier instead of 100+ days. For a 4-day deadline, this is very likely the pragmatic move for at least your dev subset, and it's a completely legitimate design choice to document ("switched from local Kaggle GPU to rented cloud H100 for OCR throughput" is a real, gradable trade-off for `design_choices.md`).
+
+**Bottom line:** don't run "all" mode on Kaggle's free GPU with this exact config — even your subset won't finish in time. Fix bullets 1–2 first (they're free, just code changes), test the new pages/sec rate on your 12-page benchmark again, and recalculate before deciding whether you still need to move to rented compute.
+
+Me: If I use this tool  layout:    {model: "detectron2:layout", score_thr: 0.5} along with the QwenVL2B , then will it perform almost as good as the 7B model?
+
+AI: Genuinely good instinct — and there's real evidence for it, though with an important caveat.
+
+**Yes, this pattern is well-documented: pairing layout detection with a small recognition model can close (or even beat) the gap against a much larger end-to-end VLM.**
+
+- A striking example: GLM-OCR, at just **0.9B parameters**, achieves a score of 94.62 on OmniDocBench V1.5, ranking #1 overall — beating far larger models — via a two-stage pipeline that pairs the language decoder with the PP-DocLayout-V3 layout detection model. That's the exact architecture you're proposing (layout-first, then a lighter recognizer), and it's currently a top performer.
+- More generally: pipeline systems ... pair lightweight detection models with VLM-based recognizers, achieving strong accuracy with modular efficiency — this is described as a real, competitive category, not a hack.
+- Direct evidence it beats "just throw it all at a big VLM": a financial-document study found directly feeding full PDFs into the VLM yields the lowest performance in every configuration ... structured processing is essential for reliable data extraction — and this held even when compared against Qwen3-VL-8B-Instruct as a strong end-to-end baseline.
+
+**Why this logically fits your case specifically:** the reason small VLMs (like Qwen2-VL-2B, or the Qwen3-VL-2B data point from earlier at 51.2 on multi-column) struggle isn't that they can't *read* text — it's that they can't reliably *figure out reading order* across a messy multi-column page on their own. If `vision/layout.py` does that job first — segmenting the page into ordered regions — you're no longer asking the 2B model to solve reading-order-detection *and* transcription simultaneously; it just has to transcribe cleanly-cropped single-column regions in the order layout gives it. That's a much easier task, and it's exactly why the pattern above works.
+
+**The real caveat — this isn't free, and it's not guaranteed to fully close the gap:**
+- Pipeline tools ... suffer from inter-stage error propagation ... every downstream field extractor has to reconstruct structure from that stream — if `detectron2:layout` misdetects a column boundary or merges two regions, your OCR model faithfully transcribes the *wrong* thing, and there's no recovery. A monolithic 7B model reading the whole page can sometimes route around a single ambiguous region; a pipeline can't self-correct across stages the same way.
+- No source above benchmarks *this specific pairing* (Detectron2 + Qwen2-VL-2B) against olmOCR-2-7B. GLM-OCR's 0.9B result used a purpose-built layout model (PP-DocLayout-V3) and a recognizer co-designed/trained for that pipeline — not an off-the-shelf combination. Your result depends heavily on how good `detectron2:layout`'s column segmentation actually is on BYTE's specific pages (sidebars, boxed code, ads breaking columns).
+
+**Practical recommendation:** this is worth testing, not assuming. Run your held-out labelled pages through: (a) raw Qwen2-VL-2B, (b) layout-segmented-then-Qwen2-VL-2B, (c) raw olmOCR-2-7B. If (b) closes most of the gap to (c), you have a genuinely strong, well-justified, fast pipeline — and a great `design_choices.md` trade-off story backed by both external evidence and your own numbers. If layout segmentation itself struggles on your messiest pages (heavy ads/sidebars), the errors will show up directly in (b)'s F1, telling you honestly whether to keep 7B for this corpus instead.
+
+
+Me: can you pls give the code for 3 of the choices and save their results accordingly in separate folders, i want to test a single page first 
+
+
+but this code will experiment 3 pipelines okay? 
+
+pls generate the code
+
+AI: Good idea — before you commit to any of these, you want real numbers on your own labelled pages. Let me check the docx/pdf skill isn't needed here (pure Python), and write this as a proper script file since it's a substantial multi-pipeline benchmark tool, not a snippet.
+
+Three-pipeline OCR comparison script for BYTE Retriever — tests raw Qwen2-VL-2B, layout-segmented Qwen2-VL-2B, and raw olmOCR-2-7B on the same page(s), saving outputs to separate folders with timing.
+Three-pipeline OCR comparison script for BYTE Retriever — tests raw Qwen2-VL-2B, layout-segmented Qwen2-VL-2B, and raw olmOCR-2-7B on the same page(s), saving outputs to separate folders with timing.
+Three-pipeline OCR comparison script for BYTE Retriever — tests raw Qwen2-VL-2B, layout-segmented Qwen2-VL-2B, and raw olmOCR-2-7B on the same page(s), saving outputs to separate folders with timing.
+Done
+---------------------------------------------------------------------------
+ImportError                               Traceback (most recent call last)
+/tmp/ipykernel_23/4105496729.py in <cell line: 0>()
+     52 import torch
+     53 from PIL import Image
+---> 54 from transformers import AutoProcessor, BitsAndBytesConfig, Qwen2_5_VLForConditionalGeneration, Qwen2VLForConditionalGeneration
+     55 
+     56 
+
+/usr/local/lib/python3.12/dist-packages/transformers/utils/import_utils.py in __getattr__(self, name)
+   2340         elif name in self._class_to_module:
+   2341             try:
+-> 2342                 module = self._get_module(self._class_to_module[name])
+   2343                 value = getattr(module, name)
+   2344             except (ModuleNotFoundError, RuntimeError, AttributeError) as e:
+
+/usr/local/lib/python3.12/dist-packages/transformers/utils/import_utils.py in _get_module(self, module_name)
+   2574             return importlib.import_module("." + module_name, self.__name__)
+   2575         except Exception as e:
+-> 2576             raise e
+   2577 
+   2578     def __reduce__(self):
+
+/usr/local/lib/python3.12/dist-packages/transformers/utils/import_utils.py in _get_module(self, module_name)
+   2572     def _get_module(self, module_name: str):
+   2573         try:
+-> 2574             return importlib.import_module("." + module_name, self.__name__)
+   2575         except Exception as e:
+   2576             raise e
+
+/usr/lib/python3.12/importlib/__init__.py in import_module(name, package)
+     88                 break
+     89             level += 1
+---> 90     return _bootstrap._gcd_import(name[level:], package, level)
+     91 
+     92 
+
+/usr/local/lib/python3.12/dist-packages/transformers/models/auto/processing_auto.py in <module>
+     23 from ...dynamic_module_utils import get_class_from_dynamic_module, resolve_trust_remote_code
+     24 from ...feature_extraction_utils import FeatureExtractionMixin
+---> 25 from ...image_processing_utils import ImageProcessingMixin
+     26 from ...processing_utils import ProcessorMixin
+     27 from ...tokenization_python import TOKENIZER_CONFIG_FILE
+
+/usr/local/lib/python3.12/dist-packages/transformers/image_processing_utils.py in <module> 22 from huggingface_hub.dataclasses import validate_typed_dict
+     23 
+---> 24 from .image_processing_base import BatchFeature, ImageProcessingMixin
+     25 from .image_transforms import center_crop, normalize, rescale
+     26 from .image_utils import (
+
+/usr/local/lib/python3.12/dist-packages/transformers/image_processing_base.py in <module>
+     23 from .dynamic_module_utils import custom_object_save
+     24 from .feature_extraction_utils import BatchFeature as BaseBatchFeature
+---> 25 from .image_utils import is_valid_image, load_image
+     26 from .utils import (
+     27     IMAGE_PROCESSOR_NAME,
+
+/usr/local/lib/python3.12/dist-packages/transformers/image_utils.py in <module>
+     52 
+     53 if is_torchvision_available():
+---> 54     from torchvision.io import ImageReadMode, decode_image
+     55     from torchvision.transforms import InterpolationMode
+     56     from torchvision.transforms.functional import pil_to_tensor
+
+/usr/local/lib/python3.12/dist-packages/torchvision/__init__.py in <module>
+      8 # .extensions) before entering _meta_registrations.
+      9 from .extension import _HAS_OPS  # usort:skip
+---> 10 from torchvision import _meta_registrations, datasets, io, models, ops, transforms, utils  # usort:skip
+     11 
+     12 try:
+
+/usr/local/lib/python3.12/dist-packages/torchvision/datasets/__init__.py in <module>
+----> 1 from ._optical_flow importFlyingChairs, FlyingThings3D, HD1K, KittiFlow, Sintel
+      2 from ._stereo_matching import (
+      3     CarlaStereo,
+      4     CREStereo,
+      5     ETH3DStereo,
+
+/usr/local/lib/python3.12/dist-packages/torchvision/datasets/_optical_flow.py in <module>
+     10 from PIL import Image
+     11 
+---> 12 from ..io.image import decode_png, read_file
+     13 from .folder import default_loader
+     14 from .utils import _read_pfm, verify_str_arg
+
+/usr/local/lib/python3.12/dist-packages/torchvision/io/__init__.py in <module>
+     16     VideoMetaData,
+     17 )
+---> 18 from .image import (
+     19     decode_avif,
+     20     decode_gif,
+
+/usr/local/lib/python3.12/dist-packages/torchvision/io/image.py in <module>
+      6 
+      7 from ..extension import _load_library
+----> 8 from ..utils import _log_api_usage_once
+      9 
+     10 
+
+/usr/local/lib/python3.12/dist-packages/torchvision/utils.py in <module>
+      9 import numpy as np
+     10 import torch
+---> 11 from PIL import __version__ as PILLOW_VERSION_STRING, Image, ImageColor, ImageDraw, ImageFont12 
+     13 __all__ = [
+
+/usr/local/lib/python3.12/dist-packages/PIL/ImageDraw.py in <module>
+     37 from typing import cast
+     38 
+---> 39 from . import Image, ImageColor, ImageFont, ImageText
+     40 
+     41 TYPE_CHECKING = False
+
+/usr/local/lib/python3.12/dist-packages/PIL/ImageText.py in <module>
+      6 
+      7 from . import ImageFont
+----> 8 from ._typing import _Ink
+      9 
+     10 
+
+ImportError: cannot import name '_Ink' from 'PIL._typing' (/usr/local/lib/python3.12/dist-packages/PIL/_typing.py)
+Message collapsed
+Diagnosed dependency conflict between torchvision and Pillow versions
+Diagnosed dependency conflict between torchvision and Pillow versions
+
+This is a dependency-version conflict, not a bug in the script — transformers>=4.49 --upgrade pulled in packages that left Pillow in a broken/partial state relative to what torchvision expects (PIL.ImageText trying to import _Ink that isn't in your installed PIL._typing).
+
+Fix — force-reinstall Pillow cleanly, then restart the kernel:
+
+python
+!pip install -q --force-reinstall --no-deps "pillow>=10.4,<11"
+
+Then Kaggle: Run → Restart & Clear Session (or just restart the kernel) — this matters, because Python has already partially imported the broken package into memory; a plain re-run of the cell won't fix it, you need a fresh interpreter.
+
+After restarting, re-run your setup cell in this order:
+
+python
+!pip install -q pymupdf opencv-python-headless bitsandbytes accelerate
+!pip install -q --force-reinstall --no-deps "pillow>=10.4,<11"
+!pip install -q "transformers>=4.49" --upgrade
+!pip install -q layoutparser
+!pip install -q "git+https://github.com/facebookresearch/detectron2.git"
+
+Putting the Pillow pin after the base installs but before the transformers upgrade keeps it from getting silently bumped again by a later package's dependency resolution.
+
+If that specific error persists, the fallback is pinning torchvision to match instead:
+
+python
+!pip install -q --force-reinstall "torchvision==0.19.1" "torch==2.4.1"
+
+(match versions to whatever your Kaggle image's CUDA build actually needs — check with !python -c "import torch; print(torch.__version__, torch.version.cuda)" first).
+
+Once it imports cleanly, re-run the script cell as before.
+
+"""
+BYTE Magazine OCR pipeline comparison — 3 pipelines, same page(s), separate
+output folders + timing, so you can benchmark before committing to one model.
+
+Kaggle notebook setup (run once, in a notebook cell):
+    !pip install -q pymupdf opencv-python-headless bitsandbytes accelerate
+    !pip install -q "transformers>=4.49" --upgrade
+    !pip install -q layoutparser
+    !pip install -q "git+https://github.com/facebookresearch/detectron2.git"
+    # Notebook Settings -> Accelerator -> GPU (T4 x2 or P100)
+    # Detectron2 install from source can take several minutes on first run.
+    # No internet/API key needed for inference: everything runs locally.
+
+Three pipelines compared, on the SAME page(s):
+    A) "qwen2vl_2b_raw"     -> Qwen2-VL-2B-Instruct, full page, no layout step.
+                               Fast, lightweight, but per earlier benchmarking
+                               discussion, weakest on multi-column reading order.
+    B) "qwen2vl_2b_layout"  -> detectron2 (PubLayNet) layout detection first,
+                               crops regions in reading order (column-aware),
+                               then Qwen2-VL-2B-Instruct OCRs each region and
+                               results are concatenated. Tests whether an
+                               explicit layout stage closes the gap for a
+                               small model (see chat for the GLM-OCR /
+                               PP-DocLayout evidence this is based on).
+    C) "olmocr_7b_raw"      -> allenai/olmOCR-2-7B-1025, full page, no layout
+                               step (it's trained end-to-end for reading
+                               order). This is your accuracy reference point.
+
+All three pipelines share the EXACT SAME preprocessing (inspect-then-act
+deskew/denoise/contrast) and the EXACT SAME page extraction, so the only
+variable being tested is the OCR/layout approach itself.
+
+Outputs land in:
+    {output_dir}/qwen2vl_2b_raw/page_XXXX.txt
+    {output_dir}/qwen2vl_2b_layout/page_XXXX.txt   (+ page_XXXX_regions.json)
+    {output_dir}/olmocr_7b_raw/page_XXXX.txt
+    {output_dir}/comparison_summary.json           (timing + region counts)
+
+Start with mode="single" on one page (default: page 12, matching your
+earlier benchmark) before spending time/GPU-hours on a full range.
+"""
+
+import argparse
+import json
+import math
+import os
+import time
+
+import cv2
+import fitz  # PyMuPDF
+import numpy as np
+import torch
+from PIL import Image
+from transformers import AutoProcessor, BitsAndBytesConfig, Qwen2_5_VLForConditionalGeneration, Qwen2VLForConditionalGeneration
+
+
+# --------------------------------------------------------------------------
+# Config
+# --------------------------------------------------------------------------
+DEFAULT_CONFIG = {
+    "pdf_path": "/kaggle/input/datasets/birotihs/cse429-byte-01/magazine.pdf",
+    "mode": "single",              # "single" | "range" | "all"
+    "page": 12,                    # used when mode == "single" (1-indexed)
+    "page_spec": "1-30",           # used when mode == "range"
+    "dpi": 300,
+    "skew_threshold_deg": 0.5,
+    "noise_threshold": 4.0,
+    "contrast_threshold": 45.0,
+
+    "qwen2vl_model_id": "Qwen/Qwen2-VL-2B-Instruct",
+    "olmocr_model_id": "allenai/olmOCR-2-7B-1025",
+    "use_4bit_quant": True,        # applies to BOTH models; keeps VRAM low on Kaggle
+
+    "layout_model_config": "lp://PubLayNet/faster_rcnn_R_50_FPN_3x/config",
+    "layout_score_thr": 0.5,       # matches config.yaml's layout.score_thr
+    "layout_column_gap_px": 40,    # x-gap used to group regions into columns
+
+    "max_new_tokens": 4096,
+    "max_image_longest_side": 1288,  # olmOCR's + Qwen2-VL's expected input scale
+
+    "output_dir": "/kaggle/working/ocr_output",
+    "run_pipelines": ["qwen2vl_2b_raw", "qwen2vl_2b_layout", "olmocr_7b_raw"],
+}
+
+
+# --------------------------------------------------------------------------
+# Page extraction (shared by all 3 pipelines)
+# --------------------------------------------------------------------------
+def extract_page_as_image(pdf_path: str, page_number: int, dpi: int = 300) -> np.ndarray:
+    doc = fitz.open(pdf_path)
+    if not (1 <= page_number <= doc.page_count):
+        doc.close()
+        raise ValueError(f"page_number={page_number} out of range (PDF has {doc.page_count} pages).")
+    page = doc[page_number - 1]
+    zoom = dpi / 72
+    pix = page.get_pixmap(matrix=fitz.Matrix(zoom, zoom))
+    img = np.frombuffer(pix.samples, dtype=np.uint8).reshape(pix.height, pix.width, pix.n)
+    if pix.n == 4:
+        img = cv2.cvtColor(img, cv2.COLOR_RGBA2BGR)
+    elif pix.n == 3:
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    doc.close()
+    return img
+
+
+def get_pdf_page_count(pdf_path: str) -> int:
+    doc = fitz.open(pdf_path)
+    count = doc.page_count
+    doc.close()
+    return count
+
+
+def parse_page_spec(spec: str, total_pages: int) -> list[int]:
+    pages = set()
+    for part in spec.split(","):
+        part = part.strip()
+        if not part:
+            continue
+        if "-" in part:
+            start, end = part.split("-")
+            pages.update(range(int(start), int(end) + 1))
+        else:
+            pages.add(int(part))
+    return sorted(p for p in pages if 1 <= p <= total_pages)
+
+
+def get_page_list(config: dict) -> list[int]:
+    total_pages = get_pdf_page_count(config["pdf_path"])
+    if config["mode"] == "single":
+        return [config["page"]]
+    elif config["mode"] == "range":
+        return parse_page_spec(config["page_spec"], total_pages)
+    elif config["mode"] == "all":
+        return list(range(1, total_pages + 1))
+    raise ValueError(f"Unknown mode: {config['mode']!r}")
+
+
+# --------------------------------------------------------------------------
+# Preprocessing (shared, unchanged, inspect-then-act)
+# --------------------------------------------------------------------------
+def measure_skew_angle(image: np.ndarray) -> float:
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) if image.ndim == 3 else image
+    _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+    coords = np.column_stack(np.where(thresh > 0))
+    if coords.shape[0] < 50:
+        return 0.0
+    angle = cv2.minAreaRect(coords)[-1]
+    if angle < -45:
+        angle = 90 + angle
+    return -angle
+
+
+def deskew_if_needed(image: np.ndarray, threshold_deg: float) -> tuple[np.ndarray, bool]:
+    angle = measure_skew_angle(image)
+    if abs(angle) <= threshold_deg:
+        return image, False
+    (h, w) = image.shape[:2]
+    rot_matrix = cv2.getRotationMatrix2D((w // 2, h // 2), angle, 1.0)
+    rotated = cv2.warpAffine(image, rot_matrix, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
+    return rotated, True
+
+
+def estimate_noise_sigma(image: np.ndarray) -> float:
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) if image.ndim == 3 else image
+    H, W = gray.shape
+    M = np.array([[1, -2, 1], [-2, 4, -2], [1, -2, 1]], dtype=np.float64)
+    conv = cv2.filter2D(gray.astype(np.float64), -1, M)
+    return np.sum(np.abs(conv)) * math.sqrt(0.5 * math.pi) / (6 * (W - 2) * (H - 2))
+
+
+def denoise_if_needed(image: np.ndarray, threshold: float) -> tuple[np.ndarray, bool]:
+    sigma = estimate_noise_sigma(image)
+    if sigma <= threshold:
+        return image, False
+    if image.ndim == 3:
+        result = cv2.fastNlMeansDenoisingColored(image, None, h=5, hColor=5, templateWindowSize=7, searchWindowSize=21)
+    else:
+        result = cv2.fastNlMeansDenoising(image, None, h=5, templateWindowSize=7, searchWindowSize=21)
+    return result, True
+
+
+def measure_contrast(image: np.ndarray) -> float:
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) if image.ndim == 3 else image
+    return float(gray.std())
+
+
+def enhance_contrast_if_needed(image: np.ndarray, threshold: float) -> tuple[np.ndarray, bool]:
+    contrast = measure_contrast(image)
+    if contrast >= threshold:
+        return image, False
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    if image.ndim == 3:
+        lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
+        l, a, b = cv2.split(lab)
+        result = cv2.cvtColor(cv2.merge((clahe.apply(l), a, b)), cv2.COLOR_LAB2BGR)
+    else:
+        result = clahe.apply(image)
+    return result, True
+
+
+def preprocess_page(image: np.ndarray, config: dict) -> tuple[np.ndarray, dict]:
+    log = {}
+    image, log["deskewed"] = deskew_if_needed(image, config["skew_threshold_deg"])
+    image, log["denoised"] = denoise_if_needed(image, config["noise_threshold"])
+    image, log["contrast_enhanced"] = enhance_contrast_if_needed(image, config["contrast_threshold"])
+    return image, log
+
+
+def resize_for_ocr(image: np.ndarray, max_longest_side: int) -> np.ndarray:
+    h, w = image.shape[:2]
+    longest = max(h, w)
+    if longest <= max_longest_side:
+        return image
+    scale = max_longest_side / longest
+    new_w, new_h = int(round(w * scale)), int(round(h * scale))
+    return cv2.resize(image, (new_w, new_h), interpolation=cv2.INTER_AREA)
+
+
+# --------------------------------------------------------------------------
+# Shared OCR-call helper — works for any Qwen2-VL-family causal LM + processor
+# --------------------------------------------------------------------------
+OCR_PROMPT_FULL_PAGE = (
+    "This is a full, unmodified scanned page from a 1970s-1990s computer "
+    "magazine (BYTE Magazine). It may use a 2-3 column layout, with code "
+    "listings, tables, figures, captions, and advertisements.\n\n"
+    "Transcribe ALL text on the page, reading in correct order: "
+    "top-to-bottom within each column, left column before right column. "
+    "Preserve code listings verbatim, including indentation. For "
+    "figures/tables/ads, transcribe any caption or label text and skip "
+    "non-text visual content. Do not summarize, reorder, or omit anything."
+)
+
+OCR_PROMPT_REGION = (
+    "This is one cropped region from a scanned page of a 1970s-1990s "
+    "computer magazine (BYTE Magazine). It has already been isolated as a "
+    "single reading-order unit (e.g. one column, one sidebar, or one code "
+    "listing) by a layout-detection step.\n\n"
+    "Transcribe ALL text in this region, top to bottom. Preserve code "
+    "listings verbatim, including indentation. Do not summarize, reorder, "
+    "or omit anything."
+)
+
+
+def run_vlm_ocr(image: np.ndarray, model, processor, prompt: str,
+                 max_new_tokens: int, max_longest_side: int) -> str:
+    """Send one image to a locally-loaded Qwen2-VL-family model, return text."""
+    image = resize_for_ocr(image, max_longest_side)
+    rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) if image.ndim == 3 else image
+    pil_image = Image.fromarray(rgb_image)
+
+    messages = [{"role": "user", "content": [{"type": "image"}, {"type": "text", "text": prompt}]}]
+    chat_text = processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+
+    inputs = processor(text=[chat_text], images=[pil_image], padding=True, return_tensors="pt")
+    inputs = {k: v.to(model.device) for k, v in inputs.items()}
+
+    with torch.no_grad():
+        generated_ids = model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=False)
+
+    trimmed_ids = [out_ids[len(in_ids):] for in_ids, out_ids in zip(inputs["input_ids"], generated_ids)]
+    output_text = processor.batch_decode(trimmed_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)
+    return output_text[0]
+
+
+# --------------------------------------------------------------------------
+# Model loaders — each called ONCE, reused across every page/pipeline call
+# --------------------------------------------------------------------------
+def load_qwen2vl_2b(model_id: str, use_4bit_quant: bool):
+    quant_config = None
+    if use_4bit_quant and torch.cuda.is_available():
+        quant_config = BitsAndBytesConfig(
+            load_in_4bit=True, bnb_4bit_compute_dtype=torch.bfloat16,
+            bnb_4bit_quant_type="nf4", bnb_4bit_use_double_quant=True,
+        )
+    print(f"Loading Qwen2-VL-2B: {model_id} (4-bit quant: {use_4bit_quant})...")
+    model = Qwen2VLForConditionalGeneration.from_pretrained(
+        model_id, quantization_config=quant_config, torch_dtype=torch.bfloat16, device_map="auto",
+    ).eval()
+    processor = AutoProcessor.from_pretrained(model_id)
+    print("Qwen2-VL-2B loaded.")
+    return model, processor
+
+
+def load_olmocr_7b(model_id: str, use_4bit_quant: bool):
+    quant_config = None
+    if use_4bit_quant and torch.cuda.is_available():
+        quant_config = BitsAndBytesConfig(
+            load_in_4bit=True, bnb_4bit_compute_dtype=torch.bfloat16,
+            bnb_4bit_quant_type="nf4", bnb_4bit_use_double_quant=True,
+        )
+    print(f"Loading olmOCR-2-7B: {model_id} (4-bit quant: {use_4bit_quant})...")
+    model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
+        model_id, quantization_config=quant_config, torch_dtype=torch.bfloat16, device_map="auto",
+    ).eval()
+    processor = AutoProcessor.from_pretrained("Qwen/Qwen2.5-VL-7B-Instruct")
+    print("olmOCR-2-7B loaded.")
+    return model, processor
+
+
+def load_layout_model(layout_model_config: str, score_thr: float):
+    """
+    Lazy import — layoutparser/detectron2 are heavy and only needed for
+    pipeline B. Uses a PubLayNet-pretrained Faster R-CNN (text/title/list/
+    table/figure regions) as a stand-in for 'detectron2:layout' in
+    config.yaml. Swap the model config string for a different pretrained
+    layout model if you find one that fits BYTE pages better.
+    """
+    import layoutparser as lp
+    print(f"Loading layout model: {layout_model_config} (score_thr={score_thr})...")
+    model = lp.Detectron2LayoutModel(
+        layout_model_config,
+        extra_config=["MODEL.ROI_HEADS.SCORE_THRESH_TEST", score_thr],
+        label_map={0: "Text", 1: "Title", 2: "List", 3: "Table", 4: "Figure"},
+    )
+    print("Layout model loaded.")
+    return model
+
+
+# --------------------------------------------------------------------------
+# Reading-order sort — groups detected regions into columns (by x-position),
+# then orders columns left-to-right and regions top-to-bottom within each.
+# This is the "column/region-segmentation stage before OCR" your A1 form
+# named as required for multi-column reading order.
+# --------------------------------------------------------------------------
+def sort_regions_reading_order(regions: list, column_gap_px: int) -> list:
+    if not regions:
+        return []
+    # Each region: {"bbox": [x1, y1, x2, y2], "type": str, "score": float}
+    sorted_by_x = sorted(regions, key=lambda r: r["bbox"][0])
+    columns = []
+    current_column = [sorted_by_x[0]]
+    current_right_edge = sorted_by_x[0]["bbox"][2]
+    for region in sorted_by_x[1:]:
+        x1 = region["bbox"][0]
+        if x1 - current_right_edge > column_gap_px:
+            columns.append(current_column)
+            current_column = [region]
+        else:
+            current_column.append(region)
+        current_right_edge = max(current_right_edge, region["bbox"][2])
+    columns.append(current_column)
+
+    ordered = []
+    for column in columns:
+        column_sorted_top_to_bottom = sorted(column, key=lambda r: r["bbox"][1])
+        ordered.extend(column_sorted_top_to_bottom)
+    return ordered
+
+
+def detect_and_order_regions(image: np.ndarray, layout_model, column_gap_px: int) -> list:
+    rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) if image.ndim == 3 else image
+    layout = layout_model.detect(rgb_image)
+    regions = [
+        {"bbox": [block.block.x_1, block.block.y_1, block.block.x_2, block.block.y_2],
+         "type": block.type, "score": float(block.score)}
+        for block in layout
+    ]
+    return sort_regions_reading_order(regions, column_gap_px)
+
+
+# --------------------------------------------------------------------------
+# Pipeline A — raw Qwen2-VL-2B, no layout step
+# --------------------------------------------------------------------------
+def pipeline_qwen2vl_2b_raw(image: np.ndarray, model, processor, config: dict) -> dict:
+    text = run_vlm_ocr(
+        image, model, processor, OCR_PROMPT_FULL_PAGE,
+        config["max_new_tokens"], config["max_image_longest_side"],
+    )
+    return {"text": text, "regions": None}
+
+
+# --------------------------------------------------------------------------
+# Pipeline B — detectron2 layout detection, then Qwen2-VL-2B per region
+# --------------------------------------------------------------------------
+def pipeline_qwen2vl_2b_layout(image: np.ndarray, qwen_model, qwen_processor,
+                                layout_model, config: dict) -> dict:
+    ordered_regions = detect_and_order_regions(image, layout_model, config["layout_column_gap_px"])
+
+    if not ordered_regions:
+        # Layout model found nothing usable -- fall back to full-page OCR
+        # rather than silently returning empty text.
+        fallback = pipeline_qwen2vl_2b_raw(image, qwen_model, qwen_processor, config)
+        fallback["regions"] = []
+        fallback["fallback_to_full_page"] = True
+        return fallback
+
+    region_texts = []
+    for region in ordered_regions:
+        x1, y1, x2, y2 = [int(v) for v in region["bbox"]]
+        x1, y1 = max(0, x1), max(0, y1)
+        x2, y2 = min(image.shape[1], x2), min(image.shape[0], y2)
+        if x2 <= x1 or y2 <= y1:
+            continue
+        crop = image[y1:y2, x1:x2]
+        if region["type"] == "Figure":
+            # Skip pure figures/ads for text OCR, per your OCR_PROMPT policy
+            # of skipping non-text visual content -- but keep the region
+            # logged so you can see what was excluded.
+            region["ocr_skipped"] = True
+            continue
+        crop_text = run_vlm_ocr(
+            crop, qwen_model, qwen_processor, OCR_PROMPT_REGION,
+            config["max_new_tokens"], config["max_image_longest_side"],
+        )
+        region["ocr_skipped"] = False
+        region_texts.append(crop_text)
+
+    combined_text = "\n\n".join(region_texts)
+    return {"text": combined_text, "regions": ordered_regions, "fallback_to_full_page": False}
+
+
+# --------------------------------------------------------------------------
+# Pipeline C — raw olmOCR-2-7B, no layout step
+# --------------------------------------------------------------------------
+def pipeline_olmocr_7b_raw(image: np.ndarray, model, processor, config: dict) -> dict:
+    text = run_vlm_ocr(
+        image, model, processor, OCR_PROMPT_FULL_PAGE,
+        config["max_new_tokens"], config["max_image_longest_side"],
+    )
+    return {"text": text, "regions": None}
+
+
+# --------------------------------------------------------------------------
+# Orchestration — runs all requested pipelines on the same page(s),
+# times each, and saves outputs into separate folders.
+# --------------------------------------------------------------------------
+def run(config: dict) -> dict:
+    os.makedirs(config["output_dir"], exist_ok=True)
+    pipeline_dirs = {}
+    for name in config["run_pipelines"]:
+        d = os.path.join(config["output_dir"], name)
+        os.makedirs(d, exist_ok=True)
+        pipeline_dirs[name] = d
+
+    # Load only the models needed for the requested pipelines.
+    qwen_model = qwen_processor = None
+    olmocr_model = olmocr_processor = None
+    layout_model = None
+
+    if "qwen2vl_2b_raw" in config["run_pipelines"] or "qwen2vl_2b_layout" in config["run_pipelines"]:
+        qwen_model, qwen_processor = load_qwen2vl_2b(config["qwen2vl_model_id"], config["use_4bit_quant"])
+    if "olmocr_7b_raw" in config["run_pipelines"]:
+        olmocr_model, olmocr_processor = load_olmocr_7b(config["olmocr_model_id"], config["use_4bit_quant"])
+    if "qwen2vl_2b_layout" in config["run_pipelines"]:
+        layout_model = load_layout_model(config["layout_model_config"], config["layout_score_thr"])
+
+    page_list = get_page_list(config)
+    print(f"Mode: {config['mode']} | Pages to process: {page_list}")
+    print(f"Pipelines: {config['run_pipelines']}")
+
+    summary = {"config": {k: v for k, v in config.items()}, "pages": {}}
+
+    for page_number in page_list:
+        print(f"\n=== Page {page_number} ===")
+        raw_image = extract_page_as_image(config["pdf_path"], page_number, dpi=config["dpi"])
+        processed_image, preprocess_log = preprocess_page(raw_image, config)
+        print(f"  Preprocessing applied: {preprocess_log}")
+
+        page_summary = {"preprocessing_applied": preprocess_log, "pipelines": {}}
+
+        if "qwen2vl_2b_raw" in config["run_pipelines"]:
+            t0 = time.time()
+            result = pipeline_qwen2vl_2b_raw(processed_image, qwen_model, qwen_processor, config)
+            elapsed = time.time() - t0
+            _save_result(pipeline_dirs["qwen2vl_2b_raw"], page_number, result)
+            page_summary["pipelines"]["qwen2vl_2b_raw"] = {"seconds": round(elapsed, 2), "num_regions": None}
+            print(f"  [qwen2vl_2b_raw] {elapsed:.1f}s")
+
+        if "qwen2vl_2b_layout" in config["run_pipelines"]:
+            t0 = time.time()
+            result = pipeline_qwen2vl_2b_layout(processed_image, qwen_model, qwen_processor, layout_model, config)
+            elapsed = time.time() - t0
+            _save_result(pipeline_dirs["qwen2vl_2b_layout"], page_number, result)
+            page_summary["pipelines"]["qwen2vl_2b_layout"] = {
+                "seconds": round(elapsed, 2),
+                "num_regions": len(result["regions"]) if result["regions"] is not None else 0,
+                "fallback_to_full_page": result.get("fallback_to_full_page", False),
+            }
+            print(f"  [qwen2vl_2b_layout] {elapsed:.1f}s, "
+                  f"{page_summary['pipelines']['qwen2vl_2b_layout']['num_regions']} regions")
+
+        if "olmocr_7b_raw" in config["run_pipelines"]:
+            t0 = time.time()
+            result = pipeline_olmocr_7b_raw(processed_image, olmocr_model, olmocr_processor, config)
+            elapsed = time.time() - t0
+            _save_result(pipeline_dirs["olmocr_7b_raw"], page_number, result)
+            page_summary["pipelines"]["olmocr_7b_raw"] = {"seconds": round(elapsed, 2), "num_regions": None}
+            print(f"  [olmocr_7b_raw] {elapsed:.1f}s")
+
+        summary["pages"][str(page_number)] = page_summary
+
+    summary_path = os.path.join(config["output_dir"], "comparison_summary.json")
+    with open(summary_path, "w", encoding="utf-8") as f:
+        json.dump(summary, f, indent=2)
+    print(f"\nSaved comparison summary: {summary_path}")
+
+    return summary
+
+
+def _save_result(out_dir: str, page_number: int, result: dict) -> None:
+    text_path = os.path.join(out_dir, f"page_{page_number:04d}.txt")
+    with open(text_path, "w", encoding="utf-8") as f:
+        f.write(result["text"])
+    if result.get("regions") is not None:
+        regions_path = os.path.join(out_dir, f"page_{page_number:04d}_regions.json")
+        with open(regions_path, "w", encoding="utf-8") as f:
+            json.dump(result["regions"], f, indent=2)
+
+
+# --------------------------------------------------------------------------
+# CLI — optional; safe to ignore in a notebook, just edit DEFAULT_CONFIG
+# and call run(DEFAULT_CONFIG) directly.
+# --------------------------------------------------------------------------
+def build_config() -> dict:
+    parser = argparse.ArgumentParser(description="BYTE Magazine 3-pipeline OCR comparison")
+    parser.add_argument("--pdf", dest="pdf_path")
+    parser.add_argument("--mode", choices=["single", "range", "all"])
+    parser.add_argument("--page", type=int)
+    parser.add_argument("--page-spec", dest="page_spec")
+    parser.add_argument("--output-dir", dest="output_dir")
+    parser.add_argument("--pipelines", nargs="+",
+                         choices=["qwen2vl_2b_raw", "qwen2vl_2b_layout", "olmocr_7b_raw"],
+                         dest="run_pipelines")
+    parser.add_argument("--no-quant", dest="use_4bit_quant", action="store_false")
+    args, _unknown = parser.parse_known_args()
+
+    config = dict(DEFAULT_CONFIG)
+    for key, value in vars(args).items():
+        if value is not None:
+            config[key] = value
+    return config
+
+
+if __name__ == "__main__":
+    cfg = build_config()
+    run(cfg)
+
+Me: Meanwhile, I’m also supposed to complete settings.py, logging_conf.py, and create an .env file.
+
+The settings.py and logging_conf.py files are located inside src/doc-agent/.
+
+
+
+
+
+Should the .env file also be placed inside src/doc-agent/, or should it live somewhere else?
+
+
+
+What exactly should I put in settings.py and logging_conf.py?
+
+
+
+What should the .env file contain, and how should it be connected to settings.py?
+
+Please answer these questions concisely.
+
+AI: **1. Where `.env` goes**
+
+`settings.py` has `env_file = ".env"` — pydantic-settings resolves that path relative to your **working directory when the app runs**, not relative to `settings.py`'s location. Since your Makefile/scripts run from the repo root (e.g. `python scripts/run_ingest.py`), `.env` belongs at the **repo root**, not inside `src/doc-agent/`. Confirmed by the file you uploaded: `_env.example` already sits at the repo root — `.env` should be right next to it, same directory.
+
+Also: **do not create `.env` inside `src/doc-agent/`** — that would silently fail to load (pydantic-settings won't find it) and you'd waste time debugging why `settings.llm_api_key` is empty.
+
+**2. `settings.py` — nothing to write**
+
+It's marked `FIXED`, not `# IMPLEMENT` — per the structure lock, this file is already complete as given. Don't add fields or change it. Just **use it**: `from settings import settings` then `settings.llm_api_key`, never `os.environ[...]` directly anywhere else in the codebase.
+
+**3. `logging_conf.py` — what to actually implement**
+
+`get_logger()` is done (also FIXED). The only real work is the `register()` function's `_trace` closure, which currently just raises `NotImplementedError`. It needs to append each `ctx` dict to `traces/run.jsonl` as a JSON line — this is your auditable-NFR trail that A3's agentic-behavior check reads to confirm the agent's path actually depends on observations. Rough shape:
+
+```python
+import json
+from pathlib import Path
+
+def register(hooks) -> None:
+    trace_path = Path("traces/run.jsonl")
+    trace_path.parent.mkdir(parents=True, exist_ok=True)
+
+    def _trace(ctx: dict) -> dict:
+        with trace_path.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(ctx) + "\n")
+        return ctx
+
+    hooks.register(hooks.ON_STEP, _trace)
+    hooks.register(hooks.ON_TOOL_CALL, _trace)
+    hooks.register(hooks.AFTER_ANSWER, _trace)
+```
+
+This is really an A3 (agent-loop) concern rather than A2 — you can implement it now since it's small, but it won't be exercised until `hooks`/the agent loop exists.
+
+**`.env` contents**
+
+Copy `_env.example` to `.env` at the repo root and fill in real values:
+```
+LLM_API_KEY=<your actual key>
+WANDB_API_KEY=<your actual key>
+```
+Confirm `.env` is in `.gitignore` (the example file's own comment says so) — never commit it. `settings.py` reads it automatically via `Config.env_file = ".env"`; you don't wire anything else by hand.
+
+Me: Answer these concisely - 
+
+1. what is pydantic settings? 
+2. what is auditable NFR trail here?
+3. LLM API and WANDB API , what are these, how do i need em and how do i get em
+
+AI: 1. **pydantic-settings** — a library that reads config/secrets from environment variables (or a `.env` file) into a typed Python object, with validation. Instead of `os.environ.get("LLM_API_KEY")` scattered everywhere (untyped, error-prone), you get `settings.llm_api_key` as a validated string, defined once in `settings.py`.
+
+2. **Auditable NFR trail** — a log of every step/tool-call the agent makes, written to `traces/run.jsonl`, so anyone can later reconstruct exactly what the agent did and why. This isn't your NFR (yours is **scalable**) — "auditable" is one of the *other* NFR options other teams might pick. You're implementing this piece anyway because `logging_conf.py` is a **mandatory** file for everyone regardless of your chosen NFR (per the Codebase Guide: "Governance and data files are mandatory").
+
+3. **What they are:**
+   - **LLM API key** — credentials for whichever model provider you call from `llm/client.py` (e.g. OpenAI, Anthropic, OpenRouter, or a self-hosted endpoint). Get it from that provider's dashboard after creating an account.
+   - **WANDB API key** — Weights & Biases, an experiment-tracking service (logs training runs, metrics, charts). Get it free at wandb.ai → sign up → **Settings → API keys**.
+
+   **Do you need both?** Not necessarily right now:
+   - You're using **pretrained, locally-run models** (Qwen2-VL-2B / olmOCR-2-7B) for OCR — no LLM API call needed for that.
+   - You'll likely need an **LLM API key** later for the *agent's reasoning brain* (A3) — unless you're also self-hosting that.
+   - **WANDB** is optional infra for tracking metrics/experiments — useful but not strictly required unless your instructor mandates it for evaluation logging. Leave it blank in `.env` if unused; `settings.py` defaults both to `""` so nothing breaks.
+
+Me: I figured out that on the code base, we have to follow the flow of the pipeline dot p y file where there are bunches of file and the functions are being called in a specific order. First of all, there is loader dot py, and then there's p post processing dot py. I have to work on those code first, but I do not know how I should be implementing the code blocks. So I would be pasting the code block from loader dot py first and then you'll tell me how I will implement and do unit test. Because once I do, uh, I complete all the files for pipeline dot py, what if it doesn't work? And then it will be so much harder for me to debug if I do not do a unit test first.
+
+AI: That's exactly the right instinct — implement `loader.py` first, unit-test it in isolation before touching `preprocess.py`, and definitely before wiring anything into `pipeline.py`. Debugging a 7-stage pipeline end-to-end when any single stage might be broken is much harder than confirming each stage works alone first.
+
+Go ahead and paste the `loader.py` stub — I'll walk through:
+1. What each `# IMPLEMENT` block is actually supposed to do (given your BYTE corpus + `contracts.py`'s expected data shapes)
+2. The actual implementation
+3. A small standalone unit test you can run right after, before moving to `preprocess.py`
+
+Me: ```python
+"""Stage 1 — load scanned page-images"""
+from __future__ import annotations
+from ..contracts import *  # noqa
+
+def load_pages(cfg: dict) -> list[Page]:
+    """Read data/raw/ -> list[Page]. IMPLEMENT."""
+    raise NotImplementedError("Stage 1: load scanned pages")
+
+
+this is the loader.py 
+```
+
+AI: Before I implement this, I need the actual `Page` contract — `contracts.py` is `FIXED` and defines the exact fields your `Page` object must have (per the structure lock, `tests/test_contracts.py` validates against it exactly). Guessing field names here risks writing something that fails the contract test even if it "works."
+
+Can you paste the relevant part of `contracts.py` — specifically the `Page` class/dataclass definition (and `doc_id`/`page_num` fields if they're separate types)? Also useful to know:
+
+1. Is `Page` a `dataclass`, a `pydantic.BaseModel`, or a `TypedDict`? (changes how you construct instances)
+2. What does `cfg` look like when it's passed in — is it the loaded `config.yaml` dict, or something merged from `task.yaml` too? (I need to know what keys are safe to read, e.g. `cfg["corpus"]["source_url"]` or similar)
+3. Where exactly does `get_data.sh` leave files in `data/raw/` — one PDF per issue? Pre-rendered page images already? Or raw scans needing rendering? This determines whether `load_pages()` needs PyMuPDF page-rendering (like your OCR script) or just reads existing image files.
+
+Paste `contracts.py`'s `Page` definition and whatever you know about `data/raw/`'s actual layout after `get_data.sh` runs, and I'll give you the real implementation + a standalone unit test for it.
+
+Me: ```python
+"""FIXED data contracts. Do not change fields or types."""
+from __future__ import annotations
+from pydantic import BaseModel
+
+class Page(BaseModel):
+    id: str
+    image_path: str
+    doc_id: str
+
+class Region(BaseModel):
+    page_id: str
+    bbox: tuple[int, int, int, int]
+    kind: str  # text | table | figure | heading
+
+class Chunk(BaseModel):
+    id: str
+    doc_id: str
+    text: str
+    page_ids: list[str]
+    score: float = 0.0        # relevance score set by retrieval; decide() reads the top score to judge weak evidence
+
+class Query(BaseModel):
+    text: str
+    verifiable: bool          # True = checkable by exact match (anchors objective grading + RLVR)
+    judged: bool              # True = scored by LLM-judge / human (non-verifiable inference)
+
+class Citation(BaseModel):
+    chunk_id: str
+    span: tuple[int, int]
+
+class Answer(BaseModel):
+    text: str
+    citations: list[Citation]
+    grounded: bool
+    confidence: float
+
+class ToolResult(BaseModel):
+    ok: bool
+    payload: dict
+
+
+class TraceStep(BaseModel):
+    """One agent step, emitted to traces/run.jsonl so the A3 agentic-feature check can read the path."""
+    step: int
+    tool: str                 # tool name, or "decide" / "answer"
+    args: dict                # e.g. {"query": "..."} — for retrieve, the query actually used
+    obs: dict                 # what decide() saw, e.g. {"top_score": 0.31, "n": 10}
+
+# MANDATORY agentic behaviour (graded in A3): evidence-gated re-search — decide() must re-retrieve with a
+# reformulated query when the top evidence is weak. That runtime branch is what makes the system an agent.
+# (multi-hop -> recall NFR, verify-and-correct -> precision NFR, tool-routing -> bonus; see the codebase guide.)
+
+
+
+
+this is the contracts.py 
+```
+AI: Good — now I can implement this against the real contract. Two things jump out from `Page`'s fields:
+
+- **No `page_num` field** — only `id`, `image_path`, `doc_id`. So page number has to live *inside* `id` as a convention (e.g. `"byte_1978-01_p0012"`), which later stages parse back out when they need it. Worth noting in `provenance.md` since it's an implicit contract nothing enforces except convention.
+- **No explicit "raw scan" vs "rendered image" distinction** — `Page.image_path` just points to *some* image file. Since your corpus lands as PDFs in `data/raw/` (matching your earlier OCR script's `pdf_path` pattern), `load_pages()` needs to actually render each PDF page to an image file first, then point `Page.image_path` at that.
+
+**Implementation, assuming `data/raw/` holds one PDF per issue** (tell me if `get_data.sh` actually saves something different — e.g. pre-rendered images or one PDF for the whole corpus — and I'll adjust):
+
+```python
+"""Stage 1 — load scanned page-images"""
+from __future__ import annotations
+from pathlib import Path
+import pymupdf as fitz  # PyMuPDF
+from ..contracts import *  # noqa
+
+RENDERED_IMAGE_DIR = "data/interim/page_images"
+DEFAULT_DPI = 300
+
+
+def _render_page_image(pdf_path: Path, page_index: int, doc_id: str, dpi: int) -> str:
+    """Render one page (0-indexed) to PNG. Cached: skips re-render if the
+    file already exists, so re-running load_pages() is cheap."""
+    out_dir = Path(RENDERED_IMAGE_DIR) / doc_id
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / f"page_{page_index + 1:04d}.png"
+    if out_path.exists():
+        return str(out_path)
+
+    doc = fitz.open(pdf_path)
+    page = doc[page_index]
+    pix = page.get_pixmap(matrix=fitz.Matrix(dpi / 72, dpi / 72))
+    pix.save(str(out_path))
+    doc.close()
+    return str(out_path)
+
+
+def load_pages(cfg: dict) -> list[Page]:
+    """Read data/raw/ -> list[Page].
+
+    Assumes data/raw/ holds one PDF per issue, filename stem used as
+    doc_id (e.g. byte_1978-01.pdf -> doc_id "byte_1978-01"). Each page
+    is rendered once to data/interim/page_images/<doc_id>/page_NNNN.png
+    and returned as Page(id="<doc_id>_pNNNN", image_path=..., doc_id=...).
+    Page number is NOT a separate contract field -- it's encoded in `id`
+    (1-indexed, zero-padded to 4 digits); downstream stages needing the
+    number parse it back out of `id`.
+    """
+    raw_dir = Path(cfg.get("raw_data_dir", "data/raw"))
+    dpi = cfg.get("dpi", DEFAULT_DPI)
+
+    pdf_paths = sorted(raw_dir.glob("*.pdf"))
+    if not pdf_paths:
+        raise FileNotFoundError(
+            f"No PDFs found in {raw_dir} -- did scripts/get_data.sh run successfully?"
+        )
+
+    pages: list[Page] = []
+    for pdf_path in pdf_paths:
+        doc_id = pdf_path.stem
+        doc = fitz.open(pdf_path)
+        num_pages = doc.page_count
+        doc.close()
+
+        for page_index in range(num_pages):
+            image_path = _render_page_image(pdf_path, page_index, doc_id, dpi)
+            page_id = f"{doc_id}_p{page_index + 1:04d}"
+            pages.append(Page(id=page_id, image_path=image_path, doc_id=doc_id))
+
+    return pages
+```
+
+**Standalone unit test — run this before touching `preprocess.py` or `pipeline.py`:**
+
+```python
+"""test_loader.py — run with: pytest test_loader.py -v
+Creates a tiny throwaway 2-page PDF so this needs no real corpus data."""
+import pymupdf as fitz
+from pathlib import Path
+from src.doc_agent.ingest.loader import load_pages  # adjust import path to your actual package layout
+
+
+def _make_fake_pdf(path: Path, num_pages: int = 2):
+    doc = fitz.open()
+    for i in range(num_pages):
+        page = doc.new_page()
+        page.insert_text((72, 72), f"Fake page {i + 1}")
+    doc.save(str(path))
+    doc.close()
+
+
+def test_load_pages_basic(tmp_path):
+    raw_dir = tmp_path / "raw"
+    raw_dir.mkdir()
+    _make_fake_pdf(raw_dir / "byte_1978-01.pdf", num_pages=2)
+
+    cfg = {"raw_data_dir": str(raw_dir), "dpi": 150}
+    pages = load_pages(cfg)
+
+    assert len(pages) == 2
+    assert pages[0].id == "byte_1978-01_p0001"
+    assert pages[0].doc_id == "byte_1978-01"
+    assert Path(pages[0].image_path).exists()
+    assert pages[1].id == "byte_1978-01_p0002"
+
+
+def test_load_pages_missing_dir(tmp_path):
+    cfg = {"raw_data_dir": str(tmp_path / "nonexistent")}
+    try:
+        load_pages(cfg)
+        assert False, "expected FileNotFoundError"
+    except FileNotFoundError:
+        pass
+
+
+def test_load_pages_multiple_pdfs(tmp_path):
+    raw_dir = tmp_path / "raw"
+    raw_dir.mkdir()
+    _make_fake_pdf(raw_dir / "byte_1978-01.pdf", num_pages=1)
+    _make_fake_pdf(raw_dir / "byte_1978-02.pdf", num_pages=3)
+
+    pages = load_pages({"raw_data_dir": str(raw_dir)})
+    doc_ids = {p.doc_id for p in pages}
+    assert doc_ids == {"byte_1978-01", "byte_1978-02"}
+    assert len(pages) == 4
+```
+
+This needs **zero real corpus data** — it builds a fake 2-page PDF on the fly with PyMuPDF itself, so you can confirm the contract shape, ID convention, caching behavior, and error handling are all correct before ever touching your actual BYTE files. Run `pytest test_loader.py -v` — all three should pass.
+
+**Before you move to `preprocess.py`:** confirm my assumption about `data/raw/` actually matches what `get_data.sh` produces (one PDF per issue vs. something else) — if it's different, this needs adjusting first, since `preprocess.py` will consume `Page.image_path` from whatever `load_pages()` actually returns.
+
+Me: Pls answer these questions concisely - 
+1. What do you mean by the page number has to leave inside the ID as a convention.?
+
+2. do i have to work on provenance.md now ? 
+3. What is the purpose of the RENDERED_IMAGE_DIR? 
+4. does adding a new function violate any of the rules set by the instructor? 
+5. can you pls explain the load_pages function step by step?
+6. also where is the "cfg" from? 
+7. do i need to create a new file to test the loader?
+
+AI: 1. **Page number "inside the ID":** `Page` has no `page_num` field — only `id`, `image_path`, `doc_id`. So the only place a page's number exists is embedded in the string `id` itself (e.g. `"byte_1978-01_p0012"` → page 12). Any later code that needs "what page number is this" must parse it back out of `id` — it's not a separate, structured field you can just read.
+
+2. **Not right now.** `provenance.md` is a Day 1 task (Debashmita's, alongside `get_data.sh`) — it documents corpus source/licence/counts, not code behavior. The "page-number-in-id" convention is worth a one-line note there eventually, but it's not blocking you today.
+
+3. **`RENDERED_IMAGE_DIR`:** your PDFs in `data/raw/` aren't images yet — each page needs rendering to PNG before OCR/anything else can use it (same as your earlier OCR script did with `extract_page_as_image`). This constant is just *where those rendered PNGs get saved* (`data/interim/page_images/<doc_id>/page_NNNN.png`), so they're cached on disk instead of re-rendered every time `load_pages()` runs.
+
+4. **No.** Per the structure lock: you may add code inside `# IMPLEMENT` blocks freely — helper functions like `_render_page_image()` inside `loader.py` are part of implementing that block, not a new top-level module/file. What's locked is directory layout, file names, and the *signature* of `load_pages()` itself (which I kept unchanged: `load_pages(cfg: dict) -> list[Page]`).
+
+5. **Step by step:**
+   - Read `raw_data_dir` (default `data/raw`) and `dpi` from `cfg`
+   - Find every `.pdf` in that folder, sorted (deterministic order matters for reproducibility)
+   - If none found, raise a clear error (rather than silently returning `[]`, which would fail confusingly downstream)
+   - For each PDF: use its filename (minus `.pdf`) as `doc_id`
+   - For each page in that PDF: render it to a PNG (skip if already rendered — cache), build `id` as `"{doc_id}_p{page_number:04d}"`, construct a `Page(id=..., image_path=..., doc_id=...)`
+   - Return the full flat list of `Page` objects across all PDFs
+
+6. **`cfg` comes from your config files** — `configs/config.yaml` (and possibly merged with `configs/task.yaml`), loaded somewhere in `pipeline.py` and passed down to each stage function. I added `raw_data_dir` and `dpi` as keys `load_pages()` reads from it — you may need to actually add those two keys to `config.yaml` if they're not there yet (they weren't in the template you showed me earlier).
+
+7. **Yes, new file — but only a test file, not a package file.** Test files sit outside the structure lock's "may not add files" rule (it applies to the `src/doc_agent/` deliverable code, not `tests/`). Save it as something like `tests/test_loader.py` — pytest auto-discovers files matching `test_*.py`, so as long as it's under wherever your `tests/` directory already is, running `pytest` will pick it up automatically.
+
+Me: 1. **No** — different category. The structure lock ("MUST NOT change: directory layout; file names; module paths") applies to your **code** in `src/doc_agent/`. `data/interim/page_images/...` is **runtime output data**, not a source file — it's exactly the kind of thing a pipeline is *supposed* to produce when it runs (same category as your OCR script's `output_dir` saving `.txt` files earlier). Nothing in the rules restricts what data artifacts your code creates on disk while running.
+
+2. **DPI = "dots per inch"** — controls the resolution/quality of the rendered page image (higher DPI = sharper image = bigger file = slower). "Reading it from `cfg`" just means: instead of hardcoding `dpi=300` inside the function, the function asks the config dict for it (`cfg.get("dpi", 300)`), so you can change resolution by editing `config.yaml` instead of editing code. Same pattern as your OCR script's `"dpi": 300` field.
+
+3. **Steps to actually verify:**
+   - Open your real `config.yaml` and check: does it currently have a `raw_data_dir` key, or a `dpi` key anywhere? (Your earlier pasted template didn't — it only had `enhance`/`layout`/`ocr`/etc. sections)
+   - Open `pipeline.py`, find the line that calls `load_pages(cfg)` — trace backward from there to see *what* is actually being passed as `cfg` (the whole `config.yaml` dict? A sub-section? Merged with `task.yaml`?)
+   - Add a temporary debug line inside `load_pages()`: `print(cfg)` — run it once, look at the actual keys available at runtime. This is the fastest way to know for certain what's really there instead of guessing from the template.
+   - Based on what you see: if `raw_data_dir`/`dpi` aren't present, add them to `config.yaml` (e.g. a new `ingest: {raw_data_dir: "data/raw", dpi: 300}` section, matching the style of your other stage configs like `layout:`/`ocr:`), then update `load_pages()`'s lookups to match wherever you placed them (e.g. `cfg["ingest"]["raw_data_dir"]` instead of `cfg.get("raw_data_dir", ...)` if it ends up nested).
+   - Remove the debug print once confirmed.
+
+Me: pipeline.py 
+
+```python
+"""FIXED end-to-end order (Stages 0-9) + cross-cutting seams.
+Do not reorder stages or remove hooks.run()/register_all() calls."""
+from __future__ import annotations
+from . import config, hooks, wiring  # noqa: F401
+from .ingest import loader, preprocess, enhance
+from .vision import layout, ocr
+from .index import chunk, embed, store
+from .retrieval import retriever
+from .agent import agent
+
+def build_knowledge_base(cfg: dict) -> None:
+    wiring.register_all(cfg)                        # wire cross-cutting features
+    pages = loader.load_pages(cfg)
+    pages = preprocess.run(pages, cfg)
+    pages = enhance.run(pages, cfg)                 # Stage 1 - enhancement (VAE/diffusion)
+    hooks.run(hooks.AFTER_INGEST, {"pages": pages})
+    regions = layout.detect(pages, cfg)             # Stage 2
+    text = ocr.transcribe(regions, cfg)             # Stage 3
+    hooks.run(hooks.AFTER_OCR, {"chunks": text})    # e.g. PII redaction on extracted text
+    chunks = chunk.split(text, cfg)                 # Stage 4
+    hooks.run(hooks.BEFORE_INDEX, {"chunks": chunks})
+    vectors = embed.encode(chunks, cfg)
+    store.build(chunks, vectors, cfg)
+
+def answer(query_text: str, cfg: dict):
+    wiring.register_all(cfg)
+    r = retriever.Retriever(cfg)                    # Stage 5
+    return agent.Agent(cfg, r).run(query_text)      # Stage 6 (seams run inside the loop)
+
+config.py
+"""FIXED config loader."""
+from __future__ import annotations
+import yaml
+from pathlib import Path
+
+def load(path: str | Path = "configs/config.yaml") -> dict:
+    with open(path) as f:
+        return yaml.safe_load(f)
+
+def load_task(path: str | Path = "configs/task.yaml") -> dict:
+    with open(path) as f:
+        return yaml.safe_load(f)
+
+```
+
+
+
+config.yaml
+
+```yaml
+# THE place you set models & parameters. Code reads only from here.
+seed: 42
+device: cuda
+
+enhance:   {enabled: true,  model: "unet_small", type: "diffusion"}   # or "vae" / "none"
+layout:    {model: "detectron2:layout", score_thr: 0.5}
+ocr:       {model: "microsoft/trocr-base-printed", finetune: true}    # BASELINE = pretrained OCR
+embed:     {model: "sentence-transformers/all-MiniLM-L6-v2", dim: 384}
+index:     {type: "faiss:hnsw", chunk_tokens: 256, overlap: 32}
+retrieve:  {k: 10, k_step: 10, k_max: 40, weak_threshold: 0.35, rerank: true, reranker: "cross-encoder/ms-marco-MiniLM-L6-v2"}   # k_step/k_max/weak_threshold drive evidence-gated re-search
+agent:     {max_steps: 8, autonomy: "act-with-approval", budget_usd: 0.05}
+rl:        {algo: "ppo", train_policy: false}                         # bonus: set true
+serve:     {batch: true}
+deploy:    {target: "hf-spaces"}
+
+
+i have not edited this as per my project's requirement yet 
+
+and last but not the least, the tasks.yaml 
+# Stage 0 — problem statement (one per group). Set by assignment.
+group_id: "G21"
+domain: "retro-computing/tech journalism"
+data_speciality: "multi-column reading order"   
+primary_nfr: "scalable"
+nfr_target: "p95 latency <= 1.5s across full corpus"   # your concrete committed target
+corpus: {min_pages: 300, min_words: 60000, source_url: "https://archive.org/details/byte-magazine", license: "Internet Archive; permitted for educational use"}
+
+
+```
+AI: Now I can verify concretely — I have all three files.
+
+**Confirmed: `raw_data_dir` and `dpi` don't exist in `config.yaml`,** and `cfg` in `load_pages(cfg)` is exactly `config.load()`'s output — a flat dict with only these top-level keys: `seed, device, enhance, layout, ocr, embed, index, retrieve, agent, rl, serve, deploy`. No `ingest` section at all yet. `task.yaml` is loaded separately via `config.load_task()` and is **not currently merged into `cfg`** — `build_knowledge_base(cfg)` only receives `config.yaml`'s contents.
+
+**Fix — add an `ingest` section to `config.yaml`, matching the style of the others:**
+
+```yaml
+seed: 42
+device: cuda
+
+ingest:    {raw_data_dir: "data/raw", dpi: 300}   # Stage 1 - where get_data.sh drops PDFs, render resolution
+enhance:   {enabled: true,  model: "unet_small", type: "diffusion"}
+layout:    {model: "detectron2:layout", score_thr: 0.5}
+ocr:       {model: "microsoft/trocr-base-printed", finetune: true}
+embed:     {model: "sentence-transformers/all-MiniLM-L6-v2", dim: 384}
+index:     {type: "faiss:hnsw", chunk_tokens: 256, overlap: 32}
+retrieve:  {k: 10, k_step: 10, k_max: 40, weak_threshold: 0.35, rerank: true, reranker: "cross-encoder/ms-marco-MiniLM-L6-v2"}
+agent:     {max_steps: 8, autonomy: "act-with-approval", budget_usd: 0.05}
+rl:        {algo: "ppo", train_policy: false}
+serve:     {batch: true}
+deploy:    {target: "hf-spaces"}
+```
+
+(This is just the `ingest` line added — remember you still need to replace the *other* sections' placeholder values with your real choices, from our earlier config.yaml pass: `enhance.enabled: false`, real `ocr.model`, real `embed.model`, etc. Don't forget those while you're in here.)
+
+**And update `loader.py` to read the nested path** (since it's inside `ingest:` now, not top-level):
+
+```python
+def load_pages(cfg: dict) -> list[Page]:
+    ingest_cfg = cfg.get("ingest", {})
+    raw_dir = Path(ingest_cfg.get("raw_data_dir", "data/raw"))
+    dpi = ingest_cfg.get("dpi", DEFAULT_DPI)
+    ...
+```
+
+Just that one line changes (`raw_dir = Path(cfg.get(...))` → `raw_dir = Path(ingest_cfg.get(...))`, same for `dpi`) — rest of the function stays identical.
+
+**One more thing worth flagging now, before it bites you later:** `task.yaml`'s `corpus.source_url` isn't accessible from inside any pipeline stage as things currently stand, since `pipeline.py` never merges `config.load_task()` into `cfg`. That's fine for `loader.py` (it doesn't need the URL — `get_data.sh` already downloaded the files), but if any later stage needs something from `task.yaml` (e.g. `primary_nfr` or `nfr_target` for logging/eval), you'll need to either merge the two dicts yourself where `cfg` is first built, or load `task.yaml` separately in that stage. Worth deciding now rather than discovering it mid-A3.
+
+Me: Cross-cutting features (grounding, security, PII, tracing) don't live in one file: their logic sits in an owner module and they run at fixed seams via `hooks.py`, wired in `wiring.py`. See `docs/cross-cutting.md` for the full owner→touchpoint map.
+what does this mean?
+
+AI: This describes the **hooks/wiring pattern** you can already see in your actual `pipeline.py` — let me connect it to what you've got.
+
+**"Cross-cutting features don't live in one file"** — things like grounding, PII redaction, security/injection defence, and audit tracing aren't self-contained modules you call once. They need to activate at *multiple different points* throughout the pipeline. PII redaction, for example, might need to run after OCR (`AFTER_OCR`) *and* before an answer is returned — not just in one place.
+
+**"Owner module"** — each feature still has one real home where its logic is actually written (e.g. PII redaction logic lives in `governance/pii.py`, tracing logic lives in your `logging_conf.py`'s `register()` function you already implemented).
+
+**"Runs at fixed seams via hooks.py"** — a "seam" is a named point in the pipeline where cross-cutting code is allowed to hook in. Your `pipeline.py` already shows these explicitly:
+```python
+hooks.run(hooks.AFTER_INGEST, {"pages": pages})
+hooks.run(hooks.AFTER_OCR, {"chunks": text})    # e.g. PII redaction on extracted text
+hooks.run(hooks.BEFORE_INDEX, {"chunks": chunks})
+```
+`AFTER_INGEST`, `AFTER_OCR`, `BEFORE_INDEX` are the seams — fixed points where any registered feature's code gets a chance to run, without the main pipeline stages (`loader`, `ocr`, `chunk`, etc.) needing to know or care that PII redaction/tracing/grounding exist at all.
+
+**"Wired in wiring.py"** — `register_all(cfg)` (called at the top of both `build_knowledge_base()` and `answer()`) is where each feature's function gets *attached* to its seam(s) — e.g. wiring might do `hooks.register(hooks.AFTER_OCR, pii.redact)`. This is exactly the same pattern you already implemented for tracing in `logging_conf.py`'s `register()` — that's a cross-cutting feature (audit trail) hooking into `ON_STEP`/`ON_TOOL_CALL`/`AFTER_ANSWER`.
+
+**Practical takeaway:** the design keeps your pipeline stages "clean" — `loader.py`/`ocr.py`/`chunk.py` never import or call PII/tracing/grounding code directly. All of that gets attached from the outside, at declared seams, via `wiring.py`. `docs/cross-cutting.md` should be your reference table of which feature owns which file and which seam(s) it hooks into — worth reading before you implement `governance/pii.py` or anything else touching a seam, so you wire it the same way rather than inventing a new pattern.
+
+Me: put scanned page images in the data/raw 
+
+then does it mean the whole pipeline will expect the data to be in image format ?
+
+AI: Good question — and this changes loader.py, since I assumed PDFs in data/raw earlier. Let's untangle what's actually format-dependent vs. not.
+
+Downstream of loader.py, yes — everything expects an image, always. Look at Page.image_path in contracts.py: that field has always meant "a path to an image file." preprocess.py, layout.py, ocr.py — every stage after loading reads pixels from that path, not a PDF. This was true even in my original assumption; I just had loader.py doing the PDF→image conversion internally before creating each Page
+
+Me: Action tags: `[fill]` write a function body · `[wire]` write logic and attach it to hook seams (see `wiring.py`) · `[author]` write config/tasks/reports/tests, not Python · `[read-only]` fixed, never edit.
+
+what does author mean
+
+AI: `[author]` means the deliverable is **content you write directly** — YAML, Markdown, JSON, test cases — not Python code you're implementing inside a function body.
+
+**Concretely, from what you've already worked on:** things like `configs/task.yaml`, `configs/config.yaml`, `data/provenance.md`, `grading_kit/manifest.yaml`, `grading_kit/tasks.jsonl`, `configs/design_choices.md`, `reports/pipeline_diagram.md` — these are all `[author]` tasks. You're not writing a function that generates them; you're just directly typing the correct values/documentation into the file yourself, based on your project's real decisions (your axes, your corpus, your model choices).
+
+**How it differs from the other tags:**
+- **`[fill]`** = write the body of a Python function that already has a signature/stub (like `load_pages()`) — this is what you did for `loader.py`.
+- **`[wire]`** = write logic AND connect it to a hook seam via `wiring.py` (like the PII redaction or tracing example from earlier — `hooks.register(hooks.AFTER_OCR, pii.redact)`).
+- **`[author]`** = write config/docs/tests by hand, no code logic needed — just correct content.
+- **`[read-only]`** = never touch it at all (`contracts.py`, `pipeline.py`'s stage order, `settings.py`).
+
+So when you see a file tagged `[author]` in the codebase guide, that's your signal: don't hunt for a function stub to implement — just fill in the file directly with your project's real values, same as you did for `task.yaml`.
+
+Me: anisa@anisa-VivoBook-ASUSLaptop-X513EPN-K513EP:~/Downloads/doc-agent-template/doc-agent-starter/scripts$ ./get_data.sh 
+TODO: fetch corpus into data/raw/
+Fetching 1 BYTE issues into data/raw ...
+-> byte-magazine-1975-09
+./get_data.sh: line 39: ia: command not found
+
+AI: That's just a missing tool, not a script bug — `ia` is the Internet Archive command-line client, and it isn't installed on your machine yet.
+
+**Fix:**
+```bash
+pip install internetarchive
+```
+(or `pip3 install internetarchive` if `pip` points to Python 2 on your system)
+
+**Then verify it's on your PATH:**
+```bash
+ia --version
+```
+
+**Re-run the script:**
+```bash
+./get_data.sh
+```
+
+**One thing worth doing before it downloads all 15 issues:** Internet Archive sometimes rate-limits or requires configuration for bulk downloads. If you hit auth/permission errors after installing, run:
+```bash
+ia configure
+```
+It'll ask for IA account credentials (free to create at archive.org if you don't have one) — not required for public-domain items usually, but worth having ready if downloads fail silently or get throttled partway through your 15-issue loop.
+
+Also — small thing to notice in your terminal output: `TODO: fetch corpus into data/raw/` printed *before* the real fetching logic ran. That means the stub file's placeholder `echo` line is still present above Debashmita's real implementation in the actual `get_data.sh` on disk (the version you showed me last had both the stub template *and* the real script pasted together, likely accidentally). Worth having her check the file and delete that leftover `echo "TODO: ..."` line — harmless right now, but confusing output otherwise.
+
 Me: 
