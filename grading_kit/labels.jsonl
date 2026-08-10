@@ -1,1 +1,43 @@
-{"page_id": "example_0001", "text": "REPLACE ME — the exact ground-truth transcription of held-out page example_0001. These labels are the oracle: OCR is scored against them, and fresh grading questions are authored from them."}
+{"page_id": "byte-magazine-1975-09_p020", "text": "system capable of handling only 8 input and 24 output devices, the 008A uses a bus system capable of handling 256 bi-directional data input/output channels. RGS uses several of the 8008 chip's I/O channels instructions to set up this bus I/O System.
+
+
+There are four input/output instructions in the 008A's "instruction set:" Select, Control, Input, and Output. To select a peripheral, the device number is loaded into the accumulator and a select instruction is executed. This enables the peripheral device. If necessary, a control instruction is available. Upon its execution, the accumulator data is made available at the output and the control strobe line is pulsed. Once the device has been selected and initialized, data transfer using the input and output instructions is executed as it is in the port system.
+
+
+Each peripheral interface board is jumper-wired for its own device number. When the device number of a particular unit is selected, data transfer between the unit and the CPU is enabled until another device number is selected. When a control instruction is executed, the accumulator data is placed on the I/O bus. The interface transfers the data from the bus to the interface output. The control strobe line is then pulsed. An output
+instruction also causes the accumulator data to be placed on the I/O bus. The interface transfers the data to its output. This time the output strobe line is pulsed. On an input instruction, the interface transfers data from its input to the I/O bus. The CPU then transfers the data from the bus to the accumulator. The input strobe line is also pulsed.
+
+
+The bus system has three big advantages. The obvious one is the capability of handling up to 256 devices. The second advantage is that each of the 256 channels will perform both input and output. The third advantage is the ability to send control instruction, thus eliminating the need to use an adjacent I/O channel for device control.
+
+
+Ready and interrupt line expansions may also be brought out through the peripheral interface boards.
+
+
+Assembly
+
+Most of the circuitry is completed by soldering the components on the various PC boards. Although most of the PC boards are doublesided, components need only be soldered on one side since all holes are plated through.
+
+
+Edge connectors are provided for each plug-in board. These connectors must be soldered on the backplane. Some 68 wires must be soldered between the backplane and the control panel. The backplane and control panel are fastened back to back using spacers on long machine screws. 
+
+
+The control panel, CPU boards, memory boards, and parallel interface boards are double sided PC boards with plated through holes. These PC boards seem to be of good quality. The backplane board and the power supply board, however, are single sided and not quite as good. Extreme caution must be used as the foil patterns on these single sided boards will lift with very little excessive heat applied.
+
+
+Only about half the power supply circuitry is included on the power supply PC board. A power transistor and a voltage regulator, both in a TO-3 case, must be mounted in a heatsink (supplied in kit) on a chassis which must be provided by the builder. The power transformer, fuses, filter capacitors and power switch are also mounted on the builder supplied chassis. All of these components must be point to point wired. Wire must be supplied by the builder.
+
+
+Documentation
+
+
+The manuals and instructions provided for the 008A fall short. Anyone planning to write up any documentation in the future should take note of this and use the criticism constructively.
+
+
+The assembly instructions provided for the 008A are brief. The author of the documentation spent very little time on clarifications. Someone who has had considerable experience in both electronic engineering and computer science would have very few problems with the 008A. However, if a product is made with the intention of selling it to everyone, the documentation should be written to be understood by everyone. This includes people who are not experts in hardware or software.
+
+
+Much of the construction has to be done by following the component placement diagrams and circuit diagrams. A diagram of the foil pattern line-up for double sided boards should have been included in the 008A documentation. For easier reading, component placement diagrams should be black components on a grey foil pattern diagram rather than black on black.
+
+
+The 008A documentation provides only a brief definition of each software instruction. No information describing the circuit operation of the CPU is provided. A brief description of circuit operation is provided for the parallel interface kit and cassette adapter kit. Only a small amount of information is provided on the use and operation of the computer. Although the 008A documentation does include complete circuit diagrams with IC pinouts, absolutely no troubleshooting information is included. Logic circuit troubleshooting can be followed on the circuit diagram after you have checked wiring and component placement, but test points and voltages should be given on the power supply. Test points and waveforms should be given for devices such as a cassette tape adapter. Even in the"}
