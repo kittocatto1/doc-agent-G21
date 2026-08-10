@@ -153,4 +153,39 @@ Several attempts have been made to get the Supreme Court to recognize the patent
 130 May 1981 © BYTE Publications Inc"}
 
 
+{"page_id": "byte-magazine-1982-04_p044", "text": "Figure 2: Cross section of the structure of a standard visible red light-emitting diode.
+
+Blue LEDs at Last
+
+Longtime readers of BYTE may recall Steve's article from several years ago on a self-refreshing LED graphics display (see reference 2). In it, he described how single-color graphic images can be formed on display panels containing arrays of many red light-emitting diodes and suggested that multicolor images could be displayed on a panel that contained arrays of triads of different-color LEDs. But his suggestion was ahead of technology. At that time, no practical method was known for making an LED that could emit blue light.
+
+Now the blue-light barrier has been broken, and in a way eminently suitable to flat-panel graphics displays. In October 1981, the Sanyo Electric Company of Japan unveiled an LED lamp component that contains two separate LED chips, one of which emits blue light at a wavelength of 480 nanometers (see reference 3). The blue-emitting chip is formed from two liquid-phase-epitaxial layers of silicon carbide grown on a silicon-carbide wafer. The other chip, made of gallium phosphide with four epitaxial layers, can emit both red light at 700 nanometers and green light at 565 nanometers. A single component that can produce all three additive primary colors makes possible a full-color, flat-panel LED graphics display.
+
+The voltage potential dropped by the blue LED chip is about 3.5 V, producing 2 mcd (millicandelas) of light, while the two-color chip drops 2 V for 3 mcd of green light and 1.9 V for 3 mcd of red light. Thus we see that real components reflect the theoretical predictions of greater efficiency at longer wavelengths. . . . RSS
+
+all of them at 40 kHz. Modulating a 100-watt incandescent light bulb at such a high frequency is out of the question: the thermal time constant of the filament is much too long. The only light sources capable of switching at such a frequency are electroluminescent devices, of which the light-emitting diode (LED) is the least expensive and most familiar.
+
+In a light-emitting diode, shown in figure 2 on page 42, light is generated when a forward-bias current is applied. This causes electrons to be injected into the n-type (negative-doped, electron-rich) semiconductor material and holes (shortages of electrons) to be injected into the p-type (positive-doped, electron-poor) material.
+
+When the injected electrons and holes recombine with the majority carriers at the p/n junction, energy is released in the form of photons. The pattern of radiation emission can be controlled somewhat by reflective surfaces within the mounting structure and by plastic lenses. Generally, a spherical dome lens with a narrow beam width is best for communication.
+
+The color of the light emitted depends upon what semiconductor materials are used in the p/n junction and how they are doped (seeded with selected impurities): the amounts of energy released in the electron/hole recombinations of different materials vary, and the wavelength (and therefore the color) of light varies in a direct relation to the amount of energy contained in its photons.
+
+Most of the semiconductor materials used in LEDs are compounds of gallium: gallium arsenide phosphide (GaAsP, which emits red, orange, or yellow light), gallium phosphide (GaP, green emitting), gallium aluminum arsenide (GaAlAs, red emitting), and gallium arsenide (GaAs, which emits infrared photons at about 900 to 1000 nm). The efficiency of an LED depends upon wavelength. The longer the wavelength, the higher the efficiency (see the text box \"Blue LEDs at Last\").
+
+Operating at longer wavelengths, infrared LEDs are more efficient than visible-light red or green LEDs; IR LEDs are therefore preferred for line-of-sight beam breaking or communication. For a given power input, an IR LED produces a brighter light than a green LED. Many IR LEDs have radiant-power outputs of more than 10 mW (milliwatts)—for instance, the TIL39 component I have been experimenting with has an 11-mW output at 940 nm.
+
+Efficiency is important, because an LED is almost a point source of light. The illumination it casts on a surface is proportional to its brightness and inversely proportional to the square of the distance to the surface. If we want our open-air communication link to operate over distances as great as 10 meters, our LED light source must be very bright to produce an acceptable signal-to-noise (S/N) ratio using an ordinary-sized receiving photosensor measuring perhaps 0.1 cm² (square centimeter).
+
+Other incentives for using IR light are reduced sensitivity to ambient visible light, greater ability to pierce through fog or smoke, and better reflection off most surfaces for a greater chance that the receiver will be able to see the light source.
+
+Choosing the Light Detector
+
+Choosing the proper light detector is as important as selecting the light emitter. Selectivity, response, and inherent noise are important considerations.
+
+There are many materials which function as photoconductors. The simplest are bulk materials such as cadmium selenide (CdSe), lead sulfide (PbS), and cadmium sulfide (CdS).
+
+42 April 1982 © BYTE Publications Inc"}
+
+
 
