@@ -1,0 +1,2942 @@
+Name: Debashmita Saha
+Student number: 2105098
+
+--- FULL CONVERSATION ---
+
+Me: For A2, I will be sending you a series of documents from a "handbooks" folder, one by one. 
+
+For each document I upload:
+1. Provide a detailed summary using this structure:
+   - **Document Purpose & Target Audience**
+   - **Key Rules / Guidelines** (bullet points)
+   - **Critical Action Items or Next Steps**
+2. **Strict Guardrail:** Base your summary ONLY on the exact text provided in that specific message. Do not assume context or fill in missing details from outside sources. If something is unclear or incomplete, explicitly state it.
+3. End your response with: *"Ready for the next document."* and wait for my next input before proceeding.
+
+Do you understand these instructions? If yes, confirm and I will send the folder structure and the first document.
+
+AI: Understood. To confirm, for each document you send I will:
+
+1. Summarize it using exactly this structure:
+   - **Document Purpose & Target Audience**
+   - **Key Rules / Guidelines** (bullet points)
+   - **Critical Action Items or Next Steps**
+2. Base the summary strictly on the text in that specific message only — no outside assumptions, no filling gaps from the A1 form or the project PDF you shared earlier. If something is unclear or missing, I'll say so explicitly.
+3. End with *"Ready for the next document."* and wait for your next upload before doing anything else.
+
+Send the folder structure and the first document whenever you're ready.
+
+Me: I have attached two files:
+1. **[Image]**: The root repository folder structure for our Deep Learning Capstone project (`doc-agent-starter`).
+2. **[PDF]**: Document `01-START-HERE.pdf` from the `handbook/` directory.
+
+Please review both files and provide a targeted summary focusing on execution rules. Extract the following details strictly based on the provided PDF:
+
+1. **Document Purpose & Reading Order**: What is the core goal of the project, and in what sequence must the remaining handbook files be read?
+2. **Critical Project Constraints & Anti-Patterns**: What are the strict rules we MUST NOT break? (e.g., file creation rules, submission tags, grading requirements).
+3. **Folder Mapping**: Cross-reference the folders mentioned in the PDF (`grading_kit/`, `forms/`, etc.) with the provided folder structure image. Confirm if all required directories exist.
+4. **Immediate Action Items**: What are the direct next steps I need to complete based on this specific file?
+
+**Rules:**
+- Base all answers ONLY on the attached files. Do not guess or add outside assumptions.
+- If any detail is missing from the document, explicitly flag it.
+- End your response with: *"Ready for document 02-How-To-Submit."*
+
+AI: **Document Purpose & Reading Order**
+
+Core goal (per PDF): Every group builds the same system — an Agentic-RAG agent over scanned books — differentiated across three axes (domain × data speciality × primary NFR) so no two projects converge.
+
+Reading order specified:
+1. 02-How-To-Submit — how work is handed in (a GitHub repo, tagged at each milestone)
+2. 03-Project-Specification — the whole system: pipeline, the three axes, the regulated-repo design, tiers, anti-copying
+3. 05-Codebase-Guide — Part 1 documents every file; Part 2 is the ordered 57-step build checklist
+4. forms/ — A2–A4 milestone forms (Word); A1 is already submitted
+5. The repo itself (doc-agent-starter.zip) — every file is a named stub, "you edit, never create"
+6. 06-Group-Assignment-Workbook — domains, data specialities, NFRs, data sources, build buckets
+
+Note: the PDF's own list skips "04" — no 04-numbered document is mentioned. This is not explained in the text, so I flag it as unclear/possibly missing from what's been shared so far.
+
+**Critical Project Constraints & Anti-Patterns**
+
+- "Every file you touch is a named stub — you edit, never create." (stated for the repo/starter template)
+- Submission is via ONE repo, submitted four times by pushing a tag: `a2-submit`, `a3-submit`, `a4-submit` (three tags named; A1's tag isn't mentioned in this excerpt)
+- "Each milestone is the previous one plus your new work; your commit history is your submission."
+- `grading_kit/` is described as "the one folder that makes your project reproducible and gradable" — `manifest.yaml` inside it must declare the three axes (domain, data speciality, primary NFR + its target) and point to the corpus and held-out pages; it also functions as the evaluation harness.
+- Exact submission commands are deferred to 02-How-To-Submit — not present in this document, so I can't state them yet.
+- Format constraints: read-only references are PDF; forms stay editable Word; the Group-Assignment Workbook stays an interactive spreadsheet; the code stub is a repository (implying these formats shouldn't be converted/changed).
+
+**Folder Mapping**
+
+PDF references vs. the folder-structure image:
+
+| Mentioned in PDF | Present in image? |
+|---|---|
+| `forms/` | ✅ Yes |
+| `grading_kit/` | ✅ Yes |
+| `handbook/` (folder holding these PDFs) | ✅ Yes (shown as `handbook`) |
+| repo itself / starter template contents | Image shows: `bonus`, `configs`, `data`, `docs`, `forms`, `grading_kit`, `handbook`, `notebooks`, `reports`, `scripts`, `src`, `tests`, `traces`, `transcripts`, plus root files (`CHANGELOG.md`, `CONTRIBUTING.md`, `Dockerfile`, `LICENSE`, `Makefile`, `pyproject.toml`, `README.md`, `requirements.lock`, `STRUCTURE.md`, `SUBMISSION.md`) |
+
+The PDF does not explicitly name or describe every one of these other folders (`bonus`, `configs`, `data`, `docs`, `notebooks`, `reports`, `scripts`, `src`, `tests`, `traces`, `transcripts`) — so I cannot confirm from this document alone what each is *for*; I can only confirm they *exist* in the image. `STRUCTURE.md` and `SUBMISSION.md` at the root look like they'd map to structural/submission guidance, but the PDF doesn't reference them by name, so that link is my inference from filenames only, not something stated in the text — flagging it as unconfirmed by this document.
+
+**Immediate Action Items**
+
+Based strictly on this document:
+1. Read `02-How-To-Submit` next (explicitly first in the list).
+2. Then `03-Project-Specification`, then `05-Codebase-Guide` (Parts 1 and 2), then the `forms/` (A2–A4), then set up the repo from `doc-agent-starter.zip`, then `06-Group-Assignment-Workbook`.
+3. No other concrete action (e.g., specific commands, deadlines, or setup steps) is given in this document — anything beyond the reading order is not yet specified here.
+
+*Ready for document 02-How-To-Submit.*
+
+Me: I have provided the full text of `02-How-To-Submit.pdf` from our Capstone project handbook. 
+
+Acting as a Project Technical Lead, analyze this document and break it down into an actionable, bulletproof guide using the following structure:
+
+1. **One-Time Repository Setup (Step-by-Step)**:
+   - Outline the exact Git commands and repository settings required.
+   - Highlight the authentication/credential setup (e.g., Personal Access Tokens, SSH).
+
+2. **Daily Team Workflow & Anti-Patterns**:
+   - What are the daily rules for commits and file management?
+   - What specific practices trigger red flags or grading penalties (e.g., commit habits, file creation, large data files)?
+
+3. **Milestone Submission Protocol**:
+   - Provide the exact terminal commands required to tag and submit milestones (A1–A4).
+   - Clarify how GitHub timestamps and tags function regarding deadlines.
+
+4. **Pre-Submission Checklist**:
+   - List every required element that MUST be present in the repository before pushing a submission tag (forms, manifests, transcripts, tests).
+
+**Guardrails:**
+- Rely strictly on the text provided. Do not invent Git commands or policy rules not stated in the document.
+- End your response with: *"Ready for document 03-Project-Specification."*
+
+AI: **1. One-Time Repository Setup (Step-by-Step)**
+
+*Initial local setup:*
+- Download the starter zip from Moodle, unzip it (→ `doc-agent-starter` folder)
+- Create a **NEW, EMPTY** GitHub repository — do **NOT** add a README or .gitignore (the folder already has them)
+- Name it `doc-agent-<your team id>` (e.g. `doc-agent-G07`)
+- Make it **Public — REQUIRED** (a private repo cannot be graded and counts as no submission)
+- Turn the unzipped folder into that repo and push:
+```
+git init
+git add .
+git commit -m "A1 start"
+git branch -M main
+git remote add origin <your repo URL>
+git push -u origin main
+```
+- **Order matters:** the empty public repo must exist on github.com *first*, because `git push` can only push to a repo that already exists there. `git init`, `git add`, and `git commit` are local-only and never touch GitHub — only `git push` uploads.
+
+*Authentication/credentials:*
+- If `git push` asks for a password and fails, GitHub no longer accepts account passwords over HTTPS. Use one of:
+  - A Personal Access Token as the password (github.com → Settings → Developer settings → Personal access tokens, with **repo** scope)
+  - GitHub Desktop
+  - SSH keys
+
+*Team setup:*
+- Add your two teammates as collaborators (Settings → Collaborators)
+- Send your instructor the repository URL — this is your team's submission address for **all four milestones** (same repo reused)
+
+**2. Daily Team Workflow & Anti-Patterns**
+
+*Daily rules:*
+- Each member commits under their **own** GitHub account (contribution is tracked per person)
+- Commit little and often
+- Put your filled assignment form, your `grading_kit/`, and your code in the repo
+- Every file already has a named stub — you **edit** it, you do **not** create new files
+- Do **NOT** commit your full corpus of page-images (it's large) — `scripts/get_data.sh` fetches it instead; commit only the few held-out sample pages under `grading_kit/heldout_pages/`
+
+*Anti-patterns / red flags:*
+- Work committed only by one account "looks like one person did everything"
+- A commit history that "appears all at once the night before a deadline is a red flag and gets reviewed by a human" (a steady, weeks-long history "looks like real work")
+- Creating new files instead of editing the provided stubs (implied violation, though the document doesn't state an explicit penalty for this — flagging that as not spelled out)
+- Committing the full corpus of page-images
+
+**3. Milestone Submission Protocol**
+
+Exact commands (using A1 as the example given; substitute A2/A3/A4 and the matching tag):
+```
+git add -A
+git commit -m "A1 submission"      # use A1 / A2 / A3 / A4
+git tag a1-submit                  # use a1-submit / a2-submit / a3-submit / a4-submit
+git push origin main --tags
+```
+- `git push origin main --tags` **is** the submission.
+- The tag `a1-submit` (or `a2-submit`, etc.) "permanently marks your repo exactly as it was at the deadline" — you may keep working afterward without altering that marked snapshot.
+
+*On timestamps/deadlines:*
+- Deadlines are read from **GitHub's servers**, not your computer's clock.
+- Changing a commit's date locally does nothing — what counts is when your push **reaches GitHub**.
+- Explicit instruction: push before the deadline.
+
+**4. Pre-Submission Checklist**
+
+Before pushing a submission tag, the document lists exactly:
+- ☐ The milestone's form is filled in
+- ☐ `grading_kit/manifest.yaml` declares your axes — domain, data-speciality, NFR + target — and points to the corpus
+- ☐ Each member has added their `transcripts/<student number>.txt`
+- ☐ The code for this milestone runs (`make test` passes what it should)
+- ☐ You created and pushed the correct tag: `aN-submit`
+
+**What we read at each milestone** (stated in the doc, relevant context for the checklist):
+- Your repository at the tag `aN-submit` (code + form + `grading_kit/`)
+- The GitHub commit timeline (when work happened; who did what)
+- What changed since your previous milestone
+- Your per-member AI-chat transcripts under `transcripts/<your student number>.txt`
+
+*Ready for document 03-Project-Specification.*
+
+Me: I have provided the full text of `05-Codebase-Guide.md` for our Deep Learning project (`doc-agent-starter`).
+Act as our Lead Software Architect. Provide a clear, high-level breakdown of this codebase guide so our engineering team can execute without getting overwhelmed. Do not just state just what is written, ratherbreakdown easily so that I can understand everything clearly. Strictly adhere to these instructions:
+### 1. The Core Architecture & Seams (Mental Model)
+- Explain the key architecture rules (what is fixed vs. what we fill in).
+- Explain how cross-cutting features work (hooks, wiring, seams, structured logging).
+- Clarify the "Strict No-File-Creation" rule and how stubs function.
+### 2. Milestone Execution Roadmap (A1 to A4 Summary)
+- Provide a simplified, chronological summary of what core features must be delivered across the 4 milestones:
+  - **A1**: Framing & Data Setup
+  - **A2**: Knowledge Base Build (Ingestion, Vision/OCR, Indexing)
+  - **A3**: Agent, Retrieval & Evaluation
+  - **A4**: Serving, MLOps & Governance
+### 3. Tier System & Rules of Engagement
+- Briefly explain how **⭐ Core**, **▲ Gated (Data Speciality / NFR)**, and **➕ Bonus** tasks interact.
+- Identify the explicit "Never Edit" boundaries that will fail CI if modified.
+**Guardrails:** Rely exclusively on the provided text. Keep explanations concise, plain-spoken, and structured for fast reference.
+
+AI: # doc-agent — Architecture Briefing (Lead Architect View)
+
+## 1. The Core Architecture & Seams (Mental Model)
+
+**Fixed vs. fill-in — the basic contract:**
+Think of the repo as a house with load-bearing walls already built. You furnish the rooms; you don't move the walls.
+
+- **FIXED (never touch structurally):** `contracts.py` (data shapes — `Page`, `Region`, `Chunk`, `Query`, `Citation`, `Answer`, `ToolResult`), `hooks.py` (the seam mechanism itself), `pipeline.py` (the Stage 0–9 order), the agent loop in `agent.py`, and the tool names/signatures in `tools.py`. CI enforces this via `tests/test_structure.py`.
+- **What you actually do:** fill in the marked `# IMPLEMENT` function bodies (`[fill]`), write config/tasks/reports (`[author]`), and — for cross-cutting stuff — wire your logic into a fixed attachment point (`[wire]`).
+- **Where you make choices:** only in `configs/` — which model, which parameters, per stage. You never choose *where* code lives.
+
+**Cross-cutting features (grounding, security, PII, tracing) — how they actually work:**
+These aren't single files you edit once — they're behaviors that need to fire at multiple points across the whole pipeline (e.g., PII redaction has to happen wherever text could leak; logging has to happen at every step). So instead of scattering that logic everywhere, the architecture uses a **publish-subscribe pattern**:
+
+1. **`hooks.py`** defines named **seams** — fixed checkpoints in the pipeline/agent loop (e.g., `BEFORE_ANSWER`, `ON_STEP`, `ON_TOOL_CALL`, `AFTER_ANSWER`).
+2. Each feature (e.g., `llm/postprocess.py` for grounding, `governance/pii.py` for redaction, `logging_conf.py` for tracing) owns its logic and calls `register(seam, handler)` to attach itself to a seam.
+3. **`wiring.py` → `register_all(cfg)`** is the *single manifest* that actually turns all these registrations on — one place to audit "what's wired where."
+4. At runtime, `hooks.run(seam, ctx)` fires every handler registered at that seam, in order, threading context through.
+
+So: **owner module has the logic, `hooks.py` defines when it runs, `wiring.py` is the master switch-list.** `docs/cross-cutting.md` documents the full owner→touchpoint map.
+
+**The "Strict No-File-Creation" rule:**
+Every deliverable — every Python module, notebook, script, report, config, test — **already exists as a named stub in the starter repo.** Your job across all four milestones is to *edit those stubs*, never create new files. This applies uniformly: from `src/doc_agent/*` implementation files down to `reports/final_report.md` and even the optional-feature backlog (E1–E39) — each enhancement has a pre-assigned home file. If you're creating a new file, you're off-spec.
+
+---
+
+## 2. Milestone Execution Roadmap (A1 → A4)
+
+**A1 — Framing & Data Setup**
+Lock in your project identity and get usable data flowing:
+- Declare your three axes (domain, data speciality, NFR+target) in `task.yaml`
+- Pick per-stage models in `config.yaml`
+- Fetch your corpus (`get_data.sh`), document its provenance/licence
+- Declare axes + corpus pointers in `grading_kit/manifest.yaml`; seed `heldout_pages/` + `labels.jsonl`
+- Enforce data quality gates (`validate.py` — min 300 pages/60k words, split by document) and version the corpus (`versioning.py`)
+- Explore the data in `eda.ipynb`; get logging and secrets management running
+*Net result: a scoped project, a validated corpus, and infrastructure plumbing in place.*
+
+**A2 — Knowledge Base Build (Ingestion → Vision/OCR → Indexing)**
+Turn raw scanned pages into a searchable index — this is the vision pipeline:
+- Load pages → preprocess (deskew/denoise/binarize) → detect layout regions → OCR/transcribe them
+- Chunk the extracted text → embed it → build/load the vector store
+- Prove it works: `kb_demo.ipynb` (OCR quality + one retrieval example), `pipeline_diagram.md`, and the design-choices table
+- **Plus:** implement *only* your one data-speciality enhancement (e.g., degraded scans, multi-column layout, HTR) and *only* your one indexing-related NFR enhancement, if applicable
+*Net result: a working, queryable knowledge base built from your specific corpus.*
+
+**A3 — Agent, Retrieval & Evaluation**
+Build the actual reasoning system and prove it's grounded:
+- Wire real top-k retrieval; implement the LLM call wrapper and prompts
+- Implement every agent tool (retrieve, rerank, read_page, enhance_page, extract, aggregate, cite, calculator, escalate_to_human)
+- Implement `decide()`, `act()`, `synthesize()` in the agent loop — critically, **`decide()` must implement evidence-gated re-search**: if the top retrieval score is weak, widen `k` and retry; abstain once `k` exceeds `k_max`. This is graded fail-closed by the A3 agentic gate.
+- Wire grounding/abstention into `BEFORE_ANSWER`, wire tracing into `ON_STEP`/`ON_TOOL_CALL`/`AFTER_ANSWER`, emit `traces/run.jsonl`
+- Train any fine-tuned components; compute eval metrics (OCR-F1, recall@k, groundedness, citation accuracy, subgroup gap) against `labels.jsonl`
+- Run an ablation study; author `tasks.jsonl` + `success_check.py` **including at least one `needs_research:true/false` task pair** so the agentic gate can verify re-search actually fires
+- Reproduce everything via `run.sh`, write `eval_report.md`, keep tests + CI green
+- **Plus:** implement only your one NFR enhancement (reranking, hybrid retrieval, calibration, explainability, fairness, robustness, security, privacy, auditability, etc. — pick the one matching your declared NFR)
+*Net result: a working, evidence-gated, evaluated agent with proof it's grounded and not hallucinating.*
+
+**A4 — Serving, MLOps & Governance**
+Ship it and account for it:
+- Serve `/answer` over an API; launch the Gradio UI/demo
+- Wire experiment tracking (MLOps backbone)
+- Write the model card/datasheet, the final report, the one-page brochure, and demo/video links
+- Un-skip the end-to-end smoke test — it must return a grounded, cited answer, CI green
+- **Plus:** implement only your one serving/governance-related NFR enhancement (offline/portable, low-latency, cost-efficient, accessible, or registry/drift-monitoring)
+*Net result: a deployed, documented, monitorable system with a governance paper trail.*
+
+---
+
+## 3. Tier System & Rules of Engagement
+
+**How the three tiers interact:**
+- **⭐ Core** — every single group builds these, in the stated build order, no exceptions. This is the shared substrate.
+- **▲ Gated** — you build *only the one item* that matches your declared data speciality, and *only the one item* that matches your declared primary NFR. You do not attempt every gated item — just your one-per-axis match. These appear after the core list in each milestone, still in stage order.
+- **➕ Bonus** — extra credit, attempt only after core (and your gated items) are solid. Never required.
+
+**Practical sequencing rule:** within any milestone, always finish ⭐ Core first, then your one ▲ data-speciality item, then your one ▲ NFR item — in that order. Don't jump to bonus work with an incomplete core.
+
+**Explicit "Never Edit" boundaries (CI will fail you):**
+- The agent loop in `agent/agent.py`
+- The stage order in `pipeline.py`
+- The seams in `hooks.py`
+- The data types/contracts in `contracts.py`
+- The tool names/signatures in `agent/tools.py`
+
+These five are structurally locked across the entire project — you implement *inside* them (e.g., fill `decide()`'s body), but you never change their shape, order, or interface.
+
+*Ready for the next document.*
+
+Me: I have provided the full text of `A2_form.docx` for Milestone 2 ("Build Your Knowledge Base") of our Deep Learning  project.
+Act as our Senior  Advisor. Walk our 3-person team through this submission form step by step. Provide a practical completion guide following these exact sections:
+### 1. Submission Overview & Critical Pitfalls
+- Summarize what needs to be delivered in the GitHub repository (`a2-submit` tag) and the ZIP file.
+- List the **A1 carry-forward artifacts** that are being graded for the first time in A2.
+- Highlight the "Grounding Gate" rule and what triggers a zero score.
+### 2. Section-by-Section Completion Guide (Sections 1 through 8)
+For each section of the form:
+- Explain **what specific data or choices** we need to input.
+- Identify **which file/notebook in our codebase** provides the evidence for that section (e.g., `kb_demo.ipynb`, `configs/design_choices.md`, `grading_kit/manifest.yaml`).
+- Highlight how to fulfill high-value rubric requirements (like reproducing at least one pretrained/published method in Section 3).
+### 3. Team Division & AI Transparency Strategy (Section 8)
+- Explain how the 3 team members must split ownership of the sections and format their AI transcript files (`transcripts/<student number>.txt`).
+**Guardrails:** Base all instructions strictly on the provided text. Keep explanations actionable, crisp, and direct.
+
+AI: # A2 Completion Guide — "Build Your Knowledge Base"
+
+## 1. Submission Overview & Critical Pitfalls
+
+**What ships, two ways:**
+- **GitHub (the real submission):** `git add -A && git commit -m "a2-submit" && git tag a2-submit && git push origin main --tags`. Per the form: "The tag IS your submission (deadlines are read from GitHub's servers) — do NOT upload a ZIP."
+- **The ZIP structure** (autograder-enforced, exact match required) contains: `A2_form.docx`, `src/doc_agent/` (ingest, vision, index implemented), `scripts/build_index.sh`, `notebooks/kb_demo.ipynb`, `reports/pipeline_diagram.md`, `configs/design_choices.md`, and `transcripts/<student number>.txt` ×3.
+
+**A1 carry-forward artifacts — graded here for the FIRST time** (because "the code stub was released after A1"):
+- `configs/task.yaml`
+- `data/provenance.md` plus your corpus (or `scripts/get_data.sh`)
+- `notebooks/eda.ipynb`
+- `grading_kit/manifest.yaml`
+- `grading_kit/heldout_pages/` with `labels.jsonl`
+
+**Don't let these slip through the cracks** — even though they were technically "done" in A1, this is the first time they're actually assessed.
+
+**The Grounding Gate — what zeroes you out:**
+Stated explicitly: "every claim in the form must match your own code, index, and notebook outputs. Numbers with no notebook evidence score zero for that item." Practical implication: never write a number (OCR error rate, chunk count, embedding dimension) into the form unless it's actually printed/visible in `kb_demo.ipynb` or your code output. No estimates, no round guesses.
+
+---
+
+## 2. Section-by-Section Completion Guide
+
+**Section 1 — Recap from Assignment 1**
+- Input: your three A1 choices (domain, data speciality, primary NFR+target) — one line each; your unchanged success metric; your corpus source/size/hard-to-read property.
+- Rule stated in the form: "Do NOT change the success metric — your system in A3 is judged on it."
+- Evidence source: your submitted A1 form / `configs/task.yaml`.
+
+**Section 2 — The Structure We Exploit**
+- Input: three things — (a) structure in the *page image* a vision model can exploit (nearby pixels form strokes/characters, shift-invariance), (b) structure in the *text* a sequence model can exploit (reading order, context, conjuncts/ligatures), (c) what should NOT change the answer (font, mild skew, scan noise, ink bleed).
+- Evidence source: your `ingest/preprocess.py`, `vision/layout.py`, `vision/ocr.py` implementation choices — this section is really justifying those choices.
+- No specific file is named in the form for this section's evidence beyond the reasoning itself, so treat it as an analytical write-up grounded in your actual pipeline design.
+
+**Section 3 — Components & Options We Considered**
+- Input: for each stage (Enhancement/bonus, Layout detection, OCR/HTR, Chunking, Embedding, Vector index) — the options compared, your choice + why, and whether it's reproduced.
+- **High-value requirement:** "At least one choice must be an existing published/pretrained method you reproduce and adapt... your OCR foundation is the natural one." Mark that row's "Reproduced?" column as **yes**. This is worth 20 points, so make sure at least one row is unambiguously checked.
+- Evidence source: your actual model/checkpoint choices in `configs/config.yaml` and the corresponding stage files (`vision/ocr.py` is the natural candidate given the form's own hint).
+
+**Section 4 — The Knowledge Base We Built**
+- Input: per stage (Ingest+enhance, Layout, OCR/HTR, Chunk, Embed, Index) — model/checkpoint, key parameters, and pretrained/fine-tuned/scratch status; plus a one-line pipeline summary noting any deviation from default.
+- Evidence source: `configs/config.yaml` (the actual parameter values) cross-checked against what's really running in `src/doc_agent/ingest/`, `vision/`, `index/`.
+
+**Section 5 — Evidence It Works** *(25 points — the single highest-weighted section)*
+- Input: OCR quality on a labelled sample (CER/WER or F1 + sample size), index statistics (chunks indexed, embedding dimension, index type, corpus coverage), one real retrieval example (query → top chunk → correct page or not), and your worst observed failure with your read on why.
+- Evidence source: **`notebooks/kb_demo.ipynb`** is explicitly named in the assignment brief as showing "OCR quality and one retrieval example" — this notebook's actual output is what the Grounding Gate will check every number in this section against. Your OCR metric should be computed against `grading_kit/labels.jsonl` (the ground-truth transcriptions from A1/A2).
+- Be honest about the failure case — the form explicitly asks for this ("honest — this shapes A3"), so a fabricated or vague failure won't hold up and undercuts your own A3 planning.
+
+**Section 6 — The Plan for A3**
+- Input: what you'll build next (retrieval+rerank, agent loop+tools, guardrails/HITL, grounding, evaluation, optional RL/RLVR), how you'll construct `tasks.jsonl` (verifiable + abstention cases), and your biggest risk/unknown.
+- Explicit carry-forward note in the form: "in A3 it must do evidence-gated re-search (widen k on weak evidence, abstain at k_max) — the mandatory agentic behaviour, graded fail-closed in A3." Make sure this is reflected in your plan, not omitted.
+- Evidence source: forward-looking, not code-graded the same way — but should be consistent with what your A2 pipeline actually produced (e.g., don't plan around index stats you didn't build).
+
+**Section 7 — Design Choices & Justification (Stages 1–4)**
+- Input: the eight-facet table (Problem statement, Data, Model, Methods, Design, Development, Deployment, MLOps) filled for the knowledge-base stages only.
+- Evidence source: this section **is** `configs/design_choices.md` — the form states directly "This is the graded design artifact (`configs/design_choices.md`)." Fill the docx version and make sure the actual `configs/design_choices.md` file in the repo matches it, since that file is what's in the ZIP submission list.
+
+**Section 8 — How We Worked With AI**
+- See Part 3 below.
+
+---
+
+## 3. Team Division & AI Transparency Strategy (Section 8)
+
+**Ownership split:**
+- Every section must have a named owner in the "Worked sections" column of the Team Members table at the top of the form.
+- Each member is responsible for submitting the AI-chat transcript behind **only the sections they led** — not the whole form.
+- Given 8 sections (+ the submission mechanics) across 3 people, a natural split is roughly 2–3 sections per person, but the form doesn't mandate a specific division — just that "every section must be owned by someone."
+
+**Transcript file requirements — exact format:**
+- Filename: exactly `<student number>.txt` (plain text), one per member, three total.
+- Location: `transcripts/` folder (per the ZIP structure table).
+- Required contents, **in this order**:
+  1. **Header** — member name, student number, sections led
+  2. **The full conversation** — every prompt and every AI reply, **unedited**
+  3. **A short reflection** — what was accepted, changed, or rejected from the AI's output, and why
+
+**Practical execution tip:** since transcripts must be unedited and tied to specific sections, each member should keep their AI conversation for A2 in a single continuous thread (or clearly delineate multiple threads) covering exactly the sections they own — this makes assembling the required header and reflection straightforward at submission time, and keeps the Grounding Gate consistent (what's claimed in the form should trace back to what's in that member's actual conversation).
+
+*Ready for the next document.*
+
+
+Me: I need to assign the engineering tasks (code implementation) and report writing (A2 Form sections) across our 3-person team for Milestone 2 of our DL project.
+
+Here is our current draft for task distribution(attached)
+
+Acting as a Senior Technical Project Manager, please evaluate our draft and provide a balanced, compliant task distribution plan. Keep the following constraints in mind:
+
+1. **Role Rotation & Equal ML Exposure**: Each member must touch core machine learning/data engineering work (as required by the course syllabus). No one should only do documentation or setup.
+2. **Form Ownership (Section 8 Compliance)**: Every section of `A2_form.docx` must have a clear primary owner who will also submit their corresponding AI-chat transcript (`transcripts/<student_number>.txt`).
+3. **Pipeline Logic**: Group coding tasks logically so team members aren't constantly blocked by each other's code (e.g., Ingest + Preprocess together, Vision + OCR together, Chunk + Embed + Vector Store together).
+
+### Please provide:
+- **Critique of our Draft**: Identify any potential bottlenecks, workload imbalances, or missing requirements.
+- **Final Code Division**: Clear, module-by-module assignment in `src/doc_agent/` for Student 1, Student 2, and Student 3.
+- **Final Form Division**: Exactly which sections of `A2_form.docx` each student leads to fill in the "Team Members" table of the form.
+
+AI: ## Review of Your Draft Plan
+
+Overall, this is a strong, well-sequenced plan — the day-by-day breakdown maps correctly onto Stages 1–4, your gated enhancements are correctly placed (**E2** multi-column → `vision/layout.py` on Day 2; **E5** HNSW → `index/store.py` on Day 3, both matching the Codebase Guide's assignment map), dependencies between commits are logical, and workload is fairly balanced (~7–8 commits per person). A few things worth fixing before you lock it in:
+
+### Gaps to close
+
+1. **`data/validate.py` and `data/versioning.py` are unassigned.** Your own Final Checklist lists these under "A1 carry-forward (must exist before A2 is even gradable)," but no day or commit in the plan actually implements them. Someone needs to own these — logically Anisa (Day 1, alongside `task.yaml`/`settings.py`) or Debashmita (Day 1, alongside `get_data.sh`/`provenance.md`, since `validate.py` checks the corpus she's fetching).
+
+2. **The fine-tuning exemption is a real risk — confirm it before Day 2.** You're using pretrained-only OCR/embedding/reranker models, but A2's spec explicitly says the OCR baseline is "fine-tune a pretrained recognizer." If your "large-corpus exemption" isn't confirmed in writing, Section 3's OCR row (worth part of the 20-point "reproduced" requirement) is at risk, and Debashmita's Day 2–3 OCR benchmarking task changes shape. Get this confirmed **before** Debashmita commits to the Qwen2-VL benchmarking path.
+
+3. **`retriever.py` is technically an A3 file (Stage 5), not A2.** Commit 18 has Anisa building `retrieval/retriever.py` on Day 3 — per the Codebase Guide, this is A3 Core item #1. It's not wrong to build a minimal version early, since A2 Section 5 explicitly requires "one retrieval example," but be clear in your form/transcript that this is a lightweight retrieval function built to produce evidence, not your full A3 retrieval+rerank build — otherwise it can look like scope creep or cause confusion about what's "done" going into A3.
+
+Everything else — the OCR F1 measurement against `labels.jsonl`, the honest worst-failure requirement, the reproducibility re-run before tagging — is correctly built in.
+
+---
+
+## A2 Form — Section Division (mapped to your git plan)
+
+Since transcripts must match who actually led each section, I'd assign ownership based on who did the corresponding code, not evenly by section count:
+
+| Section | Owner | Why |
+|---|---|---|
+| **1 — Recap from A1** | **Anisa** | She authored `task.yaml`/`config.yaml` (Commit 1), closest to the three axes |
+| **2 — Structure We Exploit** | **Sunanda + Debashmita** (joint) | Page-image structure (layout/multi-column) is Sunanda's; text/sequence structure (OCR, conjuncts) is Debashmita's — split the two rows between them |
+| **3 — Components & Options Considered** | **Sunanda** (layout, chunk, embed, index rows) + **Debashmita** (OCR/HTR row) | Directly matches Commits 9–10, 14–16 |
+| **4 — Knowledge Base We Built** | **Joint fill, Anisa assembles** | Each person states their own stage's model/params (Anisa: ingest; Sunanda: layout/chunk/embed/index; Debashmita: OCR), Anisa compiles into the final table since she wires `pipeline.py` |
+| **5 — Evidence It Works** | **Debashmita** (compiles, per Commit 20) | Pulls OCR F1 from her own work (Commit 13), index stats from Sunanda, retrieval example from Anisa — she owns the write-up but needs both teammates' numbers first |
+| **6 — Plan for A3** | **Anisa** | She's doing the pipeline wiring, closest to what agent work comes next |
+| **7 — Design Choices (8-facet table)** | **Anisa** | Explicitly assigned in Commit 21 |
+| **8 — AI Transcripts** | **Each member, individually** | Per-person `.txt`, covering only the sections they led |
+| **Submission structure / final tag** | **Anisa** | Owns Commit 23 (`a2-submit`) |
+
+**One consistency note:** wherever a section has two names against it (2, 3, 4, 5), make sure both people's transcripts actually show them discussing/authoring their half — the Grounding Gate checks the form against transcripts too, so a section listed under both names should have conversational evidence from both.
+
+Me: My name is Debashmita. My team members are Anisa and Sunanda. 
+
+**Context:**
+
+- Anisa has already created our empty GitHub repository, pushed the initial starter code, and invited us as collaborators.
+
+According to the task division you and I built together please guide me through my **very first step** as an individual contributor on this project. 
+
+### Guidelines for your response:
+
+1. **Explain the 'Why' and 'How':** Don't just give commands; explain *why* this step is necessary for our project architecture and *how* it connects to our A2 submission goals. I want to understand everything clearly, not just blindly follow you.
+
+2. **Pacing:** Give me ONLY step 1 right now. Do not jump ahead to steps 2 or 3. Wait for me to complete step 1 and confirm before moving on.
+
+3. **Git Hygiene:** Show me the exact Git commands to clone Anisa's repo and set up my local working environment safely without messing up main branch code.
+
+What is my exact Step 1?
+
+AI: ## Your Step 1: Clone the Repo and Set Up a Safe Local Branch
+
+**Why this is your actual first step (before touching any code):**
+
+Right now, the only thing that exists is Anisa's pushed starter code sitting on GitHub — your laptop knows nothing about it yet. Before you can write a single line of `get_data.sh` or `provenance.md`, you need a **local copy** of that exact repo structure, because remember the rule from the Codebase Guide: *"every file you submit already exists as a stub — you edit it, you never create one."* If you don't clone the real repo first, you risk building your files against a stale or incorrect folder structure and creating files that don't match the fixed stub locations — which fails CI's structure lock.
+
+Second, and just as important: you're about to work on `scripts/get_data.sh` and `data/provenance.md` while Anisa and Sunanda work on *other* files in the *same* repo at the *same* time. If all three of you commit directly to `main`, you risk overwriting each other's work or pushing half-finished code straight to the branch that represents your team's shared source of truth. Working on a **separate branch** protects `main` from broken or incomplete commits while you're still figuring things out — this is basic git hygiene for any multi-person repo, and it's especially important here since your commit history *is* your graded submission (per How-To-Submit: "your commit history is your submission").
+
+**How — exact commands:**
+
+1. **Get the repo URL from Anisa.** It'll look like `https://github.com/<her-username>/doc-agent-<team-id>.git`. Make sure you've accepted her collaborator invite on GitHub first (check your email or github.com notifications) — otherwise the clone will fail with a permissions error.
+
+2. **Clone it to your machine:**
+```bash
+git clone https://github.com/<team-repo-url>.git doc-agent-<team-id>
+cd doc-agent-<team-id>
+```
+This downloads the *entire* repo — including all the stub files and folder structure Anisa pushed — as-is. You now have a local copy of `main`.
+
+3. **Verify you're on `main` and it's clean:**
+```bash
+git status
+git log --oneline
+```
+`git status` should say "nothing to commit, working tree clean." `git log` should show Anisa's initial commit(s) — this confirms you actually have the real starter code, not an empty or broken clone.
+
+4. **Create your own working branch off `main` — do NOT commit directly to `main`:**
+```bash
+git checkout -b debashmita/get-data-provenance
+```
+This creates and switches to a new branch. Any commits you make now live on this branch only — `main` stays untouched until you're ready to merge, so there's zero risk of you accidentally breaking Anisa's or Sunanda's work, or vice versa.
+
+That's it for Step 1. Once you've cloned the repo, confirmed `git status` is clean, and created your branch, let me know and we'll move to Step 2 — actually locating and opening the `scripts/get_data.sh` stub.
+
+Me: Step 1 is done. moved to new branch
+git status
+On branch debashmita/get-data-provenance
+nothing to commit, working tree clean
+
+AI: Great — clean branch, ready to work. Let's move to Step 2.
+
+## Step 2: Locate and Understand the `get_data.sh` Stub Before Editing It
+
+**Why you look before you write:**
+
+The Codebase Guide's #1 rule is "every file you submit already exists as a stub — you edit it, you never create one." Before touching anything, you need to see exactly what Anisa's starter push actually gave you for this file — what shape it's in, what comments or placeholders already exist, and what it expects to produce. Writing blind (assuming what's inside) is how people accidentally break the CI structure lock or duplicate work that's already scaffolded.
+
+There's a second reason specific to your task: your job per the plan is to fetch a **10–15 issue subset now**, but build it so it **also works for the full 224 issues later**. That's a design constraint, not just a script — so you need to understand what inputs/config the stub expects (does it read issue IDs from `configs/task.yaml`? a hardcoded list? an argument?) before you decide how to parameterize it.
+
+**How — exact steps:**
+
+1. **Open the file and read it as-is:**
+```bash
+cat scripts/get_data.sh
+```
+or open it in your editor of choice. Look specifically for:
+- Any existing comments marking where you're meant to fill logic in (likely something like `# TODO` or `# IMPLEMENT`)
+- Any variables it already expects (a target directory, an identifier list, an environment variable)
+- Whether it references `data/raw/` explicitly (per the spec, this is where fetched pages must land — Loader.py's `load_pages()` reads from there in A2)
+
+2. **Check if it's referenced elsewhere**, so you know what "done" looks like from the outside:
+```bash
+grep -rn "get_data" --include="*.py" --include="*.md" --include="*.yaml" .
+```
+This tells you if `pipeline.py`, `manifest.yaml`, or docs expect this script to behave a certain way (e.g., be callable with no args, or read from `configs/task.yaml`).
+
+3. **Confirm where your BYTE corpus identifiers actually come from.** Since you're fetching from Internet Archive, you'll need the specific IA identifiers for your 10–15 chosen issues (and ideally a plan for listing all 224 later). Do you already have that list of IA identifiers picked out, or is that something we should figure out together as part of this step?
+
+Once you've looked at the file's current contents and confirm (or paste) what's inside, tell me what you see and whether you have your issue-identifier list ready — then we'll move to actually writing the fetch logic.
+
+Me:  cat scripts/get_data.sh
+
+#!/usr/bin/env bash
+
+# A1 — fetch or recreate your scanned corpus into data/raw/
+
+# IMPLEMENT: download/prepare your corpus (public-domain / openly licensed).
+
+set -euo pipefail
+
+echo "TODO: fetch corpus into data/raw/"
+
+
+
+grep -rn "get_data" --include="*.py" --include="*.md" --include="*.yaml" .
+
+./handbook/05-Codebase-Guide.md:287:- **`get_data.sh`** — A1 fetch/recreate the corpus. **`build_index.sh`** — A2 build the index. **`run.sh`** — A3 reproduce all results. (`run_ingest/index/eval.py`, `set_seed.py` already provided.)
+
+./handbook/05-Codebase-Guide.md:318:3. `[author]` **scripts/get_data.sh** — fetch or recreate your corpus into `data/raw/`.
+
+./handbook/03-Project-Specification.md:328:**Every deliverable is a pre-named stub.** The repo ships blank stubs for everything a milestone asks students to submit — `notebooks/eda.ipynb`, `notebooks/kb_demo.ipynb`, `scripts/{get_data,build_index,run}.sh`, `data/provenance.md`, `reports/{pipeline_diagram,eval_report,final_report,brochure}.md` + `reports/{demo_link,video_link}.txt` + `reports/figures/`, and `traces/`, `bonus/`, `transcripts/`, plus **`grading_kit/`** (manifest.yaml + heldout_pages/ + labels.jsonl) — the single folder that declares the three axes and makes the project reproducible and gradable; it is also the students' own evaluation harness. Students **edit** these; they never create a new file. The four assignment forms' submission structures reference these exact paths.
+
+AI: Good — that confirms two things:
+
+1. **The stub is genuinely minimal** — just a shebang, a comment marker (`# IMPLEMENT`), `set -euo pipefail` (good practice already baked in — the script will exit on any error rather than silently continuing), and a placeholder echo. No hidden constraints from other files — the grep shows only documentation references, nothing in `pipeline.py` or `.yaml` configs expects a specific internal structure from this script. Your only hard contract is: **populate `data/raw/`.**
+
+2. **You have a clean slate to design this properly** — which matters because of the "10–15 now, 224 later" requirement. That's not something the stub tells you to do; it's a decision *you* need to bake in, so the script should take your issue list as a **variable or array you can trivially expand**, not something hardcoded inline in a way that's painful to extend later.
+
+**Before you write a single line of bash, I need one thing from you:**
+
+Do you already have the specific **Internet Archive identifiers** for your chosen 10–15 BYTE issues? (These look like short slugs, e.g. `byte-magazine-1983-12` or similar — visible in the URL of each issue's IA page, like `archive.org/details/<identifier>`.)
+
+If yes — paste me 2–3 examples of what they actually look like on IA, so we format the download command correctly.
+If no — that's fine, but it becomes step 2a: we go pick them from the IA BYTE collection before writing any fetch logic, since the script is useless without real identifiers to fetch.
+
+Which situation are you in?
+
+Me: no, i do not have
+
+AI: ## Step 2a: Pick Your 10–15 BYTE Issue Identifiers from Internet Archive
+
+**Why this comes before any scripting:**
+
+`get_data.sh` is just a fetch mechanism — it's useless without a concrete list of *what* to fetch. Also, this isn't an arbitrary pick: your A1 form already declared your corpus source and the ≥300 pages / ≥60,000 words minimum. Whatever issues you pick now need to actually clear that floor on the subset, or Section 1's "Our corpus (from A1)" recap in the A2 form becomes inconsistent with what you actually built — which is exactly the kind of mismatch the Grounding Gate penalizes.
+
+There's also a practical reason to do this *before* Anisa or Sunanda touch layout/OCR: they need real pages to test against (Day 2's layout detection and OCR benchmarking both depend on your fetched subset existing in `data/raw/`).
+
+**How — exact steps:**
+
+1. **Go to the BYTE Magazine collection on Internet Archive.** The proposal PDF mentioned BYTE is hosted there with full-run scans. Search:
+```
+https://archive.org/search?query=byte+magazine
+```
+or browse a dedicated collection page if one exists (e.g. search "BYTE Magazine Volume" to see how issues are titled).
+
+2. **For each issue you want, find its identifier** — this is the string in the URL after `/details/`. For example, if an issue's page is:
+```
+https://archive.org/details/byte-magazine-1983-12
+```
+then `byte-magazine-1983-12` is the identifier you'll use in your fetch script (via IA's API or the `ia` command-line tool / direct download URLs).
+
+3. **Selection criteria to apply while picking (tie back to your A1 choices):**
+   - **Coverage of your data speciality (multi-column layout):** pick issues you can confirm are genuinely multi-column scans, not text-only reprints
+   - **Page/word count math:** since one issue is roughly 300–500+ pages per the proposal, even 1–2 issues should clear your 300-page floor — but sanity check page counts on each issue's IA detail page (usually listed under "Pages" in the metadata) before finalizing your list of 10–15
+   - **Scan quality spread:** it's fine (even good for Section 5's "worst failure" evidence) if a few issues have visibly rougher scans — don't cherry-pick only the cleanest ones
+
+4. **Write down the list** — issue identifier + rough page count for each — you'll need this both for the script and for `data/provenance.md`.
+
+Go pick your list (or start browsing), and paste me back a few real identifiers once you have them — then we write the actual fetch logic in the script.
+
+Me: https://archive.org/details/byte-1987-12
+https://archive.org/details/198902ByteMagazineVol1402PersonalWorkstationMacSE
+https://archive.org/details/byte-magazine-1995-09
+
+AI: Good — this confirms something important: **BYTE identifiers on Internet Archive are NOT consistently formatted.** Look at the pattern differences across your three:
+
+| URL | Identifier | Pattern |
+|---|---|---|
+| `archive.org/details/byte-1987-12` | `byte-1987-12` | short: `byte-YYYY-MM` |
+| `archive.org/details/198902ByteMagazineVol1402PersonalWorkstationMacSE` | `198902ByteMagazineVol1402PersonalWorkstationMacSE` | long: `YYYYMM` + descriptive title, no separators |
+| `archive.org/details/byte-magazine-1995-09` | `byte-magazine-1995-09` | medium: `byte-magazine-YYYY-MM` |
+
+**Why this matters for your script:** you can't assume a predictable naming formula (like generating `byte-magazine-1978-07` programmatically for every month/year). You'll likely need to **hardcode an explicit list of identifiers** you've manually looked up — not derive them from a pattern — because IA clearly used at least 3 different naming conventions across the collection's history.
+
+**This also directly affects your `get_data.sh` design decision:** the "fetch 10–15 now, extend to 224 later" plan means the script's core structure should be:
+```bash
+ISSUES=(
+  "byte-1987-12"
+  "198902ByteMagazineVol1402PersonalWorkstationMacSE"
+  "byte-magazine-1995-09"
+  # ... more identifiers appended here later
+)
+```
+— an explicit array you keep appending to, rather than a generated URL pattern.
+
+**Your next concrete step:** go collect the remaining identifiers to reach 10–15 total. A couple of tips to make this faster:
+1. On the collection page (`archive.org/details/byte-magazine`), use the **search box within the collection** to filter by year (e.g., search "1983") — this surfaces issues from that year without manually clicking through the full grid.
+2. Since your data speciality is multi-column layout and your A1 findings mention John M. Carroll's Dec 1983 article as an example, make sure **BYTE Vol. 8 No. 11 / Nov 1983** (or Dec 1983 — you cited it in Section 3) is in your list, since your `tasks.jsonl` eval questions may reference it.
+3. Spread your picks across a few different decades (you have late-80s, and mid-90s so far) — this gives you scan-quality variety for the "worst failure" evidence you'll need in Section 5.
+
+Go grab 7–12 more identifiers (aiming for 10–15 total), paste them here the same way, and then we'll write the actual `curl`/`wget`/`ia` download logic in the script.
+
+Me: as the naming is not consistent, how will we generalize this for 224 issues?
+
+AI: Good instinct to ask this now, before you write the script — this is exactly the design fork that determines whether Day 1's script actually satisfies the "works for 10–15 now, extend to 224 later" requirement.
+
+**The key insight: you don't need to guess or hardcode all 224 identifiers manually.** Internet Archive has a **collection-level search/metadata API** that lets you programmatically ask "give me every identifier in the `byte-magazine` collection" — regardless of how inconsistently each one is named. This solves your generalization problem entirely.
+
+## Two ways to do this
+
+**Option A — the `ia` command-line tool (recommended, simplest)**
+Internet Archive publishes an official CLI (`pip install internetarchive`) that can search and list a whole collection:
+```bash
+ia search 'collection:byte-magazine' --itemlist
+```
+This returns **every identifier** in the collection, one per line, regardless of naming pattern. You don't need to know the format in advance — IA's own indexing handles that.
+
+**Option B — the Advanced Search API directly (no extra tool)**
+```bash
+curl "https://archive.org/advancedsearch.php?q=collection:byte-magazine&fl[]=identifier&rows=300&output=json"
+```
+This returns a JSON list of identifiers you can parse with `jq` or Python.
+
+## How this reshapes your script's design
+
+Instead of hardcoding an array, `get_data.sh` should:
+1. **Fetch the full identifier list** from the collection via `ia search` or the API (this works identically whether you want 10 issues or 224)
+2. **Select a subset** — for now, filter/slice to your chosen 10–15 (e.g., by year, or just `head -15`)
+3. **Download only that subset** using `ia download <identifier>`
+4. Leave a flag or variable (e.g., `MODE=subset` vs `MODE=full`) so switching to the full 224 later is a one-line change, not a rewrite
+
+This is actually a cleaner design than what we discussed before — it directly satisfies your Day 1 requirement ("build it to also work for the full 224 later") because the *fetching mechanism* never needs per-issue hardcoding. The only thing that changes between subset and full-run is which identifiers you pass to `ia download`.
+
+**Your immediate next action:** do you have Python/pip available in your dev environment, so we can `pip install internetarchive` and test `ia search` right now? Or would you rather I show you the pure `curl` + `jq` version so you're not dependent on installing anything extra?
+
+Me: which option is better for my project? also note that my laptop has storage issues
+
+AI: Given your storage constraint, this is actually a very relevant question — let me break down what each option costs you, both now and later.
+
+## Storage impact (the part that matters most for you)
+
+**Neither option downloads any page images by itself** — both `ia search` and the `curl` API call only return a small JSON/text list of identifiers (a few KB total for all 224). The actual storage risk isn't in *this* step, it's in the **next** step when you run `ia download <identifier>` — full BYTE issues can be hundreds of MB to a few GB each in raw scan form (your A1 form itself estimated ~200+ GB for the full 224-issue corpus).
+
+So regardless of which option you pick now, your real storage decision is coming up next: **you must download only specific file formats per issue** (e.g., just the OCR'd text layer or a compressed PDF, not the full raw JP2 image set) or you'll blow through your disk on even 10–15 issues. I'll flag that clearly when we get there.
+
+## Comparing the two options for your actual situation
+
+| | **Option A: `ia` CLI** | **Option B: `curl` + `jq`** |
+|---|---|---|
+| Install footprint | `pip install internetarchive` — small Python package, negligible disk cost | Nothing to install if `curl`/`jq` already on your system (usually pre-installed on Linux/Mac) |
+| Ease of download step later | `ia download <id> --glob="*.pdf"` lets you filter to specific file types per issue — **directly controls storage** | You'd need to separately query each item's file list via the API, then `curl` only the specific files — more manual work |
+| Reproducibility for teammates | Anisa/Sunanda just need `pip install internetarchive` too — one shared dependency | No install needed, but more custom script logic to maintain and explain |
+| Fits your "generalize to 224 later" need | Built-in `search` + `download` work identically at any scale | Also works at scale, but you're hand-rolling more of the logic |
+
+## My recommendation: **Option A (`ia` CLI)**
+
+The deciding factor for your storage problem specifically: `ia download` has a **built-in `--glob` flag** that lets you grab *only* the file types you actually need (e.g., just the derived text/PDF, skipping the raw multi-GB JP2 image sets) — directly at download time, not as an afterthought. That's the safest way to keep your local `data/raw/` small while still building a script that scales cleanly to 224 issues later.
+
+**Next step:** let's install it and test the search command. Do you have `pip` working in your terminal right now? Run this and paste me the output:
+```bash
+pip show internetarchive
+```
+(This just checks if it's already installed — if not, we'll install it together.)
+
+Me: ~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$ pip show internetarchive
+debashmita@debashmita-HP:~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$
+
+AI: Good — no output means it's not installed yet (if it were installed, `pip show` would've printed a Name/Version block; if `pip` itself were broken you'd normally see an error). Let's install it now.
+
+## Install the `internetarchive` package
+
+Given your storage concerns, this package itself is tiny (a few MB with its dependencies), so no concern there. Run:
+
+```bash
+pip install internetarchive --break-system-packages
+```
+
+**Why `--break-system-packages`:** on newer Ubuntu/Debian systems (and it looks like you're on a `debashmita-HP` Linux machine), `pip` blocks direct installs into the system Python environment by default to avoid conflicts with system packages. This flag overrides that protection for a one-off CLI tool like this. (If your team ends up doing heavier Python work later, you might eventually want a proper virtual environment — but for just running this CLI tool, this is fine.)
+
+**After it installs, verify it worked:**
+```bash
+ia --version
+```
+
+Paste me the output of both commands (the install and the version check) — once we confirm it's working, we'll run your first real search against the BYTE collection.
+
+Me: pip install internetarchive --break-system-packages
+
+Usage:   
+  pip install [options] <requirement specifier> [package-index-options] ...
+  pip install [options] -r <requirements file> [package-index-options] ...
+  pip install [options] [-e] <vcs project url> ...
+  pip install [options] [-e] <local project path> ...
+  pip install [options] <archive url/path> ...
+
+no such option: --break-system-packages
+
+AI: Ah — that error means your `pip` version is too old to recognize that flag (`--break-system-packages` was added in pip 23.0.1+, released alongside PEP 668). Let's check what you're working with.
+
+**Run this and paste the output:**
+```bash
+pip --version
+python3 --version
+```
+
+This tells us two things: your pip version (confirms my theory) and your Python version (so we know what we're working with going forward — this matters later too, since your teammates' environments should ideally match closely enough that scripts behave the same for everyone).
+
+**In the meantime, try the plain install without the flag** — on an older pip, this restriction may not even exist yet, so it might just work:
+```bash
+pip install internetarchive
+```
+
+Paste me the output of all three commands and we'll figure out the right path from there.
+
+Me: pip --version
+python3 --version
+pip 18.1 from /home/debashmita/anaconda2/lib/python2.7/site-packages/pip (python 2.7)
+Python 3.12.3
+
+AI: Found the real problem — this is a classic PATH mismatch, not just an old pip.
+
+**What's happening:** your `pip` command is resolving to a **Python 2.7** install bundled inside an old Anaconda2 environment (`/home/debashmita/anaconda2/...`), while your actual `python3` is a separate, much newer 3.12.3 install. These are two completely disconnected environments — installing anything with that `pip` would install it into Python 2.7's site-packages, which `python3` (and thus `ia`) would never see anyway. Python 2.7 is also long past end-of-life, so nothing modern is designed to work with it.
+
+**The fix — bypass `pip` entirely and call pip through python3 directly:**
+
+```bash
+python3 -m pip --version
+```
+
+Paste that output first — this confirms whether `python3` has its own pip module available at all (most 3.12 installs do, but let's verify before installing anything).
+
+**If that shows a valid pip version, install with:**
+```bash
+python3 -m pip install internetarchive --break-system-packages
+```
+
+Using `python3 -m pip` instead of bare `pip` guarantees the package lands in the Python 3.12 environment that `python3` (and the `ia` command it creates) will actually use — sidestepping the Anaconda2 conflict entirely.
+
+Run the version check first and let me know what it shows.
+ python3 -m pip --version
+pip 24.0 from /usr/lib/python3/dist-packages/pip (python 3.12)
+debashmita@debashmita-HP:~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$ python3 -m pip install internetarchive --break-system-packages
+Defaulting to user installation because normal site-packages is not writeable
+Collecting internetarchive
+  Downloading internetarchive-5.11.0-py3-none-any.whl.metadata (5.5 kB)
+Requirement already satisfied: jsonpatch>=0.4 in /usr/lib/python3/dist-packages (from internetarchive) (1.32)
+Requirement already satisfied: requests<3.0.0,>=2.25.0 in /usr/lib/python3/dist-packages (from internetarchive) (2.31.0)
+Collecting tqdm>=4.0.0 (from internetarchive)
+  Downloading tqdm-4.70.0-py3-none-any.whl.metadata (57 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━ 57.3/57.3 kB 412.1 kB/s eta 0:00:00
+Requirement already satisfied: urllib3>=1.26.0 in /usr/lib/python3/dist-packages (from internetarchive) (2.0.7)
+Downloading internetarchive-5.11.0-py3-none-any.whl (129 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━ 129.6/129.6 kB 3.0 MB/s eta 0:00:00
+Downloading tqdm-4.70.0-py3-none-any.whl (80 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━ 80.2/80.2 kB 5.4 MB/s eta 0:00:00
+Installing collected packages: tqdm, internetarchive
+  WARNING: The script tqdm is installed in '/home/debashmita/.local/bin' which is not on PATH.
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+  WARNING: The script ia is installed in '/home/debashmita/.local/bin' which is not on PATH.
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+Successfully installed internetarchive-5.11.0 tqdm-4.70.0
+debashmita@debashmita-HP:~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$ ia --version
+Command 'ia' not found, but can be installed with:
+sudo apt install internetarchive
+
+AI: Exactly what I flagged — the install succeeded, but `ia` landed in `/home/debashmita/.local/bin`, which isn't on your shell's `PATH`. (Ignore that `sudo apt install internetarchive` suggestion — that would install a different, likely outdated system package, not the one we just set up. Don't run it.)
+
+## Fix: add `~/.local/bin` to your PATH
+
+**1. Check your shell first** (so we edit the right config file):
+```bash
+echo $SHELL
+```
+
+**2. Add the PATH export.** If it says `/bin/bash`, run:
+```bash
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+```
+If it says `/bin/zsh`, use `~/.zshrc` instead of `~/.bashrc` in both commands.
+
+**Why this works:** `.bashrc` (or `.zshrc`) runs every time you open a new terminal — this line tells your shell to also look inside `~/.local/bin` when resolving commands. `source`-ing it reloads your current terminal session immediately, so you don't have to close and reopen it.
+
+**3. Verify:**
+```bash
+ia --version
+```
+
+Paste me the output — once this shows a real version number, we're finally ready to run your first collection search.
+
+Me: ia --version
+5.11.0
+
+AI: `ia` is live and working — version 5.11.0 confirmed. Great, this was worth getting right since your whole team (and future scripting) depends on it.
+
+## Now let's run your first real search against the BYTE collection
+
+```bash
+ia search 'collection:byte-magazine' --itemlist
+```
+
+**What this does:** queries Internet Archive's metadata index for every item tagged under the `byte-magazine` collection and prints just their identifiers, one per line — no downloading happens here, so this is completely safe for your storage situation.
+
+**A couple of things to expect:**
+- This should print somewhere around 224 lines (matching your A1 form's stated corpus size) — a good sanity check that you've got the right collection name.
+- It might take a few seconds since it's querying IA's servers live.
+- Some `ia` commands require you to be logged in for certain operations (like downloading restricted items), but public metadata search like this one typically works anonymously without any login setup.
+
+**Run it and paste me:**
+1. The first ~10 lines of output (so we can see the actual identifier formats at scale — confirming what we saw manually)
+2. The total line count, which you can get by running:
+```bash
+ia search 'collection:byte-magazine' --itemlist | wc -l
+```
+
+This total count is actually useful data for your `data/provenance.md` too — it's a documented, reproducible way to state your corpus size instead of an estimate.
+
+Me: ia search 'collection:byte-magazine' --itemlist
+198610ByteMagazineVol1111InsideTheIBMPC
+198706ByteMagazineVol1207BonusEditionApplicationSoftwareToday
+198902ByteMagazineVol1402PersonalWorkstationMacSE
+198911ByteMagazine
+199405BYTE1905ComponentWare
+199707byte2207
+1997_20230704
+99Magazine_N.08-Crayon_Optique
+BYTE-1988-05
+BYTE-1988-06
+BYTE-1988-07
+BYTE-1988-08
+BYTE-1988-09
+BYTE-1988-10
+BYTE-1988-12
+BYTE-1993-00
+BYTE-1993-01
+BYTE-1993-02
+BYTE-1993-03
+BYTE-1993-04
+BYTE-1993-05
+BYTE-MAGAZINE-1988-12
+BYTE-MAGAZINE-1993-00
+BYTE199301
+BYTE199302
+BYTE199303
+BYTE199304
+BYTE199305
+BYTEListingsAprJun1987
+BYTEListingsJanJun1986
+BYTEListingsJanMar1987
+BYTEListingsJulOct1986
+BYTEListingsJulSep1987
+BYTEListingsOctDec1986
+BYTEListingsOctDec1987
+BYTEVol1808199307PentiumPCs
+BYTEVolume16Number11
+BYTEVolume20Number04
+BYTEVolume20Number06
+BYTEVolume20Number12
+BYTEVolume21Number12
+BYTEVolume22NUmber01
+BYTEVolume22Number02
+BYTEVolume22Number04
+BYTEVolume22Number06
+BYTEVolume22Number08
+BYTEVolume22Number09
+BYTEVolume22Number10
+BYTEVolume23Number05
+BYTE_AUG_83-A_New_Shape_Routine_for_the_Apple
+BYTE_Jun1979-Apple2MoreColors
+BYTE_Vol_02-10_1977-10_Implementing_Space_War
+BYTE_Vol_02-11_1977-11_Sweet_16
+BYTE_Vol_03-04_1978-04_Robot_Simulation
+BYTE_Vol_04-07_1979-07_Automating_Eclipses
+BYTE_Vol_04-08_1979-08_Lisp
+BYTE_Vol_06-05_1981-05_Software_Piracy
+BYTE_Vol_07-04_1982-04_Human_Factors_Engineering
+BYTE_Vol_07-05_1982-05_Japanese_Computers
+BYTE_Vol_07-10_1982-10_Computers_in_Business
+BYTE_Vol_09-01_1984-01_1984_And_Beyond
+BYTE_Vol_09-07_1984-07_Computers_and_Video
+BYTE_Vol_09-10_1984-09_Computer_Graphics
+BYTE_Vol_10-01_1985-01_Through_The_Hourglass
+BYTE_Vol_10-05_1985-05_Multiprocessing
+BYTE_Vol_10-07_1985-07_Computers_and_Space
+BYTE_Vol_10-08_1985-08_The_Amiga
+BYTE_Vol_10-09_1985-09_10th_Anniversary_Issue
+BYTE_Vol_11-01_1986-01_Robotics
+BYTE_Vol_11-10_1986-10_Apple_II_GS
+BYTE_Vol_15-06_1990-06_Windows_3.0
+BYTE_Vol_15-12_1990-11_Compaq_Dazzling_New_Laptop
+Byte199801
+Byte199804
+ByteV19N9
+ByteV21N08Sep1996
+ByteV22N07July1997
+ByteV22N5
+ByteVol21No11
+ByteVol21Num10
+b_199804
+best_of_byte_volume_1_1977_06
+byte-1982_03
+byte-1987-12
+byte-1988-07_202104
+byte-1988-11-next
+byte-1988_01
+byte-1988_02
+byte-1993_09
+byte-1994_08
+byte-1995_06
+byte-1995_07
+byte-1995_10
+byte-1996_01
+byte-1996_04.cbr
+byte-1996_06
+byte-1996_07
+byte-april-1977
+byte-august-1977
+byte-december-1977
+byte-ibm_special_edition-1990_fall
+byte-january-1982
+byte-july-1977
+byte-june-1977_20260520_0527
+byte-june-1978
+byte-june-1981
+byte-magazine-1975-09
+byte-magazine-1975-10
+byte-magazine-1975-11
+byte-magazine-1975-12
+byte-magazine-1976-01
+byte-magazine-1976-02
+byte-magazine-1976-03
+byte-magazine-1976-04
+byte-magazine-1976-05
+byte-magazine-1976-06
+byte-magazine-1976-07
+byte-magazine-1976-08
+byte-magazine-1976-09
+byte-magazine-1976-10
+byte-magazine-1976-11
+byte-magazine-1976-12
+byte-magazine-1977-01
+byte-magazine-1977-02
+byte-magazine-1977-03
+byte-magazine-1977-04
+byte-magazine-1977-05
+byte-magazine-1977-06
+byte-magazine-1977-07
+byte-magazine-1977-08
+byte-magazine-1977-09
+byte-magazine-1977-10
+byte-magazine-1977-11
+byte-magazine-1977-12
+byte-magazine-1978-01
+byte-magazine-1978-02
+byte-magazine-1978-03
+byte-magazine-1978-04
+byte-magazine-1978-05
+byte-magazine-1978-06
+byte-magazine-1978-07
+byte-magazine-1978-08
+byte-magazine-1978-09
+byte-magazine-1978-10
+byte-magazine-1978-11
+byte-magazine-1978-12
+byte-magazine-1979-01
+byte-magazine-1979-02
+byte-magazine-1979-03
+byte-magazine-1979-04
+byte-magazine-1979-05
+byte-magazine-1979-06
+byte-magazine-1979-07
+byte-magazine-1979-08
+byte-magazine-1979-09
+byte-magazine-1979-10
+byte-magazine-1979-11
+byte-magazine-1979-12
+byte-magazine-1980-01
+byte-magazine-1980-02
+byte-magazine-1980-03
+byte-magazine-1980-04
+byte-magazine-1980-05
+byte-magazine-1980-06
+byte-magazine-1980-07
+byte-magazine-1980-08
+byte-magazine-1980-09
+byte-magazine-1980-10
+byte-magazine-1980-11
+byte-magazine-1980-12
+byte-magazine-1981-01
+byte-magazine-1981-02
+byte-magazine-1981-03
+byte-magazine-1981-04
+byte-magazine-1981-05
+byte-magazine-1981-06
+byte-magazine-1981-07
+byte-magazine-1981-08
+byte-magazine-1981-09
+byte-magazine-1981-10
+byte-magazine-1981-11
+byte-magazine-1981-12
+byte-magazine-1982-01
+byte-magazine-1982-02
+byte-magazine-1982-03
+byte-magazine-1982-04
+byte-magazine-1982-05
+byte-magazine-1982-06
+byte-magazine-1982-07
+byte-magazine-1982-08
+byte-magazine-1982-09
+byte-magazine-1982-10
+byte-magazine-1982-11
+byte-magazine-1982-12
+byte-magazine-1983-01
+byte-magazine-1983-02
+byte-magazine-1983-03
+byte-magazine-1983-04
+byte-magazine-1983-05
+byte-magazine-1983-06
+byte-magazine-1983-07
+byte-magazine-1983-08
+byte-magazine-1983-09
+byte-magazine-1983-10
+byte-magazine-1983-11
+byte-magazine-1983-12
+byte-magazine-1984-01
+byte-magazine-1984-02
+byte-magazine-1984-03
+byte-magazine-1984-04
+byte-magazine-1984-05
+byte-magazine-1984-06
+byte-magazine-1984-07
+byte-magazine-1984-08
+byte-magazine-1984-09
+byte-magazine-1984-10
+byte-magazine-1984-11
+byte-magazine-1984-12
+byte-magazine-1985-02
+byte-magazine-1985-03
+byte-magazine-1985-04
+byte-magazine-1985-05
+byte-magazine-1985-06
+byte-magazine-1985-07
+byte-magazine-1985-08
+byte-magazine-1985-09
+byte-magazine-1985-10
+byte-magazine-1985-11
+byte-magazine-1985-12
+byte-magazine-1985-12_201502
+byte-magazine-1986-01
+byte-magazine-1986-02
+byte-magazine-1986-03
+byte-magazine-1986-04
+byte-magazine-1986-05
+byte-magazine-1986-06
+byte-magazine-1986-07
+byte-magazine-1986-08
+byte-magazine-1986-09
+byte-magazine-1986-10
+byte-magazine-1986-11
+byte-magazine-1986-12
+byte-magazine-1987-01
+byte-magazine-1987-02
+byte-magazine-1987-03
+byte-magazine-1987-04
+byte-magazine-1987-05
+byte-magazine-1987-06
+byte-magazine-1987-07
+byte-magazine-1987-08
+byte-magazine-1987-09
+byte-magazine-1987-11
+byte-magazine-1987-12
+byte-magazine-1988-03
+byte-magazine-1988-04
+byte-magazine-1988-05
+byte-magazine-1988-06
+byte-magazine-1988-07
+byte-magazine-1988-07_201802
+byte-magazine-1988-08
+byte-magazine-1988-09
+byte-magazine-1988-10
+byte-magazine-1989-01
+byte-magazine-1989-03
+byte-magazine-1989-04
+byte-magazine-1989-05
+byte-magazine-1989-08
+byte-magazine-1989-10
+byte-magazine-1989-12
+byte-magazine-1990-12
+byte-magazine-1991-01
+byte-magazine-1991-02
+byte-magazine-1991-03
+byte-magazine-1992-01
+byte-magazine-1992-02
+byte-magazine-1992-03
+byte-magazine-1992-04
+byte-magazine-1992-05
+byte-magazine-1992-07
+byte-magazine-1992-08
+byte-magazine-1992-09
+byte-magazine-1993-06
+byte-magazine-1993-11
+byte-magazine-1995-09
+byte-magazine-article-index-1975-11-1976-12
+byte-magazine-atari-articles
+byte-magazine-the-next-step-article-march-1989
+byte-march-1977
+byte-may-1977
+byte-may-1978
+byte-may-1980
+byte-november-1977
+byte-november-1981
+byte-romania-1997-vol.-3-nr.-1-ianuarie
+byte-romania-1997-vol.-3-nr.-11-noiembrie
+byte-romania-1997-vol.-3-nr.-12-decembrie
+byte-romania-1997-vol.-3-nr.-3-martie
+byte-romania-1997-vol.-3-nr.-4-aprilie
+byte-romania-1997-vol.-3-nr.-5-mai
+byte-romania-1997-vol.-3-nr.-7-iulie
+byte-romania-1997-vol.-3-nr.-9-septembrie
+byte-romania-1998-vol.-4-nr.-1-ianuarie
+byte-sept-1977
+byte-the-next-step-article-oop-text
+byte198001v0501domesticatedcomputers
+byte_special_issue-essential_guide_to_windows-1992
+byte_special_issue-ibm-fall_1989
+byteme1994_02
+byteme1994_03
+byteme1994_04
+byteme1994_08
+byteme1995_01
+byteme1995_02
+byteme1995_03
+byteme1995_04
+byteme1995_05
+byteme1995_06
+byteme1995_07
+byteme1995_08
+byteme1995_09
+byteme1995_10
+byteme1995_11
+byteme1995_12
+byteme1996_01
+byteme1996_02
+byteme1996_03
+byteme1996_04
+byteme1996_06
+byteme1996_07
+byteme1996_08
+byteme1996_09
+byteme1996_10
+byteme1996_11
+byteme1996_12
+byteme1997_01
+byteme1997_01book
+byteme1997_02
+byteme1997_03
+byteme1997_04
+byteme1997_05
+byteme1997_06
+byteme1997_07
+byteme1997_08
+byteme1997_09
+byteme1997_10
+byteme1997_12
+byteme1998_01
+byteme1998_02
+byteme1998_03
+byteme1998_04
+byteme1998_05
+eu_BYTE-1980-11_OCR
+the-byte-book-of-pascal
+debashmita@debashmita-HP:~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$ ia search 'collection:byte-magazine' --itemlist | wc -l
+353
+debashmita@debashmita-HP:~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$ 
+
+AI: This is a really useful (and important) result — it surfaces a discrepancy you need to deal with before going further.
+
+## Key findings from this list
+
+**1. 353 items ≠ your A1 form's stated 224.** Your A1 form said "224 English-language issue entries." The actual collection has 353 items — meaning it includes things beyond your original scope. Looking at the list, several categories don't belong in your corpus:
+
+- **`byteme*` series** (byteme1994_02 through byteme1998_05) — this looks like a *different* publication ("Byte Me"?), not BYTE Magazine itself
+- **`byte-romania-*` series** — a Romanian-language regional edition, not English
+- **`BYTEListings*` series** (BYTEListingsAprJun1987, etc.) — these are code-listing supplements, not full magazine issues
+- **`best_of_byte_volume_1_1977_06`** — a compilation/anthology, not an original issue
+- **`the-byte-book-of-pascal`** — a book, not a magazine issue
+- **Duplicates** — e.g. `byte-magazine-1988-07` AND `byte-magazine-1988-07_201802` are almost certainly the same issue scanned/uploaded twice
+- **`byte-magazine-article-index-1975-11-1976-12`** and **`byte-magazine-atari-articles`** — these look like indexes/compilations, not single issues
+
+**2. The good news:** there's one clean, dominant, well-structured block — everything matching `byte-magazine-YYYY-MM` (e.g., `byte-magazine-1975-09` through `byte-magazine-1995-09`). This matches the exact link format your A1 form already cited as your primary source. This should be your **primary pool** to pick from, since it's consistent and traceably matches what you already told the grader your corpus is.
+
+## Next step: filter to that clean subset
+
+Run this to isolate just the consistent `byte-magazine-YYYY-MM` items and count them:
+
+```bash
+ia search 'collection:byte-magazine' --itemlist | grep -E '^byte-magazine-[0-9]{4}-[0-9]{2}$' | sort
+```
+
+```bash
+ia search 'collection:byte-magazine' --itemlist | grep -E '^byte-magazine-[0-9]{4}-[0-9]{2}$' | wc -l
+```
+
+Run both and paste me the results. This will tell us:
+- How many genuinely clean, consistently-named issues exist
+- Whether that count is closer to your claimed 224 (if so, this confirms these are your "real" corpus and the other 129 items in the 353 are noise/duplicates/off-scope you should explicitly exclude and document)
+- Any gaps in date coverage, so we pick a good spread for your 10–15 subset
+
+This also matters for `data/provenance.md` — you'll want to explicitly state your inclusion/exclusion criteria (e.g., "we include only the `byte-magazine-YYYY-MM` naming pattern, excluding regional editions, listings supplements, and duplicate re-scans") so your corpus size claim is defensible under the Grounding Gate.
+
+Me: debashmita@debashmita-HP:~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$ ia search 'collection:byte-magazine' --itemlist | grep -E '^byte-magazine-[0-9]{4}-[0-9]{2}$' | sort
+byte-magazine-1975-09
+byte-magazine-1975-10
+byte-magazine-1975-11
+byte-magazine-1975-12
+byte-magazine-1976-01
+byte-magazine-1976-02
+byte-magazine-1976-03
+byte-magazine-1976-04
+byte-magazine-1976-05
+byte-magazine-1976-06
+byte-magazine-1976-07
+byte-magazine-1976-08
+byte-magazine-1976-09
+byte-magazine-1976-10
+byte-magazine-1976-11
+byte-magazine-1976-12
+byte-magazine-1977-01
+byte-magazine-1977-02
+byte-magazine-1977-03
+byte-magazine-1977-04
+byte-magazine-1977-05
+byte-magazine-1977-06
+byte-magazine-1977-07
+byte-magazine-1977-08
+byte-magazine-1977-09
+byte-magazine-1977-10
+byte-magazine-1977-11
+byte-magazine-1977-12
+byte-magazine-1978-01
+byte-magazine-1978-02
+byte-magazine-1978-03
+byte-magazine-1978-04
+byte-magazine-1978-05
+byte-magazine-1978-06
+byte-magazine-1978-07
+byte-magazine-1978-08
+byte-magazine-1978-09
+byte-magazine-1978-10
+byte-magazine-1978-11
+byte-magazine-1978-12
+byte-magazine-1979-01
+byte-magazine-1979-02
+byte-magazine-1979-03
+byte-magazine-1979-04
+byte-magazine-1979-05
+byte-magazine-1979-06
+byte-magazine-1979-07
+byte-magazine-1979-08
+byte-magazine-1979-09
+byte-magazine-1979-10
+byte-magazine-1979-11
+byte-magazine-1979-12
+byte-magazine-1980-01
+byte-magazine-1980-02
+byte-magazine-1980-03
+byte-magazine-1980-04
+byte-magazine-1980-05
+byte-magazine-1980-06
+byte-magazine-1980-07
+byte-magazine-1980-08
+byte-magazine-1980-09
+byte-magazine-1980-10
+byte-magazine-1980-11
+byte-magazine-1980-12
+byte-magazine-1981-01
+byte-magazine-1981-02
+byte-magazine-1981-03
+byte-magazine-1981-04
+byte-magazine-1981-05
+byte-magazine-1981-06
+byte-magazine-1981-07
+byte-magazine-1981-08
+byte-magazine-1981-09
+byte-magazine-1981-10
+byte-magazine-1981-11
+byte-magazine-1981-12
+byte-magazine-1982-01
+byte-magazine-1982-02
+byte-magazine-1982-03
+byte-magazine-1982-04
+byte-magazine-1982-05
+byte-magazine-1982-06
+byte-magazine-1982-07
+byte-magazine-1982-08
+byte-magazine-1982-09
+byte-magazine-1982-10
+byte-magazine-1982-11
+byte-magazine-1982-12
+byte-magazine-1983-01
+byte-magazine-1983-02
+byte-magazine-1983-03
+byte-magazine-1983-04
+byte-magazine-1983-05
+byte-magazine-1983-06
+byte-magazine-1983-07
+byte-magazine-1983-08
+byte-magazine-1983-09
+byte-magazine-1983-10
+byte-magazine-1983-11
+byte-magazine-1983-12
+byte-magazine-1984-01
+byte-magazine-1984-02
+byte-magazine-1984-03
+byte-magazine-1984-04
+byte-magazine-1984-05
+byte-magazine-1984-06
+byte-magazine-1984-07
+byte-magazine-1984-08
+byte-magazine-1984-09
+byte-magazine-1984-10
+byte-magazine-1984-11
+byte-magazine-1984-12
+byte-magazine-1985-02
+byte-magazine-1985-03
+byte-magazine-1985-04
+byte-magazine-1985-05
+byte-magazine-1985-06
+byte-magazine-1985-07
+byte-magazine-1985-08
+byte-magazine-1985-09
+byte-magazine-1985-10
+byte-magazine-1985-11
+byte-magazine-1985-12
+byte-magazine-1986-01
+byte-magazine-1986-02
+byte-magazine-1986-03
+byte-magazine-1986-04
+byte-magazine-1986-05
+byte-magazine-1986-06
+byte-magazine-1986-07
+byte-magazine-1986-08
+byte-magazine-1986-09
+byte-magazine-1986-10
+byte-magazine-1986-11
+byte-magazine-1986-12
+byte-magazine-1987-01
+byte-magazine-1987-02
+byte-magazine-1987-03
+byte-magazine-1987-04
+byte-magazine-1987-05
+byte-magazine-1987-06
+byte-magazine-1987-07
+byte-magazine-1987-08
+byte-magazine-1987-09
+byte-magazine-1987-11
+byte-magazine-1987-12
+byte-magazine-1988-03
+byte-magazine-1988-04
+byte-magazine-1988-05
+byte-magazine-1988-06
+byte-magazine-1988-07
+byte-magazine-1988-08
+byte-magazine-1988-09
+byte-magazine-1988-10
+byte-magazine-1989-01
+byte-magazine-1989-03
+byte-magazine-1989-04
+byte-magazine-1989-05
+byte-magazine-1989-08
+byte-magazine-1989-10
+byte-magazine-1989-12
+byte-magazine-1990-12
+byte-magazine-1991-01
+byte-magazine-1991-02
+byte-magazine-1991-03
+byte-magazine-1992-01
+byte-magazine-1992-02
+byte-magazine-1992-03
+byte-magazine-1992-04
+byte-magazine-1992-05
+byte-magazine-1992-07
+byte-magazine-1992-08
+byte-magazine-1992-09
+byte-magazine-1993-06
+byte-magazine-1993-11
+byte-magazine-1995-09
+debashmita@debashmita-HP:~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$ ia search 'collection:byte-magazine' --itemlist | grep -E '^byte-magazine-[0-9]{4}-[0-9]{2}$' | wc -l
+176
+
+AI: This is genuinely important data — let's process it carefully before picking your subset.
+
+## What this confirms
+
+**176 clean, consistently-named issues** — not 224 as stated in your A1 form. This is a real discrepancy you need to address, not ignore.
+
+**Coverage pattern (scanning the sorted list):**
+- **1975–1984:** essentially complete, every month present — this is your strongest, most reliable block
+- **1985:** missing January
+- **1987:** missing October
+- **1988:** missing January, February
+- **1989:** only 01, 03, 04, 05, 08, 10, 12 present (missing 6 months)
+- **1990:** only December present (missing 11 months!)
+- **1991:** only Jan–Mar present, then nothing
+- **1992:** missing June
+- **1993:** only June and November present
+- **1994:** completely absent from this clean pattern
+- **1995:** only September present
+- **1996–1998:** completely absent from this clean pattern (though messier variants like `byteme1996_*`, `byteme1997_*` exist in the full 353 — but recall those may be a different publication, not confirmed as BYTE proper)
+
+## Why this matters for your project right now
+
+1. **You cannot claim "the entire ~224-issue run" as literally indexed** if you're only using the clean-pattern subset — 176 ≠ 224. You have three options: (a) update your provenance language to say 176, (b) investigate whether some of the 129 "noisy" items in the full 353 are legitimately additional real issues worth including with cleanup, or (c) explicitly document that some months are permanently unavailable/unscanned on IA. Given your NFR is about scaling to the "full indexed corpus," this affects what "full" honestly means — worth flagging to Anisa and Sunanda now, since it touches the manifest/provenance language they're each responsible for.
+
+2. **1990s coverage is thin** in the clean pattern — if your team wants representation across the whole 1975–1998 range (as your A1 domain framing implies — "how a specific machine... was covered at the time it launched"), you may need to accept some of the messier-named 1990s items later, which reintroduces the naming inconsistency problem for that portion.
+
+## For right now: picking your 10–15 subset
+
+Given this, I'd recommend anchoring your subset in the **reliable 1975–1984 block** (clean pattern, dense monthly coverage, matches your Nov/Dec 1983 example pages already in your A1 form) plus 2–3 issues from later decades for scan-quality/era variety. Something like:
+
+```bash
+byte-magazine-1975-09   # first issue
+byte-magazine-1978-07   # you already cited this in tasks.jsonl (BASIC snippet example)
+byte-magazine-1980-07   # you already cited this in tasks.jsonl (Minifloppy example)
+byte-magazine-1981-05   
+byte-magazine-1982-04
+byte-magazine-1983-11
+byte-magazine-1983-12   # you already cited this (John M. Carroll / interface design)
+byte-magazine-1984-01
+byte-magazine-1985-06
+byte-magazine-1986-08
+byte-magazine-1987-09
+byte-magazine-1988-05
+byte-magazine-1989-04
+byte-magazine-1992-03
+byte-magazine-1993-06
+```
+
+That's 14 issues, spans 1975–1993, and — importantly — **already includes the three specific pages you hardcoded into your `tasks.jsonl` examples in A1** (1978-07, 1980-07, 1983-12), so your eval questions will actually have real backing data instead of needing rework.
+
+Want to go with this list, or do you want to swap any of these out first?
+
+Me: I want to work with the 176 issues, not 224. NOw I will work with the subset as I mentioned in the plan, with 10-15 issues. so now let's go to the next step
+
+AI: Good — locking in **176** as your true corpus size going forward. One quick note before we move on: flag this to Anisa (who owns `manifest.yaml`/`task.yaml`) and Sunanda, since your A1 form said "224" — you'll want `provenance.md` to state 176 clearly with a one-line explanation (e.g., "IA's `byte-magazine` collection contains 353 items; after excluding regional editions, code-listing supplements, duplicates, and non-magazine content, 176 issues match the consistent `byte-magazine-YYYY-MM` naming pattern and constitute our corpus"). This kind of documented, defensible filtering is exactly what the Grounding Gate rewards — a precise, reproducible number beats a vague estimate.
+
+## Next step: write `get_data.sh`
+
+Now we build the actual script. Given your storage constraints, here's the plan:
+
+1. **Hardcode your chosen 10–15 identifiers** as an array (not the full 176 — that's the "later" case)
+2. **Use `ia download` with `--glob`** to fetch only the file types you need, skipping massive raw image sets
+3. **Target `data/raw/`** as required by the pipeline contract
+
+**Before I write this, I need one decision from you:** what file format do you actually want per issue?
+
+Internet Archive typically stores each BYTE issue with multiple derivative files, commonly including:
+- `*.pdf` — a single combined PDF (usually the most storage-efficient single-file option)
+- `*_jp2.zip` — raw page-image scans (huge, likely 100s of MB to GB+ — avoid given your storage issue)
+- `*_djvu.txt` — IA's own OCR text output (tiny, but this is IA's OCR, not yours — remember your pipeline is supposed to do its own OCR via Qwen2-VL per your A1 form)
+- `*_abbyy.gz` — IA's structured OCR XML (also not your OCR)
+
+**My recommendation:** download just the `*.pdf` per issue. Your `ingest/loader.py` can then extract page images from the PDF locally (your A1 Section 5 design table already says exactly this: *"Pages are extracted from the PDFs during preprocessing"*) — so this matches what you already committed to on paper, and keeps each download to one manageable file instead of a bloated raw-scan archive.
+
+**Quick check before we script it — run this on one issue to see actual file sizes:**
+```bash
+ia metadata byte-magazine-1983-12 | python3 -m json.tool | grep -A3 '"name": ".*\.pdf"'
+```
+or more simply, list all files and their sizes for one issue:
+```bash
+ia list byte-magazine-1983-12 --format=json | python3 -m json.tool
+```
+
+Run one of these and paste the output — I want to confirm the actual PDF size before we commit to downloading 14 of them.
+
+Me:  ia metadata byte-magazine-1983-12 | python3 -m json.tool | grep -A3 '"name": ".*\.pdf"'
+
+            "name": "1983_12_BYTE_08-12_Easy_Software.pdf",
+
+            "source": "original",
+
+            "format": "Text PDF",
+
+            "mtime": "1348280887",
+
+
+AI: Good — we've confirmed the PDF exists and is named `1983_12_BYTE_08-12_Easy_Software.pdf`, format "Text PDF" (meaning it likely already has a text layer baked in — worth noting, though your pipeline will still do its own OCR via Qwen2-VL on rendered page images, per your A1 plan).
+
+**But we're missing the actual file size** — the `-A3` only grabbed 3 lines after the match, which stopped short of the `size` field. Let's get that specifically:
+
+```bash
+ia metadata byte-magazine-1983-12 | python3 -m json.tool | grep -B2 -A6 '"name": "1983_12_BYTE_08-12_Easy_Software.pdf"'
+```
+
+This widens the context window around that exact filename so we catch the `size` field (usually listed in bytes).
+
+Alternatively, this is more direct and avoids missing fields:
+```bash
+ia list byte-magazine-1983-12 --format=json | python3 -c "
+import json,sys
+for line in sys.stdin:
+    d = json.loads(line)
+    if d['name'].endswith('.pdf'):
+        print(d['name'], d.get('size', 'unknown'))
+"
+```
+
+Run either one and paste the output — I want an actual byte count before we scale this to 14 issues, since even "just the PDF" could still add up if BYTE issues run 300+ pages as your A1 form noted.
+
+Me: ia metadata byte-magazine-1983-12 | python3 -m json.tool | grep -B2 -A6 '"name": "1983_12_BYTE_08-12_Easy_Software.pdf"'
+
+        },
+
+        {
+
+            "name": "1983_12_BYTE_08-12_Easy_Software.pdf",
+
+            "source": "original",
+
+            "format": "Text PDF",
+
+            "mtime": "1348280887",
+
+            "size": "455438031",
+
+            "md5": "66562e774dc3fa7ae3873ef6edb99bc6",
+
+            "crc32": "7bc5419b",
+            
+AI: This is a critical number — let's do the math before going any further.
+
+## The real storage cost
+
+**455,438,031 bytes ≈ 434 MB** for just this one issue's PDF.
+
+For your planned **14-issue subset**: `14 × 434 MB ≈ 6.1 GB`
+
+Given you told me your laptop already has storage issues, **this is a real problem** — even the "efficient" option (PDF only, skipping raw JP2 scans) would eat over 6GB just for your Day 1 subset. And this is likely to vary — some issues may be smaller/larger depending on page count and image density, so this isn't even a worst-case number.
+
+## Your options from here
+
+**Option 1 — Check disk space first, then decide.**
+```bash
+df -h ~
+```
+This tells us how much free space you actually have right now. If you have 50GB+ free, 6GB might be totally fine and I'm overreacting — let's not solve a problem you don't have.
+
+**Option 2 — Reduce your subset size.** If space is tight, drop from 14 issues to something like 5–6, still clearing your 300-page/60k-word floor (a single ~300+ page issue likely already exceeds that minimum alone, so even 2–3 issues may satisfy A2's requirement — worth checking against your actual A1 minimum-corpus math).
+
+**Option 3 — Store the corpus outside your repo/home directory**, e.g., an external drive or a mounted secondary location, and just point `get_data.sh`'s output path there via a config variable — keeps your primary disk light while still satisfying "populate `data/raw/`" (which could be a symlink).
+
+**Option 4 — Don't store the PDF at all; extract+discard.** Modify the script to download the PDF to a temp location, immediately extract page images at whatever resolution your OCR step needs, save only the extracted images (likely much smaller than the source PDF, since 434MB probably reflects full-resolution scans embedded in the PDF), then delete the PDF. This trades a bit more script complexity for real disk savings — but page images themselves may still add up depending on resolution/count.
+
+**Run `df -h ~` first** and paste the output — that single number determines which of these paths actually makes sense for you.
+
+Me:  df -h
+Filesystem      Size  Used Avail Use% Mounted on
+tmpfs           761M  3.1M  758M   1% /run
+/dev/nvme0n1p7   67G   62G  1.5G  98% /
+tmpfs           3.8G   33M  3.7G   1% /dev/shm
+tmpfs           5.0M  8.0K  5.0M   1% /run/lock
+efivarfs        256K  161K   91K  64% /sys/firmware/efi/efivars
+tmpfs           3.8G     0  3.8G   0% /run/qemu
+/dev/nvme0n1p8   49G   11G   36G  24% /mnt/matter
+/dev/nvme0n1p9   57G   14M   54G   1% /mnt/projects
+/dev/nvme0n1p1  256M   95M  162M  37% /boot/efi
+tmpfs           761M  148K  761M   1% /run/user/1000
+
+
+AI: This confirms it — you're in a genuinely tight spot, and this changes our plan.
+
+## The critical finding
+
+Your home directory sits on `/dev/nvme0n1p7` (mounted at `/`), which has **only 1.5GB free out of 67GB (98% used)**. Your planned 6GB download alone would blow past that entirely — you'd likely hit "no space left on device" errors partway through, potentially corrupting a partial download or destabilizing your system if root fills completely.
+
+**But — good news** — you have two other mounted partitions with real breathing room:
+- `/mnt/projects` — **54GB free, only 14MB used** (essentially empty)
+- `/mnt/matter` — 36GB free
+
+`/mnt/projects` is clearly the right target: it's nearly empty and framed like it's meant for exactly this kind of work.
+
+## The plan: redirect your corpus storage there
+
+Instead of downloading into `data/raw/` inside your repo (which lives under your nearly-full home directory), we'll:
+
+1. Create the actual storage location on `/mnt/projects`
+2. Make `data/raw/` a **symlink** pointing there
+
+This satisfies the pipeline contract (`load_pages()` still reads from `data/raw/`) while the actual bytes live on the roomy partition.
+
+**Run this to set it up:**
+
+```bash
+mkdir -p /mnt/projects/byte-corpus/raw
+```
+
+**Then check you have write permission there** (important — this partition might be owned by another user or need different permissions):
+
+```bash
+touch /mnt/projects/byte-corpus/raw/test.txt && echo "write OK" && rm /mnt/projects/byte-corpus/raw/test.txt
+```
+
+Paste me the output of both — once we confirm you can write there, we'll create the symlink and then write the actual `get_data.sh` script pointing at it.
+
+Me:  mkdir -p /mnt/projects/byte-corpus/raw
+debashmita@debashmita-HP:~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$ touch /mnt/projects/byte-corpus/raw/test.txt && echo "write OK" && rm /mnt/projects/byte-corpus/raw/test.txt
+write OK
+
+AI: Confirmed — you have full write access on `/mnt/projects`. Let's set up the symlink now.
+
+## Create the symlink
+
+First, navigate back to your repo root (in case you're not already there):
+
+```bash
+cd ~/Documents/"4-1"/"CSE 429 - Deep Learning"/doc-agent-G21
+```
+
+**Check if `data/raw/` already exists as a real folder** (it might, as part of the starter stub) before we symlink over it:
+
+```bash
+ls -la data/
+```
+
+Paste that output first — this matters because:
+- If `data/raw/` doesn't exist yet, we just create the symlink directly.
+- If `data/raw/` already exists as a real (empty) directory from the starter template, we need to remove that empty folder first, then symlink — otherwise `ln -s` will nest the link inside it instead of replacing it, and `load_pages()` would look in the wrong place.
+
+Don't delete anything yet — just paste me what's in `data/` so we handle it correctly.
+
+Me: ls -la data/
+
+total 16
+
+drwxrwxr-x  2 debashmita debashmita 4096 Aug  9 11:11 .
+
+drwxrwxr-x 19 debashmita debashmita 4096 Aug  9 11:11 ..
+
+-rw-rw-r--  1 debashmita debashmita  186 Aug  9 11:11 provenance.md
+
+-rw-rw-r--  1 debashmita debashmita  307 Aug  9 11:11 README.md
+
+AI: Good — this confirms `data/raw/` **doesn't exist yet** (only `provenance.md` and `README.md` are there, both real files you'll edit, not touch here). This is the clean case — no conflict to resolve, we just create the symlink directly.
+
+## Create the symlink
+
+```bash
+ln -s /mnt/projects/byte-corpus/raw data/raw
+```
+
+**Verify it worked and points where expected:**
+```bash
+ls -la data/
+```
+
+You should now see a `raw` entry with an arrow (`raw -> /mnt/projects/byte-corpus/raw`) instead of a plain directory — that arrow confirms it's a symlink, not a real folder, so anything written into `data/raw/` from here on actually lands on `/mnt/projects`, not your nearly-full home partition.
+
+**One important note for later:** since a symlink is a local machine-specific pointer, it **will not survive `git push`** in any meaningful way for Anisa or Sunanda — if you `git add data/raw`, git will only commit the symlink itself (a tiny pointer file), not your actual downloaded corpus. That's actually fine and expected — remember the rule from How-To-Submit: *"Do NOT commit your full corpus of page-images (it's large)... `scripts/get_data.sh` fetches it."* Each teammate runs `get_data.sh` on their own machine to populate their own `data/raw/` locally. Just flag to Anisa/Sunanda that if their disks are also tight, they may want the same symlink trick — worth a quick heads-up in your team chat.
+
+Run the two commands above and paste the `ls -la data/` output so we confirm the symlink is correct before writing the actual download logic.
+
+Me: ln -s /mnt/projects/byte-corpus/raw data/raw
+
+debashmita@debashmita-HP:~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$ ls -la data/
+
+total 16
+
+drwxrwxr-x  2 debashmita debashmita 4096 Aug  9 19:15 .
+
+drwxrwxr-x 19 debashmita debashmita 4096 Aug  9 11:11 ..
+
+-rw-rw-r--  1 debashmita debashmita  186 Aug  9 11:11 provenance.md
+
+lrwxrwxrwx  1 debashmita debashmita   29 Aug  9 19:15 raw -> /mnt/projects/byte-corpus/raw
+
+-rw-rw-r--  1 debashmita debashmita  307 Aug  9 11:11 README.md
+
+debashmita@debashmita-HP:
+
+AI: Confirmed — `raw -> /mnt/projects/byte-corpus/raw` shows the `l` permission flag and arrow exactly as expected. Symlink is live and correctly pointed.
+
+## Now let's write `get_data.sh`
+
+Here's the script, built around everything we've established:
+- Your 14-issue subset (1975–1993 spread, including the 3 issues already referenced in your `tasks.jsonl`)
+- Downloads only the PDF per issue (via `ia download --glob`)
+- Writes into `data/raw/` (which now transparently lands on `/mnt/projects`)
+- Structured so extending to the full 176 later is a small change, not a rewrite
+
+```bash
+#!/usr/bin/env bash
+
+# A1 — fetch or recreate your scanned corpus into data/raw/
+
+set -euo pipefail
+
+RAW_DIR="data/raw"
+mkdir -p "$RAW_DIR"
+
+# Subset for A2 (14 issues, 1975-1993). Extend this array toward the
+# full 176-issue byte-magazine-YYYY-MM set for later milestones.
+ISSUES=(
+  "byte-magazine-1975-09"
+  "byte-magazine-1978-07"
+  "byte-magazine-1980-07"
+  "byte-magazine-1981-05"
+  "byte-magazine-1982-04"
+  "byte-magazine-1983-11"
+  "byte-magazine-1983-12"
+  "byte-magazine-1984-01"
+  "byte-magazine-1985-06"
+  "byte-magazine-1986-08"
+  "byte-magazine-1987-09"
+  "byte-magazine-1988-05"
+  "byte-magazine-1989-04"
+  "byte-magazine-1992-03"
+  "byte-magazine-1993-06"
+)
+
+echo "Fetching ${#ISSUES[@]} BYTE issues into $RAW_DIR ..."
+
+for id in "${ISSUES[@]}"; do
+  echo "-> $id"
+  ia download "$id" --glob="*.pdf" --destdir="$RAW_DIR" --no-directories
+done
+
+echo "Done. Contents of $RAW_DIR:"
+ls -la "$RAW_DIR"
+```
+
+**A few things worth understanding before you run it:**
+
+- `--no-directories` flattens IA's default per-item subfolder structure so all PDFs land directly in `data/raw/` rather than `data/raw/byte-magazine-1983-12/...` — simpler for `loader.py` to iterate over.
+- `set -euo pipefail` (already in the stub) means the whole script stops immediately if any single download fails, rather than silently continuing with a partial corpus.
+- Total expected size: 14 issues × roughly ~400MB average (based on your one sample) could land anywhere from 4–8GB depending on page density — comfortably within your 54GB free on `/mnt/projects`.
+
+**Before running this on all 14, let's test it on just ONE issue first** to confirm the command syntax actually works end-to-end. Temporarily edit the `ISSUES` array to contain just `"byte-magazine-1983-12"`, save, then run:
+
+```bash
+bash scripts/get_data.sh
+```
+
+Paste me the output — once we confirm one issue downloads cleanly, we'll restore the full list and run it for real.
+
+Me: bash scripts/get_data.sh
+
+TODO: fetch corpus into data/raw/
+
+Fetching 15 BYTE issues into data/raw ...
+
+-> byte-magazine-1975-09
+
+byte-magazine-1975-09:
+
+ downloading 1975_09_BYTE_00-01_The_Worlds_Greatest_Toy.pdf: 1
+
+-> byte-magazine-1978-07
+
+byte-magazine-1978-07:
+
+ downloading 1978_07_BYTE_03-07_How_To_Get_Your_Tarbell_Going.
+
+-> byte-magazine-1980-07
+
+byte-magazine-1980-07:
+
+ downloading 1980_07_BYTE_05-07_Computers_and_Education.pdf:  
+
+it is still going on
+
+AI: That's fine — looks like you went ahead and ran the full list rather than testing with one first (I see "TODO: fetch corpus into data/raw/" printed too, which is odd — see note below), but it's actively working, not erroring, so let's just let it run.
+
+**One thing to flag:** that first line — `TODO: fetch corpus into data/raw/` — is leftover output from the *original stub* (`echo "TODO: fetch corpus into data/raw/"`). This suggests the file you ran might still have that old placeholder line *above* your new script content, rather than being fully replaced. Not a functional problem right now (it just prints a harmless message before your real logic runs), but we should clean that up before committing — a stray "TODO" line in your submitted script looks unfinished even if it works.
+
+**While it downloads, let it keep running** — don't interrupt it, since `set -euo pipefail` means a Ctrl+C mid-download could leave a partial/corrupt PDF behind. This will likely take a while given the file sizes we saw (400+ MB each × 15 issues).
+
+**A couple of things to watch for as it progresses:**
+1. Occasional download failures (network hiccups) — if one issue fails, the whole script will stop immediately (that's `set -e` doing its job). If that happens, just paste me the error and we'll add a retry or skip-and-continue option.
+2. Keep an eye on disk space on `/mnt/projects` in a **second terminal window** if you want, just as a sanity check:
+```bash
+watch -n 5 df -h /mnt/projects
+```
+
+Let it finish, then paste me the final output (especially the `ls -la data/raw` listing at the end) so we can confirm all 15 PDFs landed correctly and check actual total size on disk.
+
+Me: while it is being run, should I push the get_data.sh in the repo? Note that, my teammate Anisa has pushed some updates so I have to pull it first. give me necessary commands step by step with reasoning
+
+AI: Good question to ask now rather than after — let's handle this carefully since you have uncommitted local changes (the edited `get_data.sh`) AND Anisa has pushed new work you don't have yet. Doing this in the wrong order risks conflicts or losing work.
+
+**First, a quick clarification: don't touch `main` directly.** You're still on your feature branch (`debashmita/get-data-provenance`), and that's exactly where you should stay. What you need is to bring Anisa's new commits from `main` *into your branch* without disrupting your own uncommitted edits or the running download.
+
+## Step 1: Check your current state before doing anything
+
+```bash
+git status
+```
+
+**Why first:** this shows you exactly what's modified (your edited `get_data.sh`) and confirms you're still on `debashmita/get-data-provenance`. We need this baseline before pulling anything, so we know nothing gets silently overwritten.
+
+Paste me that output. The running download itself is completely safe to leave alone — it's just writing files into `data/raw/` on `/mnt/projects`, which is untouched by any git operation (git only tracks the symlink pointer, not the actual downloaded content, since that lives outside the repo's tracked files via the symlink).
+
+Once I see your `git status` output, I'll walk you through the exact next step — likely committing your current work first, then fetching/merging Anisa's `main` updates into your branch, in that order, so nothing conflicts.
+
+Me:  git status
+
+On branch debashmita/get-data-provenance
+
+Changes not staged for commit:
+
+  (use "git add <file>..." to update what will be committed)
+
+  (use "git restore <file>..." to discard changes in working directory)
+
+	modified:   scripts/get_data.sh
+
+Untracked files:
+
+  (use "git add <file>..." to include in what will be committed)
+
+	data/raw
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+AI: Clean and exactly as expected — two things showing:
+
+1. **`scripts/get_data.sh`** — modified, needs to be committed (your actual work)
+2. **`data/raw`** — untracked. This is your **symlink**, not real corpus data (git can't see through it to know that, it just sees an untracked path)
+
+## Step 1: Handle the symlink correctly — do NOT commit it
+
+**Why this matters:** that symlink points to `/mnt/projects/byte-corpus/raw`, a path that only exists on *your* machine. If you `git add` and commit it, Anisa and Sunanda would pull down a broken symlink pointing to a folder that doesn't exist on their computers — breaking their `data/raw/` entirely.
+
+Add it to `.gitignore` so git stops flagging it as untracked, and so nobody on the team accidentally commits it later:
+
+```bash
+echo "data/raw" >> .gitignore
+```
+
+## Step 2: Stage and commit your actual work
+
+```bash
+git add scripts/get_data.sh .gitignore
+git commit -m "feat: get_data.sh fetches BYTE subset via ia CLI"
+```
+
+**Why commit before pulling:** if you try to pull Anisa's changes while you have uncommitted edits, git may refuse the pull (if there's any overlap) or, worse, silently stash/merge in a confusing way. Committing first gives you a clean, safe checkpoint — if anything goes wrong with the pull, your work is already safely saved in a commit, not just sitting in your working directory.
+
+Run these two steps and paste me the output — then I'll walk you through pulling Anisa's `main` updates into your branch (Step 3), which is a slightly different process than a plain `git pull` since you're on a feature branch, not `main` itself.
+
+Me: echo "data/raw" >> .gitignore
+debashmita@debashmita-HP:~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$ git add scripts/get_data.sh .gitignore
+git commit -m "feat: get_data.sh fetches BYTE subset via ia CLI"
+[debashmita/get-data-provenance b3876be] feat: get_data.sh fetches BYTE subset via ia CLI
+ 2 files changed, 39 insertions(+)
+
+AI: Committed cleanly — `b3876be`, your work is now safely saved locally. Good checkpoint to be at.
+
+## Step 3: Bring in Anisa's updates from `main`
+
+**Why this specific approach:** you're on `debashmita/get-data-provenance`, a branch that forked off `main` before Anisa's new commits existed. You need those new commits *merged into your branch* so you're working against the latest shared code — otherwise you might later push work that conflicts with or ignores what she's already built (e.g., if she touched `configs/task.yaml` in a way your `manifest.yaml` work later depends on).
+
+**First, switch to `main` and pull her changes down:**
+```bash
+git checkout main
+git pull origin main
+```
+This updates your *local* `main` to match GitHub's `main` — it does not touch your feature branch at all yet.
+
+**Then switch back to your branch and merge `main` into it:**
+```bash
+git checkout debashmita/get-data-provenance
+git merge main
+```
+This brings Anisa's commits into your branch, combined with your own. Since you committed your work first (Step 2), there's a clean, saved state on both sides — git will either merge automatically (if you didn't touch the same lines she did) or show you a conflict to resolve manually.
+
+**Run these four commands in order and paste me the full output of each**, especially the `git merge main` step — if there's a conflict, the output will clearly say `CONFLICT` and name the file(s) involved, and we'll resolve it together before doing anything else.
+
+Me: git checkout main
+git pull origin main
+Switched to branch 'main'
+Your branch is up to date with 'origin/main'.
+remote: Enumerating objects: 11, done.
+remote: Counting objects: 100% (11/11), done.
+remote: Compressing objects: 100% (5/5), done.
+remote: Total 7 (delta 2), reused 6 (delta 2), pack-reused 0 (from 0)
+Unpacking objects: 100% (7/7), 2.18 KiB | 744.00 KiB/s, done.
+From https://github.com/kittocatto1/doc-agent-G21
+ * branch            main       -> FETCH_HEAD
+   37a1834..cfe5ad8  main       -> origin/main
+Updating 37a1834..cfe5ad8
+Fast-forward
+ configs/task.yaml       | 13 +++++++------
+ transcripts/2105036.txt | 17 +++++++++++++++++
+ 2 files changed, 24 insertions(+), 6 deletions(-)
+ create mode 100644 transcripts/2105036.txt
+ 
+ AI: Clean fast-forward pull — Anisa's updates came in without any issue: she updated `configs/task.yaml` (13 lines changed) and added her transcript file. Your local `main` now matches GitHub exactly.
+
+## Step 4: Merge these into your feature branch
+
+Now switch back to your branch and bring these changes in:
+
+```bash
+git checkout debashmita/get-data-provenance
+git merge main
+```
+
+**Why this should go smoothly:** Anisa touched `configs/task.yaml` and `transcripts/2105036.txt` — you only touched `scripts/get_data.sh` and `.gitignore`. No overlapping files means git can merge these automatically without any conflict, combining both sets of changes cleanly.
+
+Run both commands and paste the output. Once merged, we'll do a final check:
+
+```bash
+git log --oneline --graph -10
+```
+
+This shows the commit history visually, so you can *see* that your commit and Anisa's commits both exist on your branch now — good confirmation that nothing was lost, and good evidence for the kind of "steady, real" commit history the project cares about.
+
+**After that's confirmed, then — and only then — should you push your branch** (not `main` directly) so Anisa and Sunanda can see your work:
+```bash
+git push -u origin debashmita/get-data-provenance
+```
+We'll do this as the very last step once the merge is verified clean. Go ahead and run the merge first.
+
+Me:  git checkout debashmita/get-data-provenance
+git merge main
+Switched to branch 'debashmita/get-data-provenance'
+Merge made by the 'ort' strategy.
+ configs/task.yaml       | 13 +++++++------
+ transcripts/2105036.txt | 17 +++++++++++++++++
+ 2 files changed, 24 insertions(+), 6 deletions(-)
+ create mode 100644 transcripts/2105036.txt
+debashmita@debashmita-HP:~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$ git log --oneline --graph -10
+*   71f946a (HEAD -> debashmita/get-data-provenance) Merge branch 'main' into debashmita/get-data-provenance
+|\  
+| *   cfe5ad8 (origin/main, origin/HEAD, main) Merge pull request #2 from kittocatto1/anisa
+| |\  
+| | * e4d3a7b Updated task configuration and added AI transcript
+* | | b3876be feat: get_data.sh fetches BYTE subset via ia CLI
+|/ /  
+* | 37a1834 Merge pull request #1 from kittocatto1/anisa
+|\| 
+| * 6204693 (origin/anisa) Update requirements.lock with autogenerated dependencies
+|/  
+* b64b3c5 initial commit
+
+
+AI: Merge completed cleanly — the graph confirms exactly what we wanted:
+
+- Your commit `b3876be` (get_data.sh) is there
+- Anisa's commit `e4d3a7b` (task.yaml + transcript) is there
+- Both are now tied together under merge commit `71f946a`, sitting on top of your branch
+
+This is a healthy history — no lost work, no conflicts, both contributors' changes present together. Good.
+
+## Step 5: Push your branch to GitHub
+
+Now it's safe to push — this is the first time this branch will exist on GitHub, so we need `-u` to set up the tracking link:
+
+```bash
+git push -u origin debashmita/get-data-provenance
+```
+
+**Why `-u` (`--set-upstream`)**: this tells git "this local branch corresponds to this remote branch" — after this one time, future `git push`/`git pull` on this branch will work without needing to specify `origin debashmita/get-data-provenance` every time.
+
+Run it and paste the output. Once that's confirmed pushed, you'll have a genuinely complete, safe checkpoint: your `get_data.sh` work is committed, merged with the team's latest, and backed up on GitHub — separate from `main`, so nothing you're still actively testing (like the corpus download) can accidentally break anyone else's work.
+
+After this, we should also check back on your `ia download` — is it still running, or has it finished by now?
+
+Me:  git push -u origin debashmita/get-data-provenance
+
+Username for 'https://github.com': 2105098@ugrad.cse.buet.ac.bd
+
+Password for 'https://2105098%40ugrad.cse.buet.ac.bd@github.com': 
+
+remote: Invalid username or token. Password authentication is not supported for Git operations.
+
+fatal: Authentication failed for 'https://github.com/kittocatto1/doc-agent-G21.git/'
+
+
+
+It keeps coming
+
+AI: This is the exact authentication issue flagged back in the How-To-Submit handbook — GitHub no longer accepts your account password over HTTPS, so we need a **Personal Access Token (PAT)** instead. Let's set that up now.
+
+## Step 1: Generate a Personal Access Token on GitHub
+
+1. Go to **github.com** → click your profile picture (top right) → **Settings**
+2. Scroll down the left sidebar to **Developer settings** (near the bottom)
+3. Click **Personal access tokens** → **Tokens (classic)**
+4. Click **Generate new token** → **Generate new token (classic)**
+5. Give it a name (e.g., `doc-agent-G21-laptop`)
+6. Set an expiration (30–90 days is reasonable for the course duration — you can regenerate later if it expires)
+7. **Under "Select scopes," check the `repo` box** (this grants push access — the How-To-Submit handbook specifically said "with repo scope")
+8. Scroll down, click **Generate token**
+9. **Copy the token immediately** — GitHub shows it only once. It'll look like `ghp_xxxxxxxxxxxxxxxxxxxx`. Paste it somewhere temporarily safe (a text editor) — don't lose it, since you can't view it again.
+
+## Step 2: Use the token as your password
+
+Run the push command again:
+```bash
+git push -u origin debashmita/get-data-provenance
+```
+
+When prompted:
+- **Username:** same as before (`2105098@ugrad.cse.buet.ac.bd`)
+- **Password:** paste the **token** (not your actual GitHub password)
+
+**One thing to know:** when you paste the token at the password prompt, your terminal won't show any characters or cursor movement — that's normal for password-style input, not a freeze. Just paste and press Enter.
+
+## Optional but recommended: avoid re-entering this every time
+
+If you don't want to paste the token on every single push, you can cache it:
+```bash
+git config --global credential.helper store
+```
+Run this once, before your next push — after entering the token successfully one time, git will remember it for future pushes on this machine.
+
+Go generate the token first, then try the push again and paste me the result.
+
+Me: git push -u origin debashmita/get-data-provenance
+Username for 'https://github.com': 2105098@ugrad.cse.buet.ac.bd
+Password for 'https://2105098%40ugrad.cse.buet.ac.bd@github.com': 
+Enumerating objects: 15, done.
+Counting objects: 100% (12/12), done.
+Delta compression using up to 12 threads
+Compressing objects: 100% (7/7), done.
+Writing objects: 100% (7/7), 1.21 KiB | 1.21 MiB/s, done.
+Total 7 (delta 3), reused 0 (delta 0), pack-reused 0
+remote: Resolving deltas: 100% (3/3), completed with 2 local objects.
+remote: 
+remote: Create a pull request for 'debashmita/get-data-provenance' on GitHub by visiting:
+remote:      https://github.com/kittocatto1/doc-agent-G21/pull/new/debashmita/get-data-provenance
+remote: 
+To https://github.com/kittocatto1/doc-agent-G21.git
+ * [new branch]      debashmita/get-data-provenance -> debashmita/get-data-provenance
+branch 'debashmita/get-data-provenance' set up to track 'origin/debashmita/get-data-provenance'.
+
+
+AI: Pushed successfully — the token worked, and your branch `debashmita/get-data-provenance` now exists on GitHub with your `get_data.sh` work and the merged updates from Anisa.
+
+## Where you stand right now
+
+- ✅ `get_data.sh` written and committed
+- ✅ Merged cleanly with Anisa's latest `main` work
+- ✅ Pushed to a safe, separate branch — `main` is untouched, so nothing risks breaking Sunanda's or Anisa's work
+- GitHub is now offering to open a Pull Request (that link in the output) — **don't merge it into `main` yet**, since your `get_data.sh` is still mid-test (only tested on the full 15-issue run, not yet confirmed complete) and has that leftover stub artifact ("TODO: fetch corpus...") we flagged earlier that should be cleaned up first
+
+## Next: check on your download
+
+Since some time has passed, let's see where the `ia download` loop actually landed:
+
+```bash
+ls -la data/raw
+```
+
+and
+
+```bash
+du -sh data/raw
+```
+
+Paste both outputs — this tells us (a) how many of the 15 PDFs actually finished downloading, and (b) total size on disk, so we can confirm we're safely within your 54GB budget on `/mnt/projects` before moving on to cleaning up the script and writing `data/provenance.md`.
+
+Me: ls -la data/raw
+lrwxrwxrwx 1 debashmita debashmita 29 Aug  9 19:15 data/raw -> /mnt/projects/byte-corpus/raw
+debashmita@debashmita-HP:~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$ du -sh data/raw
+0	data/raw
+
+AI: That output is misleading, not necessarily bad — `ls -la data/raw` (no trailing slash) shows the symlink *itself*, not what's inside it, and `du -sh data/raw` on some systems reports the symlink's own tiny size rather than following it into the target. We need to look **through** the symlink, not at it.
+
+**Try these instead:**
+
+```bash
+ls -la data/raw/
+```
+(note the trailing slash — this tells the shell to list the *contents* of what the symlink points to, not the symlink itself)
+
+```bash
+du -sh /mnt/projects/byte-corpus/raw
+```
+(checking the real target path directly, bypassing the symlink entirely)
+
+Paste both outputs. If these still show empty or near-empty, that's a real concern — it would mean the download loop may have silently failed or is still stuck on the very first issue, and we'd need to check whether the terminal running `get_data.sh` is even still active (did that terminal window/tab get closed at any point while you were doing the git work in a separate one?).
+
+Me: ls -la data/raw/
+total 691016
+drwxrwxr-x 2 debashmita debashmita      4096 Aug  9 20:07 .
+drwxrwxr-x 3 debashmita debashmita      4096 Aug  9 19:14 ..
+-rw-rw-r-- 1 debashmita debashmita  62035693 Sep 22  2012 1975_09_BYTE_00-01_The_Worlds_Greatest_Toy.pdf
+-rw-rw-r-- 1 debashmita debashmita 193084715 Sep 22  2012 1978_07_BYTE_03-07_How_To_Get_Your_Tarbell_Going.pdf
+-rw-rw-r-- 1 debashmita debashmita 109275288 Sep 22  2012 1980_07_BYTE_05-07_Computers_and_Education.pdf
+-rw-rw-r-- 1 debashmita debashmita 175416510 Sep 22  2012 1981_05_BYTE_06-05_Software_Piracy.pdf
+-rw-rw-r-- 1 debashmita debashmita 167772160 Aug  9 20:26 1982_04_BYTE_07-04_Human_Factors_Engineering.pdf
+debashmita@debashmita-HP:~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$ du -sh /mnt/projects/byte-corpus/raw
+675M	/mnt/projects/byte-corpus/raw
+
+Me: This is genuinely good news — the download is real and actively working, not stuck.
+
+## What this tells us
+
+- **5 of 15 issues downloaded so far** (1975-09 through 1982-04), totaling **675MB**
+- The 5th file (`1982_04...`) has a timestamp of `20:26` — very recent, meaning **it's still actively downloading in the background right now**, working through 1983-11 next
+- Average so far: ~135MB/issue, notably smaller than the 434MB we saw for the 1983-12 sample earlier — so file sizes vary a fair amount by issue (probably page count/scan density differences), which is useful to know
+- At this rate, projecting for all 15: roughly **2–3GB total**, safely inside your 54GB budget on `/mnt/projects`
+
+**One clarification for you:** those file timestamps showing "Sep 22 2012" are **not** when *you* downloaded them — that's the original file's metadata from when it was uploaded to Internet Archive, preserved during download. Don't let that confuse you into thinking something's wrong; the file being physically present just now (visible in your `ls`) is what actually matters.
+
+## What to do right now
+
+**Just let it keep running** — don't touch that terminal. Since `set -euo pipefail` is active, if any of the remaining 10 issues fails partway (network hiccup, etc.), the whole script will stop and print a clear error — so if it eventually stops on its own, that's useful signal, not silent failure.
+
+**Come back and check progress in a few minutes** with the same two commands:
+```bash
+ls -la data/raw/
+du -sh /mnt/projects/byte-corpus/raw
+```
+
+Let it run for a while longer, then report back with the updated file count and total size — once all 15 are confirmed present, we'll clean up that leftover "TODO" stub line in the script, update `data/provenance.md` with real numbers, and get that committed too.
+
+Me: While the 15 issues are being downloaded, in the meantime let's do somthing else 
+
+AI: Good instinct — no reason to sit idle for 15-20 more minutes of downloading. Let's look at what's actually next for you.
+
+## What fits well right now
+
+Looking back at your team's 4-Day Execution Plan, your Day 2 tasks are:
+- `vision/ocr.py` — start OCR benchmarking (Qwen2-VL-2B vs a lighter/faster candidate)
+- Finish held-out transcriptions
+
+Both of these technically need actual page images to work with — but here's the thing: **you already have 5 PDFs sitting in `data/raw/` right now** (1975-09 through 1982-04), fully downloaded and stable. You don't need to wait for all 15 to start working with what you already have.
+
+## A good parallel task: clean up the script's leftover TODO line
+
+This is small, quick, and something we flagged earlier but didn't fix yet — good to knock out now while it's fresh:
+
+```bash
+cat scripts/get_data.sh
+```
+
+Paste me the output — I suspect there's still a stray `echo "TODO: fetch corpus into data/raw/"` line sitting above your real logic (from the original stub) that we should remove before this gets merged into `main`.
+
+---
+
+**Or, if you'd rather make real progress on Day 2 work**, a good option: pick ONE already-downloaded PDF (e.g., `1983_12_BYTE_08-12...` isn't done yet, but `1982_04...` is) and start exploring how to extract a page image from it — this is the first real step toward both `ingest/loader.py` (Anisa's task, but useful for you to understand) and your own OCR benchmarking, since you'll need rendered page images before you can run Qwen2-VL on anything.
+
+**Which would you rather do — clean up the script now, or start exploring PDF-to-image extraction on one of your downloaded issues?**
+
+Me: While the 15 issues are being downloaded, in the meantime let's do somthing else
+
+AI: Good instinct — no reason to sit idle for 15-20 more minutes of downloading. Let's look at what's actually next for you.
+
+## What fits well right now
+
+Looking back at your team's 4-Day Execution Plan, your Day 2 tasks are:
+- `vision/ocr.py` — start OCR benchmarking (Qwen2-VL-2B vs a lighter/faster candidate)
+- Finish held-out transcriptions
+
+Both of these technically need actual page images to work with — but here's the thing: **you already have 5 PDFs sitting in `data/raw/` right now** (1975-09 through 1982-04), fully downloaded and stable. You don't need to wait for all 15 to start working with what you already have.
+
+## A good parallel task: clean up the script's leftover TODO line
+
+This is small, quick, and something we flagged earlier but didn't fix yet — good to knock out now while it's fresh:
+
+```bash
+cat scripts/get_data.sh
+```
+
+Paste me the output — I suspect there's still a stray `echo "TODO: fetch corpus into data/raw/"` line sitting above your real logic (from the original stub) that we should remove before this gets merged into `main`.
+
+---
+
+**Or, if you'd rather make real progress on Day 2 work**, a good option: pick ONE already-downloaded PDF (e.g., `1983_12_BYTE_08-12...` isn't done yet, but `1982_04...` is) and start exploring how to extract a page image from it — this is the first real step toward both `ingest/loader.py` (Anisa's task, but useful for you to understand) and your own OCR benchmarking, since you'll need rendered page images before you can run Qwen2-VL on anything.
+
+**Which would you rather do — clean up the script now, or start exploring PDF-to-image extraction on one of your downloaded issues?**
+
+Me: First I want to clean up the script, then go for the next step which I can start with what I have currently. Go one step at once, and explain everything with proper reasoning
+
+AI: ## Step 1: Clean Up the Script
+
+Let's see exactly what's in there first.Run this in your terminal and paste me the output:
+
+```bash
+cat scripts/get_data.sh
+```
+
+**Why we look before editing:** we wrote this script together a while back, but I want to see the *actual current file on your disk* — not rely on memory — before touching it. There's a real chance the leftover `echo "TODO: fetch corpus into data/raw/"` line from the original stub is still sitting above the logic we added (since we never explicitly went back to remove it), and I want to confirm exactly where it is and what else might need tidying (e.g., stray blank lines, leftover comments) before making any edit.
+
+Paste the output and we'll go from there — one clean, verified step at a time.
+
+Me: cat scripts/get_data.sh
+#!/usr/bin/env bash
+# A1 — fetch or recreate your scanned corpus into data/raw/
+# IMPLEMENT: download/prepare your corpus (public-domain / openly licensed).
+set -euo pipefail
+echo "TODO: fetch corpus into data/raw/"
+#!/usr/bin/env bash
+# A1 — fetch or recreate your scanned corpus into data/raw/
+set -euo pipefail
+RAW_DIR="data/raw"
+mkdir -p "$RAW_DIR"
+# Subset for A2 (14 issues, 1975-1993). Extend this array toward the
+# full 176-issue byte-magazine-YYYY-MM set for later milestones.
+ISSUES=(
+  "byte-magazine-1975-09"
+  "byte-magazine-1978-07"
+  "byte-magazine-1980-07"
+  "byte-magazine-1981-05"
+  "byte-magazine-1982-04"
+  "byte-magazine-1983-11"
+  "byte-magazine-1983-12"
+  "byte-magazine-1984-01"
+  "byte-magazine-1985-06"
+  "byte-magazine-1986-08"
+  "byte-magazine-1987-09"
+  "byte-magazine-1988-05"
+  "byte-magazine-1989-04"
+  "byte-magazine-1992-03"
+  "byte-magazine-1993-06"
+)
+echo "Fetching ${#ISSUES[@]} BYTE issues into $RAW_DIR ..."
+for id in "${ISSUES[@]}"; do
+  echo "-> $id"
+  ia download "$id" --glob="*.pdf" --destdir="$RAW_DIR" --no-directories
+done
+echo "Done. Contents of $RAW_DIR:"
+ls -la "$RAW_DIR"
+
+AI: Confirmed exactly what I suspected — the file literally has **two full script bodies stacked on top of each other**:
+
+1. **Lines 1–5:** the original stub (shebang, comments, `set -euo pipefail`, the `echo "TODO..."` placeholder)
+2. **Lines 6 onward:** a second `#!/usr/bin/env bash` shebang, then our real logic
+
+**Why this happened:** when I originally gave you the script content, it was likely appended to the end of the file rather than replacing the stub's contents — probably via a copy-paste or an editor action that added new lines below the existing ones instead of overwriting them.
+
+**Why this needs fixing (not just cosmetic):**
+1. A file can only have one valid shebang line (`#!/usr/bin/env bash`) — having two doesn't break bash execution (the second one is just treated as a comment when not on line 1), but it signals sloppy, unreviewed work to a grader.
+2. The leftover `echo "TODO: fetch corpus into data/raw/"` actually **executes** every time you run the script — that's exactly why you saw `TODO: fetch corpus into data/raw/` print out before your real "Fetching 15 BYTE issues..." message when you first ran it. It's not just visual clutter; it's dead code silently running.
+3. Per the Codebase Guide's rule — "you edit, you never create" — the expectation is a clean edit of the *existing* stub, not stub-plus-new-content bolted together.
+
+## The fix
+
+We'll rewrite the file cleanly, keeping only the real logic (lines 6 onward), removing the duplicate stub lines (1–5) entirely.That's the clean version — single shebang, no dead TODO line, comment count corrected to "15 issues" (matching your actual array, since your earlier comment said "14" but you actually have 15 entries).
+
+**On your machine, run this to replace the file with the clean version:**
+
+```bash
+nano scripts/get_data.sh
+```
+
+Select all existing content and delete it (in nano: `Ctrl+Shift+End` then `Delete`, or just hold delete), then paste this in:
+
+```bash
+#!/usr/bin/env bash
+# A1 — fetch or recreate your scanned corpus into data/raw/
+set -euo pipefail
+
+RAW_DIR="data/raw"
+mkdir -p "$RAW_DIR"
+
+# Subset for A2 (15 issues, 1975-1993). Extend this array toward the
+# full 176-issue byte-magazine-YYYY-MM set for later milestones.
+ISSUES=(
+  "byte-magazine-1975-09"
+  "byte-magazine-1978-07"
+  "byte-magazine-1980-07"
+  "byte-magazine-1981-05"
+  "byte-magazine-1982-04"
+  "byte-magazine-1983-11"
+  "byte-magazine-1983-12"
+  "byte-magazine-1984-01"
+  "byte-magazine-1985-06"
+  "byte-magazine-1986-08"
+  "byte-magazine-1987-09"
+  "byte-magazine-1988-05"
+  "byte-magazine-1989-04"
+  "byte-magazine-1992-03"
+  "byte-magazine-1993-06"
+)
+
+echo "Fetching ${#ISSUES[@]} BYTE issues into $RAW_DIR ..."
+
+for id in "${ISSUES[@]}"; do
+  echo "-> $id"
+  ia download "$id" --glob="*.pdf" --destdir="$RAW_DIR" --no-directories
+done
+
+echo "Done. Contents of $RAW_DIR:"
+ls -la "$RAW_DIR"
+```
+
+Save (`Ctrl+O`, `Enter`) and exit (`Ctrl+X`).
+
+**Verify it's clean:**
+```bash
+cat scripts/get_data.sh
+```
+
+**Important — don't re-run it right now.** Your background download is still using the *old* script logic mid-run, and that's fine — editing the file on disk doesn't affect a process already executing (it already read the file into memory when it started). We're just fixing the file for next time / for commit purposes.
+
+Paste me the `cat` output once you've saved it, so we confirm it's a single clean script before committing this fix.
+
+Me:  cat scripts/get_data.sh
+#!/usr/bin/env bash
+# A1 — fetch or recreate your scanned corpus into data/raw/
+set -euo pipefail
+
+RAW_DIR="data/raw"
+mkdir -p "$RAW_DIR"
+
+# Subset for A2 (15 issues, 1975-1993). Extend this array toward the
+# full 176-issue byte-magazine-YYYY-MM set for later milestones.
+ISSUES=(
+  "byte-magazine-1975-09"
+  "byte-magazine-1978-07"
+  "byte-magazine-1980-07"
+  "byte-magazine-1981-05"
+  "byte-magazine-1982-04"
+  "byte-magazine-1983-11"
+  "byte-magazine-1983-12"
+  "byte-magazine-1984-01"
+  "byte-magazine-1985-06"
+  "byte-magazine-1986-08"
+  "byte-magazine-1987-09"
+  "byte-magazine-1988-05"
+  "byte-magazine-1989-04"
+  "byte-magazine-1992-03"
+  "byte-magazine-1993-06"
+)
+
+echo "Fetching ${#ISSUES[@]} BYTE issues into $RAW_DIR ..."
+
+for id in "${ISSUES[@]}"; do
+  echo "-> $id"
+  ia download "$id" --glob="*.pdf" --destdir="$RAW_DIR" --no-directories
+done
+
+echo "Done. Contents of $RAW_DIR:"
+ls -la "$RAW_DIR"
+
+AI: Confirmed clean — single shebang, no duplicate stub, no dead TODO line. This is exactly what should be committed.
+
+## Commit this fix
+
+```bash
+git add scripts/get_data.sh
+git commit -m "fix: remove leftover stub duplication in get_data.sh"
+```
+
+**Why commit this separately, right now, rather than bundling it with future changes:** this is a small, self-contained fix with a clear "why" (removing dead/duplicate code). Keeping it as its own commit makes your history easier to read — anyone reviewing later can see exactly when and why the cleanup happened, rather than it being buried inside a larger unrelated commit. This is the "commit little and often" habit the How-To-Submit handbook explicitly rewards.
+
+**Don't push yet** — no urgency, since this branch is already backed up on GitHub from your last push. We can batch this with your next push once you've got more done (like `data/provenance.md`), so you're not spamming tiny pushes for every micro-change. Just keep committing locally as you go.
+
+Run the two commands above and paste the output — then let's check on your download progress before moving to the next step.
+
+Me: git add scripts/get_data.sh
+git commit -m "fix: remove leftover stub duplication in get_data.sh"
+[debashmita/get-data-provenance 7396225] fix: remove leftover stub duplication in get_data.sh
+ 1 file changed, 1 insertion(+), 8 deletions(-)
+ 
+AI: Committed cleanly — `7396225`. That "1 insertion, 8 deletions" confirms exactly what we expected: the duplicate stub lines were removed, nothing else changed unexpectedly.
+
+## Quick check on your download before we move to the next step
+
+```bash
+ls -la data/raw/
+du -sh /mnt/projects/byte-corpus/raw
+```
+
+Paste that — I want to know how many of the 15 issues have landed by now before we decide what to actually build next (since our next step depends on having at least one complete PDF to work with, and ideally I want to confirm nothing has silently stalled or errored out while we were doing the git cleanup).
+
+Me: ls -la data/raw/
+du -sh /mnt/projects/byte-corpus/raw
+total 1181032
+drwxrwxr-x 2 debashmita debashmita      4096 Aug  9 21:12 .
+drwxrwxr-x 3 debashmita debashmita      4096 Aug  9 19:14 ..
+-rw-rw-r-- 1 debashmita debashmita  62035693 Sep 22  2012 1975_09_BYTE_00-01_The_Worlds_Greatest_Toy.pdf
+-rw-rw-r-- 1 debashmita debashmita 193084715 Sep 22  2012 1978_07_BYTE_03-07_How_To_Get_Your_Tarbell_Going.pdf
+-rw-rw-r-- 1 debashmita debashmita 109275288 Sep 22  2012 1980_07_BYTE_05-07_Computers_and_Education.pdf
+-rw-rw-r-- 1 debashmita debashmita 175416510 Sep 22  2012 1981_05_BYTE_06-05_Software_Piracy.pdf
+-rw-rw-r-- 1 debashmita debashmita 512254515 Sep 22  2012 1982_04_BYTE_07-04_Human_Factors_Engineering.pdf
+-rw-rw-r-- 1 debashmita debashmita 157286400 Aug  9 21:27 1983_11_BYTE_08-11_Inside_the_IBM_PC.pdf
+1.2G	/mnt/projects/byte-corpus/raw
+
+AI: Progress: **6 of 15 done, 1.2GB total** — on pace, well within budget, and the most recent file (`1983_11...`, timestamped `21:27`) confirms it's still actively working through the list in the background. No errors, nothing stalled.
+
+## Step 2: Explore PDF-to-page-image extraction (using what you already have)
+
+**Why this is the right next step, with reasoning:**
+
+Your OCR benchmarking task (Day 2, Qwen2-VL vs. a lighter model) needs **page images**, not raw PDFs — a VLM-based OCR model reads pixels, not PDF structure. Your team's A1 form already committed to this exact plan (Table 13, Design facet): *"Pages are extracted from the PDFs during preprocessing"* rendered *"at 300 DPI via PyMuPDF."* So this step is: turn one PDF into individual page images, so we have something real to feed into OCR next.
+
+We'll use `1975_09_BYTE_00-01_The_Worlds_Greatest_Toy.pdf` (the first, smallest one — 62MB) since a smaller file means faster iteration while we get the extraction logic right, before doing this at scale.
+
+**First, check if PyMuPDF is installed** (your A1 form specifically committed to this library):
+
+```bash
+python3 -c "import fitz; print(fitz.__doc__)"
+```
+
+**Why check first, not just install blindly:** PyMuPDF's package name (`pymupdf` on PyPI) and its import name (`fitz`) are different, which trips people up — I want to confirm what's already there before adding anything, especially since we now know your `pip` situation needs the `python3 -m pip` + `--break-system-packages` pattern we established earlier.
+
+Run that and paste the output — if it's not installed, we'll install it the same safe way we did for `internetarchive`.
+
+Me: python3 -c "import fitz; print(fitz.__doc__)"
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+ModuleNotFoundError: No module named 'fitz'
+
+AI: Expected — not installed yet. Same pattern as before, so this should be quick.
+
+## Install PyMuPDF
+
+```bash
+python3 -m pip install pymupdf --break-system-packages
+```
+
+**Why `pymupdf` as the install name but `fitz` as the import name:** this is just a historical naming quirk of the library — it was originally built as a Python binding to a C library called MuPDF, and `fitz` was the internal module name that stuck even as the PyPI package got renamed to `pymupdf` for clarity. Not something you're doing wrong — just how the package is structured upstream.
+
+**Verify it installed correctly:**
+```bash
+python3 -c "import fitz; print(fitz.__doc__)"
+```
+
+This time it should print something like `PyMuPDF X.X.X: Python bindings for the MuPDF...` instead of erroring.
+
+Run both and paste the output — once confirmed, we'll write a small test script to extract just the first page of your 1975-09 PDF as an image, so we can visually inspect one page before scaling this up to full issues.
+
+Me: python3 -m pip install pymupdf --break-system-packages
+Defaulting to user installation because normal site-packages is not writeable
+Collecting pymupdf
+  Downloading pymupdf-1.28.2-cp310-abi3-manylinux_2_28_x86_64.whl.metadata (26 kB)
+Downloading pymupdf-1.28.2-cp310-abi3-manylinux_2_28_x86_64.whl (25.8 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━ 25.8/25.8 MB 1.7 MB/s eta 0:00:00
+Installing collected packages: pymupdf
+Successfully installed pymupdf-1.28.2
+debashmita@debashmita-HP:~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$ python3 -c "import fitz; print(fitz.__doc__)"
+warning: The `fitz` API is deprecated and will be removed in future. Use `import pymupdf` instead.
+PyMuPDF 1.28.2: Python bindings for the MuPDF 1.28.2 library.
+Python 3.12 running on linux (64-bit).
+Installed successfully — version 1.28.2. Good catch by the library itself, though: it's telling us `fitz` is the **deprecated** import name now, and we should use `import pymupdf` directly instead. Worth following that guidance now rather than writing code we'd need to fix later — small thing, but "use the currently correct API" matters for code quality review.
+
+## Step 3: Extract one test page as an image
+
+Let's write a tiny standalone test script — not part of the real pipeline yet, just to prove the extraction works and let you *see* a page before we build this into `ingest/loader.py` properly (which is Anisa's file, but understanding this now helps you both).
+
+**Why test on ONE page first, not the whole PDF:** if something's misconfigured (wrong DPI, wrong output format), you want to discover that by inspecting one image, not by generating 100+ pages of a whole issue and finding out afterward. Fail fast, on the smallest possible unit.
+
+Create a small test script:
+
+```bash
+mkdir -p /tmp/page_test
+python3 << 'EOF'
+import pymupdf
+
+pdf_path = "data/raw/1975_09_BYTE_00-01_The_Worlds_Greatest_Toy.pdf"
+doc = pymupdf.open(pdf_path)
+
+print(f"Total pages in PDF: {len(doc)}")
+
+# Render just the first page at 300 DPI, per your A1 form's stated plan
+page = doc[0]
+pix = page.get_pixmap(dpi=300)
+pix.save("/tmp/page_test/page_001.png")
+
+print(f"Saved page 1 as PNG — dimensions: {pix.width}x{pix.height}")
+doc.close()
+EOF
+```
+
+**What each part does:**
+- `pymupdf.open(pdf_path)` — opens the PDF, gives you access to all its pages
+- `doc[0]` — grabs the *first* page (0-indexed, so page 1 in human terms)
+- `get_pixmap(dpi=300)` — renders that page as an actual image at 300 DPI, matching your A1 form's stated resolution choice
+- `pix.save(...)` — writes it out as a viewable PNG file
+
+Run this and paste me the output — it should print the total page count for this issue (useful data point — first issue's actual length) and confirm the image dimensions. Once we see it worked, we'll open the image to visually check it actually looks like a real BYTE page.
+
+Me: are you following all the file instructions given in the specifications strictly? There were specific instructions on file creation and editing, do not forget that
+
+AI: Good check — let me be precise about this, since it matters.
+
+## Reviewing what we've actually done against the rule
+
+The rule from the Codebase Guide is: **"every file you submit already exists as a stub — you edit it, you never create one."** Let me verify each thing we've touched:
+
+| Action | File | Status |
+|---|---|---|
+| Edited | `scripts/get_data.sh` | ✅ Pre-existing stub (confirmed — you `cat`'d it and saw the original TODO/IMPLEMENT content before we touched it) |
+| Appended to | `.gitignore` | ✅ This ships with every starter repo by default (How-To-Submit explicitly says "do NOT add a README or .gitignore, the folder already has them") — we appended a line, didn't create the file |
+| Created | `/tmp/page_test/page_001.png` and the inline test script | ⚠️ **This is NOT part of your repo at all** — it's in `/tmp`, your system's temporary scratch space, completely outside the `doc-agent-G21` folder |
+
+## Why the `/tmp` test doesn't violate the rule
+
+The no-new-files rule governs your **submitted repo** — what gets committed, pushed, and graded. `/tmp/page_test` was deliberately placed *outside* your repo, as disposable scratch space to visually sanity-check that PyMuPDF extraction works before we touch any real stub file. Nothing there will ever be committed or count as a deliverable — it's the equivalent of testing something in a Python REPL or a scratch notebook cell before writing real code.
+
+## Where this matters going forward — and a correction on task ownership
+
+Here's the more important thing your question surfaces: **the actual page-extraction logic ultimately belongs in `ingest/loader.py` — which is Anisa's assigned stub, not yours**, per your task division. My plan was for you to understand and test the extraction approach here (useful since your OCR benchmarking depends on having real page images), but the moment we write this into the actual pipeline, it should go into Anisa's file, not a new file you create for yourself.
+
+**So to be fully strict and correct:** once we confirm the test extraction works, I should NOT suggest saving this into some new file like `scripts/extract_test.py` or similar. The two legitimate paths from here are:
+1. Keep it as throwaway `/tmp` exploration only (what we're doing now) — good enough for your own OCR benchmarking work, since you need images to test Qwen2-VL against, not to build the pipeline itself
+2. If this logic needs to become part of the real pipeline, it goes into `ingest/loader.py`, and that's Anisa's edit to make (or a joint conversation with her), not something you create separately
+
+Thanks for the check — want to proceed with the `/tmp` test as scratch-only (safe, no rule conflict), or would you rather we loop Anisa in now since `loader.py` touches her ownership?
+
+Me: So are you telling that to go to the next step, I should check loader.py by Anisa first?
+
+AI: Not required for the immediate next step — but worth doing, and here's the precise reasoning so it's clear why.
+
+## Two separate things, two separate answers
+
+**For right now — running the `/tmp` scratch test:** No, you don't need to check `loader.py` first. That test only proves "does PyMuPDF extract a readable page image from a BYTE PDF" — a pure library sanity-check, disconnected from anyone's pipeline code. You can run it immediately.
+
+**For the *next* real step after that — your actual OCR benchmarking work:** Yes, you should look at `loader.py` first, for a good reason: your OCR benchmarking script will eventually need to consume pages in whatever shape the real pipeline produces them in, not some ad-hoc format you invent independently. Specifically:
+
+- `contracts.py` (FIXED, per the Codebase Guide) defines a `Page` class — this is the locked data shape every stage must use
+- `loader.py → load_pages()` is supposed to return `list[Page]` objects, per its stub description
+- If you build your OCR benchmark against your own throwaway image-loading logic instead of the real `Page` contract, you risk writing OCR code that doesn't actually plug into Anisa's `loader.py` output later — meaning rework
+
+**So the practical sequencing is:**
+1. Run the `/tmp` test now (zero dependency, just confirms the library works) — quick win, no coordination needed
+2. Before writing your real OCR benchmarking script, open `loader.py` and `contracts.py` to see the actual `Page` class fields (path, page_id, image data, etc.) — this costs you 2 minutes of reading, not a blocking conversation with Anisa
+3. Only if `loader.py`'s current stub is still empty/unimplemented and blocking you would you need to actually talk to Anisa or wait — otherwise you're just reading her stub's *contract*, not editing her file
+
+Want to run the `/tmp` test first (confirm PyMuPDF works), then look at `contracts.py` + `loader.py` together right after, so your OCR script is built against the real shape from the start?
+
+Me: Okay let's run /tmp test
+
+AI: Go ahead and run the script we prepared:
+
+```bash
+mkdir -p /tmp/page_test
+python3 << 'EOF'
+import pymupdf
+
+pdf_path = "data/raw/1975_09_BYTE_00-01_The_Worlds_Greatest_Toy.pdf"
+doc = pymupdf.open(pdf_path)
+
+print(f"Total pages in PDF: {len(doc)}")
+
+# Render just the first page at 300 DPI, per your A1 form's stated plan
+page = doc[0]
+pix = page.get_pixmap(dpi=300)
+pix.save("/tmp/page_test/page_001.png")
+
+print(f"Saved page 1 as PNG — dimensions: {pix.width}x{pix.height}")
+doc.close()
+EOF
+```
+
+**Quick reminder on why each line matters** (since you asked earlier to understand, not just copy commands):
+- `import pymupdf` — using the current, non-deprecated import name we confirmed works
+- `pymupdf.open(pdf_path)` — opens your actual downloaded 1975-09 issue
+- `doc[0]` — the very first page of that issue (the cover page, most likely)
+- `get_pixmap(dpi=300)` — renders it as a real image at the resolution your A1 form committed to
+- saving to `/tmp` — deliberately outside your repo, so this stays pure scratch work with no risk of violating the no-new-files rule
+
+Paste me the terminal output (page count + dimensions) once it runs — then we'll open the actual PNG to visually confirm it looks like a real BYTE magazine page before moving forward.
+
+Me: mkdir -p /tmp/page_test
+python3 << 'EOF'
+import pymupdf
+
+pdf_path = "data/raw/1975_09_BYTE_00-01_The_Worlds_Greatest_Toy.pdf"
+doc = pymupdf.open(pdf_path)
+
+print(f"Total pages in PDF: {len(doc)}")
+
+# Render just the first page at 300 DPI, per your A1 form's stated plan
+page = doc[0]
+pix = page.get_pixmap(dpi=300)
+pix.save("/tmp/page_test/page_001.png")
+
+print(f"Saved page 1 as PNG — dimensions: {pix.width}x{pix.height}")
+doc.close()
+EOF
+Total pages in PDF: 100
+Saved page 1 as PNG — dimensions: 2471x3231
+
+AI: Extraction worked cleanly.
+
+**What this tells us:**
+- **100 pages** in the 1975-09 issue — a real, usable data point. Note: this is on the low end compared to what your A1 form estimated (100–150 pages for early issues) — consistent with expectations, good sign.
+- **2471×3231 pixels** at 300 DPI — that's roughly 8.2×10.8 inches, a normal magazine page size. This confirms the PDF isn't some degraded/cropped scan — dimensions look sane.
+
+## Let's visually confirm it
+
+I can view the image directly if you tell me it's accessible, but since it's on *your* machine (not mine — remember, I'm working in my own separate sandboxed environment, not directly on your laptop), you'll need to open it yourself to actually see it. Open `/tmp/page_test/page_001.png` with your system's image viewer, e.g.:
+
+```bash
+xdg-open /tmp/page_test/page_001.png
+```
+
+(or just navigate to it in your file manager and double-click)
+
+**What to check when you look at it:**
+1. Is it actually readable — sharp text, not blurry or garbled?
+2. Does it show the multi-column layout your data speciality is centered on?
+3. Any visible scan artifacts (yellowing, skew, spots) — useful to note for later "worst failure" evidence?
+4. Is this even a *text* page, or is page 1 likely a cover/title page (which might look different from a typical article page)?
+
+Take a look and tell me what you see — this is exactly the kind of visual inspection your A1 form's `eda.ipynb` already started doing (Table 11's "three example pages"), so this observation is genuinely useful data, not just a sanity check.
+
+Me: Ok, before that, I need  total page count and word count of the full corpus, my teammate is asking for this
+
+AI: Good question — but let's be precise about what's actually feasible here, because full corpus page/word counts for all 176 issues have two very different costs.
+
+## The key distinction
+
+**Page count** — cheap and easy. Internet Archive stores page count as metadata (usually a field like `imagecount`) that you can query **without downloading anything**. Just an API call per issue.
+
+**Word count** — expensive. There's no metadata field for this; to know the actual word count, you'd need the *actual text content* of every issue, which means either:
+- Downloading and parsing all 176 PDFs (potentially 30-60GB+ based on what we've seen — not viable given your storage situation), or
+- Using IA's own OCR text layer (`_djvu.txt` files, mentioned earlier) — smaller than full PDFs, but still 176 separate downloads, and it's *their* OCR quality, not yours
+
+## My recommendation: get real page counts now, estimate word count
+
+This mirrors exactly what your own A1 form already did honestly — Table 7 said *"Rough estimate: ~45,000–50,000 pages total, ~20–25 million words"* — an estimate, not a measured count. For A2, we can upgrade the **page count** to a real, precise number (since it's free to get), while keeping word count as a **documented estimate** based on your actual downloaded sample's average words/page — which is more defensible than a guess, and honest about being an estimate.
+
+## Step 1: Get real page counts for all 176 issues (no downloads needed)
+
+First, save your clean list of 176 identifiers to a file so we can loop over them:
+
+```bash
+ia search 'collection:byte-magazine' --itemlist | grep -E '^byte-magazine-[0-9]{4}-[0-9]{2}$' | sort > /tmp/all_176_ids.txt
+wc -l /tmp/all_176_ids.txt
+```
+
+This just re-confirms the 176 count and saves the list so we don't have to regenerate it. Run this and paste the output — once confirmed, I'll give you the next command that loops through and pulls page counts via metadata (lightweight, no PDF downloads).
+
+Me: ia search 'collection:byte-magazine' --itemlist | grep -E '^byte-magazine-[0-9]{4}-[0-9]{2}$' | sort > /tmp/all_176_ids.txt
+wc -l /tmp/all_176_ids.txt
+176 /tmp/all_176_ids.txt
+
+I need page count for the 15 issues we are working on for now
+
+AI: Ah, simpler than I made it — good, let's scope this down to just your working subset of 15. This is fast and cheap since we're only querying metadata for issues you already have.
+
+## Get page counts for your 15 issues
+
+```bash
+for id in byte-magazine-1975-09 byte-magazine-1978-07 byte-magazine-1980-07 byte-magazine-1981-05 byte-magazine-1982-04 byte-magazine-1983-11 byte-magazine-1983-12 byte-magazine-1984-01 byte-magazine-1985-06 byte-magazine-1986-08 byte-magazine-1987-09 byte-magazine-1988-05 byte-magazine-1989-04 byte-magazine-1992-03 byte-magazine-1993-06; do
+  count=$(ia metadata "$id" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('metadata',{}).get('imagecount','N/A'))")
+  echo "$id : $count pages"
+done
+```
+
+**What this does:**
+- Loops through your exact 15 issue identifiers
+- For each, queries IA's metadata (a tiny JSON response, not the PDF itself — no storage cost)
+- Pulls out the `imagecount` field, which IA uses to record how many page-images exist for that scanned item
+- Prints a clean `identifier : page count` line for each
+
+**Why `imagecount` specifically:** this is the field IA uses across its scanned-book/magazine items to record the actual number of page-image scans — it should closely match (or exactly match) what you'd get from `len(doc)` in PyMuPDF (we already confirmed 100 pages for 1975-09 this way — worth checking if this metadata number agrees).
+
+Run it — it'll take maybe 15-30 seconds total (one small API call per issue) — and paste me the full output. Once we have all 15, we can sum them for your subset total, and separately calculate a word-count estimate using the one real PDF we've already extracted from.
+
+Me: but all 15 issues are not completed downloaded, will it work? 
+
+for id in byte-magazine-1975-09 byte-magazine-1978-07 byte-magazine-1980-07 byte-magazine-1981-05 byte-magazine-1982-04 byte-magazine-1983-11 byte-magazine-1983-12 byte-magazine-1984-01 byte-magazine-1985-06 byte-magazine-1986-08 byte-magazine-1987-09 byte-magazine-1988-05 byte-magazine-1989-04 byte-magazine-1992-03 byte-magazine-1993-06; do
+
+  count=$(ia metadata "$id" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('metadata',{}).get('imagecount','N/A'))")
+
+  echo "$id : $count pages"
+
+done
+
+byte-magazine-1975-09 : N/A pages
+
+byte-magazine-1978-07 : N/A pages
+
+byte-magazine-1980-07 : N/A pages
+
+byte-magazine-1981-05 : N/A pages
+
+byte-magazine-1982-04 : N/A pages
+
+byte-magazine-1983-11 : N/A pages
+
+byte-magazine-1983-12 : N/A pages
+
+byte-magazine-1984-01 : N/A pages
+
+byte-magazine-1985-06 : N/A pages
+
+byte-magazine-1986-08 : N/A pages
+
+byte-magazine-1987-09 : N/A pages
+
+byte-magazine-1988-05 : N/A pages
+
+byte-magazine-1989-04 : N/A pages
+
+byte-magazine-1992-03 : N/A pages
+
+byte-magazine-1993-06 : 327 pages
+
+
+
+This is the output
+
+AI: Good question to ask, but the answer is: **no, it doesn't matter whether the download is complete** — `ia metadata` makes a completely separate, independent API call to IA's servers asking for that item's metadata. It has nothing to do with what's sitting in your local `data/raw/` folder. So the download status isn't the issue here.
+
+**The real problem: inconsistent metadata field naming.** Only the *last* one worked (`1993-06 : 327 pages`) — that's suspicious. It suggests the `imagecount` field either doesn't exist, or is named differently, for most of these items (possibly because they were scanned/uploaded by different contributors at different times, similar to the naming inconsistency we found earlier).
+
+## Let's inspect the raw metadata for ONE issue to find the correct field name
+
+```bash
+ia metadata byte-magazine-1983-12 | python3 -m json.tool
+```
+
+**Why check this one specifically:** this will dump the *entire* metadata JSON structure for one issue, so we can visually scan it and find whatever field actually holds the page count — it might be called something like `pages`, `page-progression`, `scanningdpi` combined with dimensions, or the count might live in the `files` list itself as a count of `.jp2` entries rather than a documented single field, in the same way the naming pattern was inconsistent.
+
+Paste me the full output — it'll be long, but I need to see the actual field names IA is using for this particular item before we can fix the loop.
+
+Me:  ia metadata byte-magazine-1983-12 | python3 -m json.tool
+debashmita@debashmita-HP:~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$ 
+
+AI: That's odd — no output at all, not even an error. This suggests either the `ia metadata` call returned nothing, or something failed silently in the pipe. Let's debug this in two separate steps instead of one combined command, so we can see exactly where it breaks.
+
+**Step 1 — check the raw `ia metadata` output alone, without piping to python:**
+```bash
+ia metadata byte-magazine-1983-12
+```
+
+Paste whatever this prints — even if it looks like a wall of text, that's fine, I want to see it raw first.
+
+**Step 2 — separately check the command's exit status:**
+```bash
+echo $?
+```
+
+Run this immediately after Step 1 — it'll print a number. `0` means the command succeeded silently (meaning maybe it really did return empty), anything else means it failed (network issue, rate limiting, or a typo).
+
+This two-step approach isolates whether the problem is with `ia metadata` itself (network/API issue) or with how we piped its output into `python3 -m json.tool` (parsing issue) — no point debugging the JSON parsing if the raw command isn't even returning data in the first place.
+
+Me: ia metadata byte-magazine-1983-12
+debashmita@debashmita-HP:~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$ echo $?
+
+AI: Both came back with no visible output at all — including `echo $?`, which should always print *something* (a number). That's odd enough that I want to rule out a display/terminal issue before assuming it's an API problem.
+
+**Try this single, simpler check first:**
+```bash
+ia metadata byte-magazine-1983-12; echo "EXIT CODE WAS: $?"
+```
+
+Putting them on one line with `;` avoids any chance of a copy-paste or terminal-refresh issue between two separate commands, and the "EXIT CODE WAS:" label makes the number unmissable even if the metadata output is empty or very short.
+
+**Also, let's sanity-check whether `ia` itself is still working at all**, since we know it worked earlier for downloads:
+```bash
+ia metadata byte-magazine-1975-09; echo "EXIT CODE WAS: $?"
+```
+
+(Testing with 1975-09 specifically since that's one you've already fully downloaded and confirmed exists.)
+
+Run both and paste whatever appears — even if it's genuinely blank, tell me that explicitly ("nothing printed at all") so we know for certain rather than guessing it might have been a paste error.
+
+Me: In the meantime shouldn't I push the current version of my AI transcript?
+
+I want to keep it running in the background, and want to to do other works in the meantime
+
+Tell me step by step what to do with proper reasoning.
+
+AI: ## Why we can do this safely right now
+
+Your download is running as a **foreground process in one specific terminal window**. As we confirmed earlier, opening a **separate, new terminal window** doesn't touch that process at all — they're independent. So yes, you can absolutely do git/transcript work in parallel, as long as you don't touch or close the terminal that's actively downloading.
+
+Let's go step by step.
+
+---
+
+## Step 1: Open a new terminal (leave the download terminal alone)
+
+Open a fresh terminal window, then navigate to your repo:
+```bash
+cd ~/Documents/"4-1"/"CSE 429 - Deep Learning"/doc-agent-G21
+```
+
+**Why:** this is a completely separate shell process from the one running `get_data.sh` — nothing you do here can interrupt that download.
+
+---
+
+## Step 2: Find your transcript stub file
+
+Check what's already there:
+```bash
+ls -la transcripts/
+```
+
+**Why check first:** we already saw Anisa's `transcripts/2105036.txt` get created and pushed earlier in your merge log — so the folder exists and likely has a pattern to follow. Your file should be named `2105098.txt` (your student number, based on what we've seen so far), inside that same `transcripts/` folder.
+
+---
+
+## Step 3: Create your transcript file with the required structure
+
+Per your A2 form's exact requirement (Section 8), the file must contain, **in this order**:
+1. **Header** — your name, student number, sections led
+2. **The full conversation** — every prompt and every AI reply, unedited
+3. **A short reflection** — what you accepted, changed, or rejected, and why
+
+**Why this matters and why now is a good checkpoint:** you have a substantial, real conversation right now (this whole `get_data.sh` build, the storage/symlink troubleshooting, the download debugging) — this is genuine, substantive AI-assisted work exactly like the form wants documented. Better to capture it now while it's fresh and complete for this session, rather than trying to reconstruct it later.
+
+**Practical step:** since this is a chat interface, you'll need to copy the actual conversation text yourself (select and copy from this chat) and paste it into a `.txt` file. Open the file in your text editor:
+```bash
+nano transcripts/2105098.txt
+```
+
+Paste in, in order:
+```
+Name: Debashmita Saha
+Student number: 2105098
+Sections led: [fill in — likely Section 3 (OCR/HTR row), Section 5 (OCR quality evidence), plus your get_data.sh / provenance work]
+
+--- FULL CONVERSATION ---
+[paste your entire conversation here — every prompt you typed and every response]
+
+--- REFLECTION ---
+[write 3-5 sentences: what you accepted from the AI's suggestions, what you changed or pushed back on, and why — e.g., you can mention catching the duplicate-stub issue, deciding on the symlink storage fix, the ia-CLI vs curl decision, etc.]
+```
+
+Save (`Ctrl+O`, `Enter`) and exit (`Ctrl+X`).
+
+---
+
+## Step 4: Commit this file (don't push yet — see reasoning below)
+
+```bash
+git add transcripts/2105098.txt
+git commit -m "docs: add AI transcript for get_data.sh and corpus setup work"
+```
+
+**Why commit now even though the work isn't 100% finished:** committing costs nothing and creates a safe checkpoint. Your transcript will keep growing as you do more work — you'll update and re-commit it later (e.g., after your OCR benchmarking). No rule says a transcript must be submitted only once at the very end; you can commit it incrementally just like code.
+
+---
+
+## Step 5: Push it
+
+```bash
+git push origin debashmita/get-data-provenance
+```
+
+**Why push now:** your last push already set up tracking (`-u`) for this branch, so this is a plain push — no extra flags needed. Getting this backed up to GitHub now means it's safe even if something goes wrong locally later (like tonight's laptop-closing incident).
+
+---
+
+**Once this is done**, tell me and we'll move to real parallel work — I'd suggest reading `contracts.py`'s `Page` class next (quick, useful, and directly prepares you for writing your OCR benchmarking script against the real data shape), while your download keeps running untouched in the other terminal.
+
+Me: Pushing transcript till now is done
+
+AI: Good — that's safely backed up. One thing worth double-checking before we move on:
+
+**Quick sanity check — confirm the push actually succeeded cleanly:**
+```bash
+git log --oneline -3
+git status
+```
+
+This should show your transcript commit at the top, and `git status` should say "nothing to commit, working tree clean" (aside from the ignored `data/raw` symlink, which is expected and fine). Paste that if you want a final confirmation — otherwise we can move straight on.
+
+---
+
+## Next: read `contracts.py` and `loader.py` (while your download keeps running untouched)
+
+**Why this is the right next step, with reasoning:**
+
+Your Day 2 task is OCR benchmarking (Qwen2-VL vs. a lighter model). For that script to be useful — not just a throwaway test — it needs to consume pages in the **same shape** the real pipeline will use, because:
+1. `contracts.py` is FIXED — it defines the `Page` class every stage must use, so if you build your OCR test against some ad-hoc dictionary or tuple instead of the real `Page` object, you'll have to rewrite it later to plug into `agent/tools.py`'s `ReadPage` or `vision/ocr.py`'s `transcribe()`.
+2. `vision/ocr.py`'s `Reader.transcribe_region(region)` — notice it takes a **`Region`**, not a raw page or raw image. That means OCR in this pipeline runs on *segmented layout regions* (from Sunanda's `vision/layout.py`), not whole pages directly. This is an important detail — your benchmarking approach might need to account for this pipeline order (layout detection happens *before* OCR), even if for a quick standalone benchmark you test on whole-page images first as a simplification.
+
+**Run this to view the actual contract definitions:**
+```bash
+cat src/doc_agent/contracts.py
+```
+
+Paste me the output — I want to see the exact fields on `Page`, `Region`, and `Chunk` before we design your OCR benchmarking script, so whatever we build together is consistent with what Anisa and Sunanda are also building against.
+
+Me: git log --oneline -3
+git status
+7396225 (HEAD -> debashmita/get-data-provenance, origin/debashmita/get-data-provenance) fix: remove leftover stub duplication in get_data.sh
+71f946a Merge branch 'main' into debashmita/get-data-provenance
+b3876be feat: get_data.sh fetches BYTE subset via ia CLI
+On branch debashmita/get-data-provenance
+Your branch is up to date with 'origin/debashmita/get-data-provenance'.
+
+nothing to commit, working tree clean
+
+AI: Hold on — this is worth flagging clearly: **the transcript commit isn't actually there.**
+
+Look at the log — the top commit is still `7396225` (the get_data.sh fix from earlier), and `git status` says "nothing to commit, working tree clean." There's no `transcripts/2105098.txt` commit showing up anywhere in this list. This means Step 3-5 from my instructions didn't actually complete the way we discussed — either the file was never created, or it was created but never `git add`ed/committed before you told me it was pushed.
+
+**Let's check what's actually going on:**
+
+```bash
+ls -la transcripts/
+```
+
+This tells us: does `transcripts/2105098.txt` exist on disk at all right now?
+
+**Possible explanations, and we'll know which once you paste that output:**
+1. **The file was never created** — maybe the `nano` step got skipped or interrupted
+2. **The file exists but was never staged/committed** — in which case `git status` should have shown it as an untracked file, but it didn't, which is odd
+3. **You may have run these commands in a different terminal/directory than you think**, and the file exists somewhere else
+
+Run the `ls -la transcripts/` command and paste the output — we need to sort this out before assuming your transcript work is actually safe, since right now the evidence says it isn't.
+
+Me: ls -la transcripts/
+total 16
+drwxrwxr-x  2 debashmita debashmita 4096 Aug  9 20:03 .
+drwxrwxr-x 19 debashmita debashmita 4096 Aug  9 20:03 ..
+-rw-rw-r--  1 debashmita debashmita  996 Aug  9 20:03 2105036.txt
+-rw-rw-r--  1 debashmita debashmita  118 Aug  9 11:11 README.md
+
+
