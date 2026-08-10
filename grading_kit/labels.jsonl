@@ -68,6 +68,7 @@ Carl Helmers' editorial in the March 1978 BYTE, page 6, was interesting to me, s
 
 Continued on page 120"}
 
+
 {"page_id": "byte-magazine-1980-07_p197", "text": "WHERE CAN YOU FIND...
 
 SOFTWARE - All the best from top authors and distributors.
@@ -118,4 +119,38 @@ in NH, 603-673-5144
 Circle 131 on inquiry card.
 
 BYTE July 1980 195"}
+
+
+{"page_id": "byte-magazine-1981-05_p132", "text": "Supreme Court Takes a Softer Look at Software
+
+\"A claim drawn to subject matter otherwise statutory does not become nonstatutory simply because it uses a mathematical formula, computer program, or digital computer.\"
+Justice William Rehnquist, Majority Decision, Diamond v. Diehr, March 1981
+
+With this somewhat cryptic remark, the Supreme Court has, in the words of software and patent expert Morton C Jacobs, \"removed the shackles from the software innovator.\" The Diamond v. Diehr decision (described in the accompanying article) was the culmination of years of court cases involving the patentability of software.
+
+The key word in the above quote is \"statutory.\" According to patent law, an invention is statutory if it is a \"process,\" \"machine,\" \"article of manufacture,\" or \"composition of matter.\" All other inventions are said to be nonstatutory. For example, computer programs or mathematical algorithms are currently considered to be nonstatutory by the court. In the Diehr case, the Supreme Court decided for the first time that an invention does not become ineligible for a patent simply because of the presence of a computer program in the invention. However, an invention must still fall in a statutory category and must pass the traditional tests for merit: it must be \"novel,\" \"useful,\" and \"unobvious.\"
+
+The court has yet to take the final step and say that software is patentable, but this important decision points in that direction.
+
+Jacobs feels that now small businesses can afford to once again become innovators in the software field. Small-business entrepreneurs need patent protection to raise venture capital to bring their ideas to fruition.
+
+Ruth M Davis, former director of the Center for Computer Services and Technology of the National Bureau of Standards, agrees that \"there is a small-business potential to innovate in the software field...the patent system is important in stimulating [this] technological innovation.\"
+
+The closeness of the 5 to 4 decision in the Diehr case has led some observers to conclude that the court is evenly divided on the software issue, but Jacobs is quick to point out that the court is becoming progressively more and more \"pro-software\" in its recent decisions. Further, the Supreme Court has had the benefit of advice and testimony from computer experts over the years, and the growing sophistication of its decisions reflects this.
+
+Of course, the answers aren't all in yet. For example, what if an enterprising inventor puts a new program in a computer so that he can claim the novelty of the entire machine? This effectively preempts the algorithmic content of the program. The courts have balked at this approach in the past. Even so, the day may soon come when a program residing on a floppy disk will be granted a patent...CM
+
+ing was affirmed by the US Court of Appeals for the Seventh Circuit, and precipitated considerable concern within the data-processing industry. It appeared that in the future, the only realistic defense against software piracy would be strict enforcement of licensing agreements. But a licensing agreement binds only those who are party to it. It has no legal effect on a pirate who obtains the software without signing an agreement.
+
+The copyright problem was resolved by the Computer Software Copyright Act of 1980, which was passed in the waning days of the 96th Congress and signed by President Carter just before he left office. The Act amends the 1976 copyright statute by defining a computer program as \"a set of statements or instructions to be used directly or indirectly in a computer to bring about a certain result.\" The word \"directly\" refers, of course, to the object code. But while the new copyright law protects both the source statements and the sequence of machine instructions in the program, it does not protect the underlying logic of the program—the operations that the software is designed to perform.
+
+The Patent Problem
+
+The most effective way to prevent unauthorized use of computer programs would be to patent them. A patent would protect the process that a program carries out, regardless of its specific form. True, the duration of a patent is short (17 years), but in a rapidly changing industry that disadvantage is only theoretical; for practical purposes, the protection afforded by a patent borders on the absolute.
+
+Several attempts have been made to get the Supreme Court to recognize the patentability of computer software. In Gottschalk v. Benson (1972), the Court unanimously rejected a patent claim for an algorithm that converted numerical data in binary-coded-decimal form to pure binary. In his opinion for the Court, Justice William O Douglas started with the long-established proposition that \"an
+
+130 May 1981 © BYTE Publications Inc"}
+
+
 
