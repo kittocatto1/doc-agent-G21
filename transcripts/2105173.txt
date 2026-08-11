@@ -1,0 +1,2606 @@
+Header
+------------------------------
+Member Name: Sunanda Chowdhury
+Student Number: 2105173 
+AI used : Claude Sonnet 5 Medium
+Sections Led: 
+
+Full Conversation
+------------------------------
+
+Me: this is the project walkthrough of our dl project. we have to work on A@ section now. Its been long since we done A1. what do we need from A1 to start A2?? go through the project walkthrough meticulously and explain in details
+
+AI: Now I have the full picture. Here's what you need carried over from A1 to start A2.
+
+## Why this matters
+A2 Section 1 (5 pts) explicitly requires you to **copy forward, unchanged**, your key A1 decisions — and the guide warns: *"If your three choices here don't match what you wrote in A1, that's a red flag — they must be identical."* So A2 isn't a fresh start — it builds directly on specific A1 outputs.
+
+## What you need from A1, concretely
+
+**1. Your three (really four) core choices** — must be word-for-word consistent:
+- **① Domain** — the real-world subject + the actual end user (e.g. agriculture / a farmer or extension officer)
+- **② Data speciality** — the one hard property of your corpus (e.g. Bangla, degraded scans, multi-column)
+- **③ Primary NFR + target number** — the one quality you're optimizing, with a concrete measurable target (e.g. offline, model ≤ 2GB)
+- **④ Agentic feature** — declared in A1, graded later in A3, but should already be fixed
+
+**2. Your corpus itself, fully prepped**, since A2's whole job is turning it into a knowledge base:
+- The actual scanned page-images (not typed text) — name, link, licence
+- Size proof: ≥300 pages AND ≥60,000 words (or ≥100,000 pages if huge-corpus profile)
+- Your **train/test split by whole book/document** (not by page — this prevents leakage) — you'll reuse this split when reporting A2 evidence
+- Documented scan/script difficulty (what specifically makes it hard to OCR)
+
+**3. Your data-exploration findings** — since A2 Section 2 asks you to explain *why reading these pages is a vision problem*, which builds on the "three real findings" and "what it means for your build" from A1 Section 3.
+
+**4. Your A1 pipeline scoping (CORE/GATED/BONUS)** — A2 builds exactly the stages you scoped: **ingest → enhance (if gated) → layout → OCR → chunk → embed → index**. If you marked something GATED-in (e.g. image cleanup for foxed pages), A2 is where you actually have to build it.
+
+**5. Your success metric and baseline** — the headline number (e.g. Groundedness ≥ 0.9) and the trivial baseline you're trying to beat — these frame how you'll report "Evidence it works" in A2 Section 5.
+
+**6. Your risk answers**, especially OCR failure and PII — since A2 is where those risks get实际 engineered against (e.g. the fallback for low-confidence OCR lines becomes a real code decision now).
+
+## Practical next step
+Since it's been a while, I'd literally pull your A1 submission (the `a1-submit` tag) and paste these into A2 Section 1 verbatim:
+- Project name, task statement
+- The three choices + justifications
+- Corpus name/link/size/split
+- Success metric + baseline
+
+Then A2 Section 3 asks you to make real decisions (with a table of options considered) for OCR, chunking, embedding, and vector index — each of these decisions should trace back to your A1 data speciality and NFR. For example, if your speciality is Bangla, that alone should push you toward a Bangla-capable OCR/HTR model and a multilingual embedding model, not a default English one.
+
+Want me to help draft the A2 Section 1 recap table, or start working through the Section 3 options table for your specific speciality/NFR?
+
+Me: what do we need to do in A2?? give a step by step detailed plan and explain easily
+
+AI: Here's A2 broken into a clear step-by-step build plan. The goal: turn your raw scanned pages into a searchable knowledge base, with proof it actually works.
+
+## The big picture
+You're building this pipeline, in order:
+**ingest → enhance (if needed) → layout → OCR → chunk → embed → index**
+
+Each arrow is a stage that takes the output of the last stage and transforms it. By the end, you can type a question and get back the right chunk of text from your corpus.
+
+## Step-by-step plan
+
+**Step 1 — Recap A1 (Section 1, 5 pts)**
+Copy forward, word-for-word: project name, task, your three+one choices (domain/speciality/NFR/agentic feature), corpus details, success metric. This must match A1 exactly — no drift allowed.
+
+**Step 2 — Explain why this is a vision problem (Section 2, 10 pts)**
+Write up two things concretely for *your* pages:
+- What visual patterns your layout/OCR stage will exploit (columns, margins, letter shapes, consistent line structure)
+- What textual patterns your embeddings will exploit (word order, phrasing, grammar)
+Then say plainly which of these your actual layout+OCR design depends on more.
+
+**Step 3 — Build ingest**
+Load your scanned page-images into your pipeline as data your code can iterate over (paths, metadata, page numbers). Nothing fancy — just get every page loadable.
+
+**Step 4 — Build enhance (only if GATED for you)**
+If your data speciality is degraded scans, foxing, tilted pages, etc., clean the images here (denoise, deskew, contrast fix) before OCR sees them. If your profile doesn't need this, skip it — but only if you correctly scoped it as out-of-scope in A1.
+
+**Step 5 — Build layout**
+Detect where text actually sits on the page — columns, blocks, reading order. This matters most if you have multi-column layouts, mixed scripts, or procedure-blocks like Team G07's example.
+
+**Step 6 — Build OCR (the reproduction requirement)**
+Run a real model that reads text off the image. Pick based on your data speciality:
+- Clean script → general OCR engine (e.g. Tesseract)
+- Hard script (Bangla, Arabic, handwriting) → a fine-tuned HTR model or vision-language model
+This is likely your "genuinely reproduced a pretrained method" requirement for Section 3 — you must actually run it, not just cite it.
+
+**Step 7 — Build chunk**
+Split OCR'd text into small searchable pieces. Choose and justify: fixed-size (every N words), by paragraph, or semantic (split on topic change). Smaller = precise but loses context; bigger = keeps context but retrieves loosely.
+
+**Step 8 — Build embed**
+Turn each chunk into a vector (list of numbers capturing meaning). Pick a model that actually understands your language — if your speciality is Bangla/Arabic, an English-only embedding model won't work.
+
+**Step 9 — Build index**
+Store those vectors so you can search them fast. Choose flat (exact, fine for small corpora) or approximate like HNSW/IVF (faster, needed at scale). Justify against your corpus size.
+
+**Step 10 — Fill Section 3's comparison table (20 pts)**
+For OCR, chunking, embedding, and index: list the options you considered, your choice, why, and confirm which one you genuinely reproduced (ran real code on, not just described). Also name your biggest risk/unknown stage and your fallback plan.
+
+**Step 11 — Report the knowledge base you built (Section 4, 20 pts)**
+Write one honest paragraph describing what actually runs end-to-end (models + key settings). Give real index statistics: chunk count, embedding dimension, index type/size. State what "contracts" (data shapes) must NOT change, since A3 depends on them.
+
+**Step 12 — Generate evidence it works (Section 5, 25 pts — biggest block)**
+This is graded by an automatic re-measurement against a hidden ground-truth set, so numbers must be real:
+- OCR quality on a labelled sample (character/word error rate or F1, with sample size)
+- One retrieval example that actually worked (question → correct page returned)
+- Your worst failure, shown honestly (hiding failures loses more marks than showing them)
+
+**Step 13 — Plan for A3 (Section 6, 5 pts)**
+Briefly describe how you'll go from searchable text to a working agent: retrieval → reranking → agent loop → grounding.
+
+**Step 14 — Fill the 8-facet design table (Section 7, 10 pts)**
+Same table format as A1 — Problem, Data, Model, Method, Design, Development, Deployment, MLOps — now applied to your ingest-through-index stages. Each needs a choice + justification (what it costs, what would change it).
+
+**Step 15 — AI-use transcripts (Section 8, 5 pts + gate)**
+Each member submits their own transcript. Now that you're committing real code, the grader cross-checks commit history against who claims what work — a mismatch flags a free-rider.
+
+## Quick sanity checklist before submitting
+- [ ] A1 choices copied forward identically
+- [ ] Split is by whole book, not by page (carried from A1)
+- [ ] OCR/retrieval numbers are real, not inflated — the grader re-measures
+- [ ] At least one pretrained method is genuinely run, not just cited
+- [ ] Worst failure case is included, not hidden
+- [ ] Index stats are concrete (chunk count, dimension, size)
+
+Want help with any specific step — like picking an OCR/embedding model for your specific speciality, or setting up the actual pipeline code?
+
+Me: so we dont need the ocred corpus yet. just the scanned images?
+
+AI: Right — for A1, you only need the **scanned page-images** themselves, not OCR'd text. Confirming from the guide:
+
+- A1 Section 2 says your corpus "must be **scanned page-images** (photographs of pages), not already-typed text — because reading the image is the whole point of the project." A1 is explicitly "no working code yet... about making good decisions before building."
+- OCR only enters the picture in **A2** — it's literally one of the pipeline stages you build there (ingest → enhance → layout → **OCR** → chunk → embed → index).
+
+So at the A1 stage, all you needed was:
+- The actual image files (or a working link to them)
+- Proof of size (≥300 pages, ≥60,000 words *of expected/estimated text*, not yet extracted)
+- A description of *why* they're hard to read (conjunct letters, foxing, etc.) — you can tell this just by looking at the images, no OCR required
+- Your train/test split, by whole book
+
+Now in A2, Step 6 (Build OCR) is where you actually run a model over those images and produce real, machine-readable text for the first time. Before that step, your corpus exists only as images + metadata — that's expected and correct at this point.
+
+One thing to flag: A2 Section 5 needs a **labelled sample** — a small set of pages where you (a human) already know the correct text — so you can measure OCR accuracy against ground truth. That's worth preparing early since it takes manual transcription effort, separate from the OCR pipeline itself.
+
+Me: what we did in A1 then?
+
+AI: I don't have your actual A1 submission in front of me — I only have the walkthrough guide, which tells us what A1 *required*, not what your team specifically wrote or submitted. So let me lay out exactly what A1 asked for, section by section, so you can match it against what you remember doing (or check your repo's `a1-submit` tag).
+
+## A1 deliverables (100 pts, all on paper — no code)
+
+**Section 1 — Your problem & three choices (20 pts)**
+- Picked your **domain** (subject + real user)
+- Picked your **data speciality** (the one hard property of your corpus)
+- Picked your **primary NFR + a concrete numeric target**
+- Declared your **agentic feature** (graded later in A3)
+- Justified each with something testable, not just a one-liner
+- Named who actually uses this tool (a real role, not "the marker")
+- Picked one headline success metric + target
+- Named a baseline (laziest possible system) to beat
+
+**Section 2 — Your corpus (20 pts)**
+- Found & linked a real scanned page-image collection (not typed text)
+- Confirmed licence and shareability
+- Confirmed size (≥300 pages, ≥60,000 words)
+- Explained your specific scan/script difficulty
+- Split it by whole book (not by page) into build/test sets
+
+**Section 3 — What the data shows (15 pts)**
+- Ran an exploration notebook
+- Reported three real findings about your corpus
+- Explained what each finding means for your build
+- Showed three real example pages
+
+**Section 4 — Risks (10 pts)**
+- Answered: PII, licensing, OCR failure, hallucination, bias, and one honesty-over-score trade-off
+
+**Section 5 — Design choices (15 pts)**
+- Filled the 8-facet table (Problem/Data/Model/Method/Design/Development/Deployment/MLOps) for the ingest stage
+- Named one real trade-off
+
+**Section 6 — Pipeline & scope (5 pts)**
+- Marked each pipeline stage CORE/GATED/BONUS/out-of-scope for your profile
+
+**Section 7 — Agent design on paper (10 pts)**
+- Described your agent's "brain," the 9 fixed tools, autonomy/human-in-loop/budget, testing plan, and agent-specific risks (prompt injection, runaway loops, ungrounded answers)
+
+**Section 8 — AI-use transcripts (5 pts + gate)**
+
+---
+
+Do you have your actual A1 doc or repo handy? If you paste or upload it, I can pull out exactly what your team decided (domain, speciality, NFR, corpus) and use that to make the A2 plan concrete for *your* project instead of generic.
+
+Me: Here is the A1_form.md done by us
+
+AI: Great, now I can see exactly what your team (**BYTE Retriever**) decided in A1. Here's the summary:
+
+## Your A1 decisions
+
+**Project:** BYTE Retriever — a citation-grounded Q&A agent over *BYTE* magazine (1975–1998)
+
+**① Domain:** Retro-computing/tech journalism — for hobbyists, preservation researchers, tech historians asking things like "was the IBM PC covered before launch, and what did reviewers say?"
+
+**② Data speciality:** **Multi-column reading order** — BYTE pages have 2–3 running columns, sidebars, boxed code listings, and full-page ads breaking flow. This forces a **column/region-segmentation stage before OCR**.
+
+**③ Primary NFR + target:** **Scalable** — P95 query latency ≤ 1.5s across the *full* ~224-issue corpus, hit via HNSW (approximate index) instead of flat search.
+
+**④ Agentic feature:** Evidence-gated re-search — widen k and retry if top retrieval score is weak; abstain at k_max.
+
+**Corpus:** All 224 English BYTE issues from Internet Archive — ~45–50k pages, ~20–25M words, ~200+ GB of scans. Licence status unclear → treated as "link only," with a download script instead of redistributing scans. No train/test split, since your project is exempted from training (pretrained models only).
+
+**Success metric:** Groundedness ≥ 0.85. **Baseline to beat:** naive top-1-chunk-verbatim ≈ 0.4 answer-F1.
+
+**Key A1 findings that drive design:**
+- Multi-column layout scrambles naive OCR reading order → need bounding-box extraction + column sorting before chunking
+- Non-article content (ads, code listings) needs metadata filtering during indexing
+- Schema already defined: `doc_id`, `page_num`, `chunk_id`, `reading_order_idx`, `ocr_text`, `layout_type`, `layout_bbox`
+
+**Section 6 pipeline plan (this is your A2 blueprint):**
+| Stage | Your plan |
+|---|---|
+| Ingest+Enhance | OpenCV conditional deskew/denoise/CLAHE (only when needed) |
+| Layout | *Not yet implemented* — planned for A2, benchmarking a pretrained layout model |
+| OCR | Benchmark **Qwen2-VL-2B-Instruct** vs **olmOCR-2 7B** (VLM-based, good for multi-column/table-heavy pages), also compare faster OCR models for scalability |
+| Index | Embed with **Jina v5-text-small** (vs Qwen3-Embedding-4B) → **FAISS HNSW** index |
+| Retrieval | Hybrid: dense (Jina) + BM25, reranked with **Qwen3-Reranker** |
+
+## What this means concretely for A2
+
+Since Section 6 already named your candidate models, A2 is where you **actually run and benchmark them**, not just describe them:
+
+1. **Ingest** — load your BYTE page images (start with a manageable subset, not all 45–50k pages, unless your instructor requires full scale from day one)
+2. **Enhance** — implement the conditional OpenCV pipeline you described (deskew/denoise/CLAHE with thresholds)
+3. **Layout** — this is your biggest open item: you said "not yet implemented" in A1, so A2 Section 2 (explaining why this is a vision problem) and Section 3 (component comparison) need you to actually pick and justify a layout/region-segmentation model — this is the stage your data speciality *forces*
+4. **OCR** — actually run Qwen2-VL-2B and/or olmOCR-2 on a real sample and get real CER/WER numbers (A2 Section 5 requires this, and it'll be checked against a hidden ground-truth set)
+5. **Chunk** — use your `reading_order_idx` + `layout_bbox` schema to sort chunks by column, filter out `advertisement` layout_type
+6. **Embed** — actually benchmark Jina v5-text-small vs Qwen3-Embedding-4B, pick one
+7. **Index** — build the real FAISS HNSW index and report real stats (chunk count, dimension, size)
+
+One thing to flag early: your A1 said "training was exempted" and corpus split wasn't really done by book — for A2's evidence section you'll still need a **held-out labelled sample** (pages with known-correct transcriptions) to measure OCR accuracy honestly, separate from any train/test question.
+
+Want to start on the layout-segmentation decision first, since that's the piece flagged "not yet implemented" and is the one your data speciality most directly forces?
+
+Me: this is the codebase guide. there are 3 members in  our team. how can we divide the works among us equally?? our teacher has wrote he will track everything in github repo:  Deep-Learning Capstone — Full Package Every group builds the same system — an Agentic-RAG agent over scanned books — differentiated across three axes (domain × data speciality × primary NFR) so no two projects converge. Read in this order 1. 02-How-To-Submit — how you hand work in (a GitHub repo, tagged at each milestone). Read this first. 2. 03-Project-Specification — the whole system: pipeline, the three axes, the regulatedrepo design, tiers, anti-copying. 3. 05-Codebase-Guide — Part 1 documents every file; Part 2 is the ordered 57-step build checklist. You build against this. 4. forms/ — A2–A4, the remaining milestone forms you fill in (Word). A1 is already submitted. 5. the repo itself — the code you build in (doc-agent-starter.zip). Every file you touch is a named stub — you edit, never create. 6. 06-Group-Assignment-Workbook — domains, data specialities, NFRs, data sources, and the build buckets (one workbook). How the milestones work You get ONE repo (from the starter template) and submit it four times by pushing a tag — a2-submit, a3-submit, a4-submit. Each milestone is the previous one plus your new work; your commit history is your submission. See 02-How-To-Submit for the exact commands. The single grading folder Your repo’s grading_kit/ is the one folder that makes your project reproducible and gradable: manifest.yaml declares your three axes (domain, data speciality, primary NFR + its target) and points to your corpus and held-out pages. It is also your own evaluation harness. Formats: read-only references are PDF; the forms stay editable Word; the Group-Assignment Workbook stays an interactive spreadsheet; the code stub is a repository.
+
+AI: Based on the 57-step checklist, here's how A2's workload breaks down for your team, mapped to your specific speciality (**E2 — multi-column layout**) and NFR (**E5 — scalable HNSW**).
+
+## A2 full task list (11 core + 2 gated-for-you items)
+
+| # | File | Type | Applies to you? |
+|---|---|---|---|
+| 1 | `ingest/loader.py → load_pages()` | fill | Core |
+| 2 | `ingest/preprocess.py → run()` | fill | Core |
+| 3 | `vision/layout.py → detect()` | fill | Core **+ your E2 speciality** |
+| 4 | `vision/ocr.py → Reader, transcribe()` | fill | Core |
+| 5 | `index/chunk.py → split()` | fill | Core |
+| 6 | `index/embed.py → encode()` | fill | Core |
+| 7 | `index/store.py → build(), load()` | fill | Core **+ your E5 NFR** |
+| 8 | `scripts/build_index.sh` | author | Core |
+| 9 | `notebooks/kb_demo.ipynb` | author | Core |
+| 10 | `reports/pipeline_diagram.md` | author | Core |
+| 11 | `configs/design_choices.md` | author | Core |
+
+Notice **layout.py** and **store.py** carry extra weight for your team specifically — they're where your speciality and NFR actually get built, not just described.
+
+## Proposed 3-way split (balanced by difficulty, not just file count)
+
+**Person 1 — Ingest & Vision-Input (lighter fill load, owns the demo)**
+- `ingest/loader.py` — load BYTE page images into `Page` objects
+- `ingest/preprocess.py` — conditional deskew/denoise/CLAHE (you already designed the logic in A1 — just implement it)
+- `reports/pipeline_diagram.md` — diagram ingest→index end to end
+
+**Person 2 — Layout & OCR (heaviest, this is your speciality's core)**
+- `vision/layout.py → detect()` — **this is E2**: column/region segmentation so multi-column text doesn't get scrambled before OCR. Biggest open item from A1 ("not yet implemented")
+- `vision/ocr.py → Reader, transcribe()` — benchmark Qwen2-VL-2B vs olmOCR-2, pick one, transcribe regions in correct order
+- `notebooks/kb_demo.ipynb` — show OCR quality + one retrieval example (natural fit since this person owns OCR output)
+
+**Person 3 — Chunk, Embed & Index (this is your NFR's core)**
+- `index/chunk.py → split()` — chunk using `reading_order_idx`/`layout_bbox`, filter ad blocks
+- `index/embed.py → encode()` — benchmark Jina v5-text-small vs Qwen3-Embedding-4B
+- `index/store.py → build(), load()` — **this is E5**: build the FAISS HNSW index (not flat) to hit your ≤1.5s P95 target
+- `scripts/build_index.sh` — the one-command script wiring chunk→embed→store together
+
+**Shared across all three**
+- `configs/design_choices.md` — each person fills the design-choice row for their own stage(s), so it stays first-hand
+- Each person's own AI-chat transcript for their sections (Section 8 requirement)
+- Integration testing: since the pipeline is sequential (loader→preprocess→layout→OCR→chunk→embed→store), each person's output is the next person's input — plan a short sync point after Person 1 finishes ingest, another after Person 2 finishes OCR, so Person 3 isn't blocked
+
+## Why this split is fair
+
+It's not 1 file each — it's roughly one *pipeline zone* each, and the zones are sized so nobody just gets "the easy stuff": Person 2 gets fewer files but the hardest ones (this is the stage your whole data-speciality choice hinges on), Person 3 gets three files but they're comparatively lighter individually, and Person 1's lighter fill-load is balanced by owning the demo notebook and diagram.
+
+If it's useful, this also maps cleanly onto continuity from A1 — whoever led your OCR/model-comparison thinking in Section 6/7.1 is the natural Person 2, and whoever led the index/retrieval design (Jina/HNSW/FAISS) in A1 is the natural Person 3.
+
+Want me to turn this into an actual GitHub issue/task breakdown you can paste into your repo, or start on the layout.py implementation for the multi-column segmentation first since that's your biggest open item?
+
+Me: the codebaseguide is so huge! why did u distribute so little amounts of files?
+
+AI: Fair pushback — let me clear this up properly. Let me check the full file list I haven't shown you yet.Fair question — let me be straight about this, because the confusion is legit.
+
+**The codebase guide documents the ENTIRE repo — all four milestones (A1–A4) plus fixed infrastructure. A2 only touches a slice of it.** Here's why the rest isn't "missing," it's just not due now:
+
+## Where the rest of the files actually go
+
+| Category | Examples | Why not in A2 |
+|---|---|---|
+| **Already done (A1)** | `task.yaml`, `get_data.sh`, `provenance.md`, `manifest.yaml`, `eda.ipynb`, `validate.py`, `versioning.py` | You submitted these at `a1-submit`. Done. |
+| **A3's job** | `retriever.py`, `rerank.py`, `agent.py`, `tools.py`, `memory.py`, `llm/client.py`, `llm/postprocess.py`, `eval/metrics.py`, `eval/ablation.py`, `tasks.jsonl` | The agent loop, tools, and evaluation only make sense *after* you have a working index — which is exactly what A2 builds. |
+| **A4's job** | `serve/api.py`, `serve/ui.py`, `mlops/tracking.py`, `model_card.md`, `final_report.md`, `brochure.md` | Serving/deployment/governance — comes last. |
+| **FIXED — you never touch these** | `contracts.py`, `hooks.py`, `wiring.py`, `agent.py`'s loop, `settings.py`, `prompts.py` | Explicitly locked: *"Never edit (CI will fail you): the agent loop, the stage order in pipeline.py, the seams in hooks.py, the data types in contracts.py, the tool names/signatures in tools.py."* Editing these breaks grading. |
+| **Optional / bonus only** | `rl/`, `training/`, everything in `optional/`, `governance/pii.py`, `eval/calibration.py`, `eval/fairness.py` | Only required if your specific NFR needs it. Your NFR is scalability (E5), not privacy/calibration/fairness — so `pii.py`, `calibration.py`, etc. are genuinely not yours to build now, maybe ever. |
+| **CI/test scaffolding** | All of `tests/*.py` | Mostly placeholder stubs across A2/A3 — `test_smoke.py` only "passes once students implement the stages," meaning it activates progressively, not all in A2. |
+
+So it's not that I under-assigned — the guide itself says explicitly: *"Build top to bottom. Within each assignment do the Core first... then your one gated enhancement."* A2's own checklist in Part 2 has exactly **11 core items + 2 gated-for-you items (E2, E5)** — that's the literal scope, not my trimming.
+
+The repo *looks* huge because it's the whole 4-milestone skeleton dropped on you at once, front-loaded for context — not because A2 wants all of it now.
+
+If you want, I can make you a full **milestone-by-milestone map** (which files are A2 vs A3 vs A4 vs fixed) so it's clear at a glance what's actually left for later, and nobody worries the team's behind.
+
+Me: you sure, thats all we gotta do for A2?
+
+AI: Mostly yes for the *code* — but "all" needs three caveats, because A2 isn't just the repo checklist. Let me spell out the complete scope so nothing's missed.
+
+## 1. The code (what we listed) — confirmed complete
+The 11 core files + your 2 gated ones (`layout.py` for E2, `store.py` for E5) is the full A2 code checklist, straight from Part 2 of the guide. Nothing more required there.
+
+## 2. But there's also the A2 **form** — the actual graded document
+Remember from earlier: A2 is 100 points, and it's *not just code*. The form (the Word doc, like your A1_form) has its own sections that reference your code but aren't code themselves:
+
+| Form section | What it needs from your code |
+|---|---|
+| Section 1 recap | A1 choices copied forward |
+| Section 2 — vision problem | Why multi-column pages are a vision problem — draws on your `layout.py` decisions |
+| Section 3 — comparison table | The options-considered table for OCR/chunk/embed/index — this is where you write up what you benchmarked (Qwen2-VL vs olmOCR, Jina vs Qwen3-Embed, etc.) |
+| Section 4 — KB report | What actually runs end-to-end, real index stats (chunk count, dimension, size) |
+| Section 5 — evidence | Real OCR CER/WER numbers, one retrieval example, your worst failure — **this needs labelled ground-truth pages** |
+| Section 6 — A3 plan | Short write-up, not code |
+| Section 7 — 8-facet table | Design justification per stage |
+| Section 8 — transcripts | Each member's AI-chat log |
+
+So: build the code first, but budget time to actually **write the form** — it's graded separately and is worth just as much as the code itself.
+
+## 3. One thing that's easy to miss: growing your `heldout_pages/` + `labels.jsonl`
+The guide notes labels *"grows through A2–A3."* For Section 5's OCR evidence, you need real human-transcribed ground truth to score CER/WER against — that's manual work (someone types out the correct text for a handful of pages), separate from any pipeline code, and it takes time. Start this early, don't leave it for the night before.
+
+## Also: `configs/config.yaml`
+Not a separate listed A2 step, but it's the file all your `[fill]` functions read from (`cfg['ocr']`, `cfg['embed']`, `cfg['index']`) — you'll be updating it continuously as you lock in model choices, so it's not "done" from A1, it evolves with A2.
+
+**Short answer: code checklist = yes, that's it. Full A2 deliverable = code + the write-up form + manually labelling some ground-truth pages.** Want me to draft the A2 form's Section 1–2 recap now, using your A1 answers, so that part's out of the way early?
+
+Me: we did not do these in A1. `task.yaml`, `get_data.sh`, `provenance.md`, `manifest.yaml`, `eda.ipynb`, `validate.py`, `versioning.py ` our teacger asked us to submit them with A2. divide these too
+
+AI: Got it — makes sense to fold those in now since your teacher wants them alongside A2. Here's the added split, matching each to the person who's already working nearest to it, so nobody juggles unrelated context.
+
+## The 7 missing A1 carryovers
+
+| File | Type | What it does |
+|---|---|---|
+| `configs/task.yaml` | author | Declares domain/speciality/NFR + target |
+| `scripts/get_data.sh` | author | Fetches your corpus into `data/raw/` |
+| `data/provenance.md` | author | Source, licence, page/word counts |
+| `grading_kit/manifest.yaml` | author | Points to corpus, heldout slice, build/run commands |
+| `notebooks/eda.ipynb` | author | Corpus exploration — scan quality, page-length spread |
+| `data/validate.py → validate()` | fill | Enforces ≥300 pages/≥60k words, checks split |
+| `data/versioning.py → snapshot()` | fill | Records a version id for the exact corpus used |
+
+## Updated 3-way split
+
+**Person 1 — Ingest owner**
+- *(existing)* `ingest/loader.py`, `ingest/preprocess.py`, `reports/pipeline_diagram.md`
+- **+ `scripts/get_data.sh`** — actually fetch the BYTE issues from Internet Archive; `loader.py` can't be tested without this existing first
+- **+ `data/provenance.md`** — write up source/licence/counts, natural pairing since they're the one pulling the corpus in
+- **+ `data/validate.py`** — enforces page/word minimums right at ingest, same stage
+
+**Person 2 — Layout & OCR owner**
+- *(existing)* `vision/layout.py` (E2), `vision/ocr.py`, `notebooks/kb_demo.ipynb`
+- **+ `notebooks/eda.ipynb`** — this is literally your scan-quality/data-speciality difficulty analysis (multi-column layout, font variety, foxing) — same expertise as the layout/OCR work
+
+**Person 3 — Chunk/Embed/Index owner**
+- *(existing)* `index/chunk.py`, `index/embed.py`, `index/store.py` (E5), `scripts/build_index.sh`
+- **+ `configs/task.yaml`** — quick, declarative, ties into whatever's finalized by the time the build runs
+- **+ `grading_kit/manifest.yaml`** — this literally *points to* the build/run commands and heldout slice, so it belongs with whoever owns the final "one command builds everything" step
+- **+ `data/versioning.py`** — records which corpus version produced this exact index — pairs naturally with `store.py`
+
+## Load check
+- Person 1: 3 existing + 3 new = 6 items (but `get_data.sh`/`provenance.md`/`validate.py` are individually lighter than layout/OCR work)
+- Person 2: 3 existing + 1 new = 4 items (heaviest per-item — OCR benchmarking + layout are still the hardest single tasks)
+- Person 3: 4 existing + 3 new = 7 items (lightest per-item on average — chunk/embed/store are moderate, and task.yaml/manifest.yaml/versioning.py are quick)
+
+Roughly balanced. One sequencing note: **`get_data.sh` and `validate.py` need to be done first**, before anyone else's `[fill]` functions can even run against real data — so Person 1 should front-load those two, even ahead of `preprocess.py`.
+
+Want me to fold these into the GitHub issue breakdown from before, so it's one clean set of issues to paste into the repo?
+
+Me: Is this task dividing ok? Scrutinise in detail (A detailed md file of A2_tasks division)
+
+AI: Let me verify a few things against the actual codebase guide before scrutinizing further — particularly `settings.py`'s status, since I flagged it as FIXED earlier but the plan has Anisa authoring it.Scrutinizing this against the actual guide (I re-checked the source file directly), here's what holds up and what doesn't.
+
+## ✅ What's genuinely solid
+- Every A1-carryover file is correctly identified against the guide's own A1 list (task.yaml, config.yaml, get_data.sh, provenance.md, manifest.yaml, heldout_pages/labels.jsonl, validate.py, versioning.py, logging_conf.py, settings.py+.env — that's the *complete* A1 list, nothing extra, nothing missing from the source list).
+- Dependency ordering (get_data → loader → preprocess → layout → OCR → chunk → embed → store) matches Stage 1–4 order exactly.
+- Evidence requirements are correctly tied to what's actually gradable (OCR F1 with sample size, one verified retrieval, one honest failure).
+
+## ⚠️ Correction I owe you first
+Earlier I told you `settings.py` was "FIXED — never touch." That was wrong on my part — checking the actual Part 2 A1 list, it's explicitly `[author] settings.py + .env`. "FIXED" in Part 1 means the *interface* is locked, not that you can't populate it. Sorry for the confusion — the plan's Commit 2 (Anisa doing settings.py) is correct, mine was the error.
+
+## 🔴 Critical gap: `validate.py` and `versioning.py` are checklisted but never assigned
+Look at the Final Checklist — both are listed under "A1 carry-forward (must exist)." But scan the Day-by-day table and all 23 commits: **neither file appears anywhere.** Nobody's building the ≥300-page/≥60k-word enforcement or the corpus-version snapshot. Day 1's testing note even says *"sanity-check page/word counts clear the floor"* — but that's exactly what `validate.py` is supposed to automate, and it's not on anyone's plate. This needs a home — cheapest fix: fold both into Debashmita's Day 1 (right after `get_data.sh`, since `validate()` runs against what that script fetches).
+
+## 🔴 Biggest structural risk: Days 2–3 are a relay race dressed up as parallel work
+Day 2: preprocess (Anisa) → layout (Sunanda) → OCR start (Debashmita), all **same day, same chain**. Sunanda can't meaningfully start until Anisa's done; Debashmita can't meaningfully start until Sunanda's done. If preprocess tuning takes longer than expected (deskew/CLAHE thresholds are exactly the kind of thing that eats a morning), two people sit idle behind schedule.
+
+Day 3 is worse — one continuous chain: OCR finalize → chunk → embed → store → pipeline wiring → retriever, touching all three people sequentially in a single day, with Day 4's entire evidence section depending on all of it landing.
+
+**Fix:** unblock Sunanda/Debashmita with a small hand-cropped sample (3–5 pages) they can start against immediately, instead of waiting on the full automated pipeline output. Reconcile with real pipeline output once it's ready.
+
+## 🔴 Realistic risk on Debashmita's Day 3 load
+"Run transcribe() across the whole subset" with a VLM (Qwen2-VL-2B) isn't a quick task — VLM inference over a few thousand pages can genuinely eat most of a day depending on GPU/Colab availability, and it's the one thing every downstream step (chunk/embed/store/wiring/evidence) is blocked on. This is your single point of failure for the whole plan. Worth a fallback: if full-subset OCR isn't done by midday Day 3, fall back to OCR-ing a smaller slice and being upfront about it in Section 5.
+
+## 🟡 Worth flagging, not necessarily wrong
+- **Commit 18** (`retriever.py`) and **Commit 13** (`eval/metrics.py`) are technically **A3 core files** per the guide, not A2 items. Pulling them forward is reasonable — you need *some* way to run a query and compute F1 for A2's evidence section — but note in your transcripts that you're only implementing the specific function needed now (`retrieve()`, `ocr_f1()`), not building those files out fully, so it doesn't read as scope confusion at grading time.
+
+## 🔴 Still the top overall risk (you already caught this — seconding it hard)
+A2 core item #4 literally says *"fine-tune a pretrained OCR model"* as the baseline expectation, not "benchmark zero-shot." If your large-corpus exemption doesn't cover this, Day 2–3's OCR plan (benchmark Qwen2-VL vs olmOCR with no fine-tuning) doesn't satisfy the requirement as written. **Get this confirmed in writing before Day 2 starts** — if it's not exempted, you need labelled training data and training time budgeted, which changes the whole week.
+
+**Net verdict:** division of labor is fair and dependency-aware in principle, but two real gaps (validate.py/versioning.py orphaned, and same-day serial chains masquerading as parallel work) need fixing before you start, and the OCR fine-tuning question needs an answer today, not Day 2.
+
+Me: i dont understand a single thing. I am sunanda. What do i have to do? please expalin EASILY in details
+
+AI: Okay, deep breath. Forget the whole team plan for a second — here's **just your job**, in plain English, day by day.A few honest things worth knowing:
+
+- **Day 2 and Day 3 both start blocked on someone else's work.** Don't just wait around all morning — ask Anisa/Debashmita for even a rough/partial output early so you can start testing your code on *something*, then re-run once their final version lands.
+- **Day 3 is genuinely the heaviest day for you** — three real pieces of code, not one. If you're short on time, get `chunk.py` and `embed.py` working first (they're more mechanical); `store.py`'s HNSW index setup usually just needs a config tweak once you have embeddings.
+- You don't need to understand OCR models or preprocessing deeply — that's not your part. You just need to know: "I get cleaned images (Day 2) or real text (Day 3) as input, and I hand off boxes/chunks/an index as output."
+
+Want me to write the actual starter code for `layout.py` (Day 2) first, since that's your first real coding task?
+
+Me: i need information for task.yaml: corpus: {min_pages: 300, min_words: 60000, source_url: "", license: ""} help me with this
+
+AI: Good news — I found the actual source. Here's what to put in, based on real data plus what your team already decided in A1.
+
+```yaml
+corpus:
+  min_pages: 300
+  min_words: 60000
+  source_url: "https://archive.org/details/byte-magazine"
+  license: "unclear / all-rights-reserved — link-only, no redistribution"
+```
+
+## Why these specific values
+
+**`source_url`** — The actual collection lives at `archive.org/details/byte-magazine`, which holds individual issue items like `byte-magazine-1993-06`, `byte-magazine-1988-06`, etc., scanned at 600 PPI with ABBYY FineReader OCR. There's also a "complete" bundle at `archive.org/details/BYTE-MAGAZINE-COMPLETE`, but the individual-issue collection URL is the safer one to cite since that's what `get_data.sh` will actually pull from.
+
+**`license`** — I checked an actual item page directly, and there's **no explicit license/rights field** anywhere on it — no Creative Commons tag, no public-domain notice, nothing. This matches exactly what your A1 form already said: *licence status unclear*. So the honest value here is not a real license name — it's a statement of that uncertainty, which is also why your A1 plan was "link only, no redistributing scans, download script instead."
+
+## What to actually type in
+
+```yaml
+corpus:
+  min_pages: 300
+  min_words: 60000
+  source_url: "https://archive.org/details/byte-magazine"
+  license: "unclear"
+```
+
+Then in `data/provenance.md` (Debashmita's file), add one sentence like: *"Internet Archive does not publish an explicit license for this collection; treated as all-rights-reserved. We do not redistribute scans — only a fetch script pointing to archive.org is committed."* That covers you for A1 Section 2 and A2's provenance requirement in one line.
+
+One thing worth double-checking with your instructor: some courses want a real SPDX-style license string even for "unknown" (e.g. `"LicenseRef-unclear"`) if `validate.py` or the autograder parses this field strictly — worth a quick Slack/email to confirm the expected format before you lock it in.
+
+Me: # THE place you set models & parameters. Code reads only from here.
+seed: 42
+device: cuda
+
+enhance:   {enabled: true,  model: "unet_small", type: "diffusion"}   # or "vae" / "none"
+layout:    {model: "detectron2:layout", score_thr: 0.5}
+ocr:       {model: "microsoft/trocr-base-printed", finetune: true}    # BASELINE = pretrained OCR
+embed:     {model: "sentence-transformers/all-MiniLM-L6-v2", dim: 384}
+index:     {type: "faiss:hnsw", chunk_tokens: 256, overlap: 32}
+retrieve:  {k: 10, k_step: 10, k_max: 40, weak_threshold: 0.35, rerank: true, reranker: "cross-encoder/ms-marco-MiniLM-L6-v2"}   # k_step/k_max/weak_threshold drive evidence-gated re-search
+agent:     {max_steps: 8, autonomy: "act-with-approval", budget_usd: 0.05}
+rl:        {algo: "ppo", train_policy: false}                         # bonus: set true
+serve:     {batch: true}
+deploy:    {target: "hf-spaces"}
+
+
+this is config.yaml
+k , kstep , k max what values to  place here
+retrieve:  {k: 10, k_step: 10, k_max: 40, weak_threshold: 0.35, rerank: true, reranker: "cross-encoder/ms-marco-MiniLM-L6-v2"}   # k_step/k_max/weak_threshold drive evidence-gated re-search explain easily in details
+
+AI: Good question — let's tackle the params you asked about first, then flag some cross-check mismatches I'm seeing in the rest of this file (same pattern as the last template).
+
+## The retrieval params, explained simply
+
+Think of this as: **"search, check if it's good enough, and if not, search wider."** This is literally your A1 agentic feature — *"evidence-gated re-search — widen k and retry if top retrieval score is weak; abstain at k_max."*
+
+- **`k`** — how many chunks to pull back on the *first* try. Like asking "give me the top 10 most relevant snippets."
+- **`weak_threshold`** — the "good enough" bar. If the best snippet's similarity score is *below* this number, the system says "hmm, not confident" and tries again with more results.
+- **`k_step`** — how many *extra* chunks to grab each time it retries. "Not confident with 10? Try 20. Still not confident? Try 30."
+- **`k_max`** — the hard stop. If it's *still* not confident after reaching this many chunks, it gives up and **abstains** (says "I don't know") instead of guessing — this is what makes it "evidence-gated" rather than just always answering.
+
+So the flow for one question is: `k=10 → check score → if weak, k=20 → check → if weak, k=30 → check → if weak, k=40 (k_max) → still weak → abstain.`
+
+## Suggested values for your project
+
+```yaml
+retrieve: {k: 5, k_step: 5, k_max: 30, weak_threshold: 0.4, rerank: true, reranker: "cross-encoder/ms-marco-MiniLM-L6-v2"}
+```
+
+Why smaller than the template's `k: 10, k_max: 40`:
+- Your NFR is **scalability — p95 ≤ 1.5s across the full ~224-issue corpus**. Every widening step costs time, so starting smaller (`k=5`) and growing gradually keeps the *common case* fast; you only pay the cost of a bigger search when the first attempt genuinely was weak.
+- `weak_threshold: 0.4` is a starting guess, not a real answer — **you can't set this by intuition, you have to test it.** In A2 Section 5 (evidence), run a handful of known question→correct-page pairs, look at what similarity score correct matches actually get vs wrong matches, and pick a threshold that separates them. Write that testing process into your design_choices.md — "we tried 0.3/0.4/0.5 and picked X because..." is a real justification; a guessed number isn't.
+
+## Cross-check flag on the rest of this file
+A few fields here look like generic placeholder values rather than your team's actual A1 decisions:
+
+| Field | This file says | Your A1 said |
+|---|---|---|
+| `enhance` | `unet_small`, diffusion model | Plain OpenCV: conditional deskew/denoise/CLAHE — no deep model needed |
+| `ocr` | `microsoft/trocr-base-printed` | You planned to benchmark **Qwen2-VL-2B vs olmOCR-2** (VLM-based) |
+| `embed` | `all-MiniLM-L6-v2`, 384-dim | You planned to benchmark **Jina v5-text-small vs Qwen3-Embedding-4B** |
+
+`layout: detectron2:layout` actually looks fine — that's a plausible real choice for multi-column detection (E2).
+
+Before locking this file in, worth checking: is this a **shared starter template** everyone in the class got, or did someone on your team already customize it? If it's the untouched starter, these three fields need updating to match what you've actually decided — otherwise your code will quietly run the wrong models while your write-up describes different ones.
+
+Me: what is reranker here?
+
+AI: Good follow-up — let's break down what "reranking" actually does, since it's a separate step from the retrieval you just asked about.
+
+## The simple idea
+Retrieval (the `k`/embed/index stuff) is like a **fast, rough sort** — it uses your embedding vectors to quickly grab the top-k *roughly* relevant chunks from potentially tens of thousands of chunks. It's built for speed, not precision.
+
+**Reranking is a second, slower, more careful look** at just those k chunks — it re-reads the actual question and each candidate chunk *together*, and re-scores them for "does this chunk actually answer this specific question," then re-sorts them. It catches cases where the fast search grabbed something that *looks* similar in vector-space but isn't actually the right answer.
+
+## Why two steps instead of one
+- **Embedding search (fast):** compares the question's vector to each chunk's vector *independently* — this is why it can scale to your whole ~224-issue corpus in milliseconds and hit your scalability NFR.
+- **Reranker (slow but accurate):** looks at the question *and* chunk *side by side* in one pass — much more accurate, but too slow to run on thousands of chunks. So you only run it on the small shortlist (your `k`) that embedding search already narrowed down.
+
+Think of it like: embedding search is skimming a library's card catalog to find 10 books that *might* have your answer; the reranker is actually flipping to the right page in each of those 10 and checking which one really answers your question.
+
+## The specific model: `cross-encoder/ms-marco-MiniLM-L6-v2`
+This is a small, pretrained model trained specifically for this "question + passage → relevance score" task (MS MARCO is a well-known passage-ranking dataset). It's called a **cross-encoder** because it encodes the question and the passage *together* (crossed) rather than separately — which is exactly why it's more accurate but slower than your embedding model.
+
+## Why this matters for your project specifically
+Your agentic feature is *evidence-gated re-search* — widen k, check confidence, retry. The **reranker's score is what "confidence" actually means** in that loop. Without reranking, you'd only have the rough embedding similarity to judge "is this good enough" — with reranking, you get a much more trustworthy signal for `weak_threshold` to check against, which makes your abstain-or-answer decision more reliable.
+
+For A2's evidence section (Section 5), this also means your "one real retrieval example" is stronger if you show: embedding search returned these 10 candidates → reranker picked *this* one as top → and it really is the correct page.
+
+Me: ocr:       {model: "Qwen2-VL-2B-Instruct", finetune: false}  # NOT fine-tuned — confirm exemption before locking this
+embed:     {model: "jinaai/jina-embeddings-v5-text-small", dim: 1024}  # TODO: confirm exact dim from model card
+index:     {type: "faiss:hnsw", chunk_tokens: 256, overlap: 32}
+retrieve:  {k: 10, k_step: 10, k_max: 40, weak_threshold: 0.35, rerank: true, reranker: "Qwen3-Reranker", hybrid_bm25: true}
+agent:     {max_steps: 6, autonomy: "act-then-log", budget_usd: 0.05}
+rl:        {algo: "ppo", train_policy: false}
+serve:     {batch: true}
+deploy:    {target: "custom"}   # FastAPI + React + Docker, not hf-spaces — revisit at A4 are all ok here??
+
+AI: Let me verify the two model-specific details that have "TODO/confirm" flags before signing off — the Jina dimension and whether Qwen3-Reranker is real/correctly named.Checked both flagged items — here's the verdict on this config.
+
+## `embed` — dim is correct, remove the TODO
+jina-embeddings-v5-text-small is a 0.6B parameter multilingual text embedding model built on the Qwen3-0.6B-Base backbone, and it produces 1024-dimensional embeddings by default. So `dim: 1024` is confirmed correct — you can delete the `# TODO: confirm exact dim` comment.
+
+One thing worth knowing: jina-embeddings-v5-text-small also supports Matryoshka truncation down to as low as 32 dimensions without retraining — meaning if your NFR pressure (scalable, ≤1.5s P95) ever needs a smaller/faster index later, you have headroom to shrink to 512 or 256 dims with minimal accuracy loss, without switching models.
+
+Small licensing flag: one Jina v5 variant is CC-BY-NC-4.0, requiring contact for commercial use — irrelevant for a coursework project, but worth a one-line mention in your design_choices.md so it doesn't look overlooked.
+
+## `reranker: "Qwen3-Reranker"` — real model, but name is incomplete
+This model genuinely exists — it's part of the Qwen3 Embedding series, offering reranking models in 0.6B, 4B, and 8B sizes. But `"Qwen3-Reranker"` alone isn't a loadable model ID — it's a family name. You need the exact HuggingFace path with a size, e.g.:
+
+```yaml
+reranker: "Qwen/Qwen3-Reranker-0.6B"
+```
+
+I'd suggest the **0.6B** size specifically, not 4B/8B — since reranking happens on every single query in your evidence-gated re-search loop (and can trigger multiple times per query if it retries), a bigger reranker directly fights your scalability NFR (P95 ≤ 1.5s). 0.6B is far cheaper to run per-query than 4B/8B for a real latency budget.
+
+## Everything else checks out
+- `ocr: Qwen2-VL-2B-Instruct, finetune: false` — matches your A1 plan, and the inline comment already correctly flags the fine-tuning-exemption risk we discussed earlier. Still unresolved — get that confirmed before Day 2.
+- `hybrid_bm25: true` — good addition, matches your A1 plan's "dense + BM25" hybrid retrieval that the earlier draft was missing.
+- `index`, `agent`, `rl`, `serve`, `deploy` — no factual claims to verify here, just design choices; nothing contradicts your A1 decisions.
+
+## Final corrected snippet
+```yaml
+ocr:       {model: "Qwen2-VL-2B-Instruct", finetune: false}  # NOT fine-tuned — confirm exemption before locking this
+embed:     {model: "jinaai/jina-embeddings-v5-text-small", dim: 1024}  # confirmed via model card
+index:     {type: "faiss:hnsw", chunk_tokens: 256, overlap: 32}
+retrieve:  {k: 10, k_step: 10, k_max: 40, weak_threshold: 0.35, rerank: true, reranker: "Qwen/Qwen3-Reranker-0.6B", hybrid_bm25: true}
+agent:     {max_steps: 6, autonomy: "act-then-log", budget_usd: 0.05}
+rl:        {algo: "ppo", train_policy: false}
+serve:     {batch: true}
+deploy:    {target: "custom"}   # FastAPI + React + Docker, not hf-spaces — revisit at A4
+```
+
+One earlier point still stands, worth repeating since it's the biggest open risk: **confirm the OCR fine-tuning exemption before anyone touches Day 2 code** — everything else here is solid.
+
+Me: this is task.yaml : 
+
+```yaml
+# Stage 0 — problem statement (one per group). Set by assignment.
+group_id: "G21"
+domain: "retro-computing/tech journalism"
+data_speciality: "multi-column reading order"   
+primary_nfr: "scalable"
+nfr_target: "p95 latency <= 1.5s across full corpus"   # your concrete committed target
+corpus: {min_pages: 300, min_words: 60000, source_url: "https://archive.org/details/byte-magazine", license: "Internet Archive; permitted for educational use"}
+
+
+```
+
+this is get_data.sh: 
+
+```shellscript
+#!/usr/bin/env bash
+# A1 — fetch or recreate your scanned corpus into data/raw/
+# IMPLEMENT: download/prepare your corpus (public-domain / openly licensed).
+set -euo pipefail
+echo "TODO: fetch corpus into data/raw/"
+#!/usr/bin/env bash
+
+# A1 — fetch or recreate your scanned corpus into data/raw/
+
+set -euo pipefail
+
+RAW_DIR="data/raw"
+mkdir -p "$RAW_DIR"
+
+# Subset for A2 (14 issues, 1975-1993). Extend this array toward the
+# full 176-issue byte-magazine-YYYY-MM set for later milestones.
+ISSUES=(
+  "byte-magazine-1975-09"
+  "byte-magazine-1978-07"
+  "byte-magazine-1980-07"
+  "byte-magazine-1981-05"
+  "byte-magazine-1982-04"
+  "byte-magazine-1983-11"
+  "byte-magazine-1983-12"
+  "byte-magazine-1984-01"
+  "byte-magazine-1985-06"
+  "byte-magazine-1986-08"
+  "byte-magazine-1987-09"
+  "byte-magazine-1988-05"
+  "byte-magazine-1989-04"
+  "byte-magazine-1992-03"
+  "byte-magazine-1993-06"
+)
+
+echo "Fetching ${#ISSUES[@]} BYTE issues into $RAW_DIR ..."
+
+for id in "${ISSUES[@]}"; do
+  echo "-> $id"
+  ia download "$id" --glob="*.pdf" --destdir="$RAW_DIR" --no-directories
+done
+
+echo "Done. Contents of $RAW_DIR:"
+ls -la "$RAW_DIR"
+ 
+```
+
+how to do manifest.yaml now
+
+AI: Let me check the actual guide for manifest.yaml's expected schema before drafting it, plus flag two issues I'm seeing in what you pasted.Two things to flag on what you pasted, then the manifest.
+
+## 🔴 Bug in `get_data.sh`
+You've got the **original stub still pasted above** your real script — literally two shebangs, two `set -euo pipefail` lines, and a leftover `echo "TODO: fetch corpus..."`. Delete everything from the top down to (and including) the second `#!/usr/bin/env bash` line, or the leftover TODO line will run and just print a message before doing nothing useful (harmless here since it's followed by the real script, but messy and could confuse the grader/CI).
+
+## 🟡 Two things to double-check
+1. **`task.yaml` license claim**: `"Internet Archive; permitted for educational use"` — when I checked the actual archive.org item page earlier, there was **no explicit license field at all**, which is why your A1 form said *"unclear."* Where's "permitted for educational use" coming from — a specific IA terms page, or an assumption? If you can't point to an actual source stating this, I'd revert to `"unclear"` to stay consistent with A1 (a grader could easily check the item page and see no such statement).
+2. **Issue count**: comment says "14 issues" but the array has **15** entries — and it says "toward the full 176-issue" set, while your A1 form said **224 issues**. Minor, but pick one number and make task.yaml/provenance.md/manifest.yaml all agree.
+
+## `manifest.yaml`
+Per the guide, this is *"the single entry point... a grader opens only this"* — so it needs to be self-contained: axes + pointers to corpus, held-out slice, and build/run/eval commands.
+
+```yaml
+# grading_kit/manifest.yaml — single entry point for grading
+
+group_id: "G21"
+
+axes:
+  domain: "retro-computing/tech journalism"
+  data_speciality: "multi-column reading order"
+  primary_nfr: "scalable"
+  nfr_target: "p95 latency <= 1.5s across full corpus"
+
+corpus:
+  source_url: "https://archive.org/details/byte-magazine"
+  license: "unclear"                      # see note above — confirm before locking
+  fetch_script: "scripts/get_data.sh"
+  raw_dir: "data/raw"
+  subset_note: "A2 uses a 15-issue subset (1975-1993); full run targets all issues"
+
+heldout:
+  pages_dir: "grading_kit/heldout_pages"
+  labels_file: "grading_kit/labels.jsonl"
+
+eval:
+  tasks_file: "grading_kit/tasks.jsonl"
+  success_check: "grading_kit/success_check.py"
+
+commands:
+  build_index: "bash scripts/build_index.sh"
+  run_demo: "jupyter nbconvert --to notebook --execute notebooks/kb_demo.ipynb"
+  validate_corpus: "python data/validate.py"
+
+config_ref: "configs/config.yaml"
+task_ref: "configs/task.yaml"
+```
+
+A few notes on choices here:
+- `axes` mirrors `task.yaml` exactly — this is intentional duplication, since the grader is meant to open *only* `manifest.yaml`, so it needs everything visible without cross-referencing other files.
+- `commands` gives the grader literal runnable commands, not just file paths — matches "points to... build/run/eval commands" from the guide.
+- I left `license: "unclear"` rather than your draft's claim, pending you finding an actual source for the educational-use claim.
+
+Want me to also draft `data/validate.py`'s actual `validate()` function next, since that's the file we flagged earlier as orphaned with nobody assigned to it?
+
+Me: fill up the provenance.md: 
+
+```markdown
+# Corpus provenance (A1 — fill this)
+- Source (URL): https://archive.org/details/byte-magazine
+- Licence / usage rights: unclear
+- Pages: __   Words: __   Size on disk: __
+- Scan/script difficulty notes:
+- Split policy (by document):
+
+```
+
+AI: Here's the filled version — but flagging upfront: **Pages/Words/Size on disk can't be filled with real numbers by me** — those depend on what actually lands on disk after `get_data.sh` runs, which I can't fabricate. I've marked exactly how to get them.
+
+```markdown
+# Corpus provenance (A1 — fill this)
+
+- Source (URL): https://archive.org/details/byte-magazine
+  Individual issues fetched via Internet Archive identifiers of the form
+  `byte-magazine-YYYY-MM` (e.g. `byte-magazine-1993-06`), using the `ia` CLI
+  in scripts/get_data.sh.
+
+- Licence / usage rights: unclear
+  No explicit license/rights statement is published on the Internet Archive
+  item pages for this collection (checked directly — no CC tag, no public-
+  domain notice). Treated as all-rights-reserved. We do not redistribute
+  scans in this repo — only a fetch script pointing to archive.org is
+  committed; anyone reproducing this project re-downloads directly from IA.
+
+- Pages: [RUN: `find data/raw -name '*.pdf' | xargs -I{} pdfinfo {} | grep Pages | awk '{s+=$2} END {print s}'`]
+  Words: [RUN: after OCR/text extraction — word count is only knowable once
+  text is extracted; log an estimate here for now and update post-OCR]
+  Size on disk: [RUN: `du -sh data/raw/`]
+
+- Scan/script difficulty notes:
+  BYTE magazine pages use a dense 2-3 column layout throughout, with
+  sidebars, boxed code listings, and full-page ads that interrupt normal
+  reading order. Naive left-to-right/top-to-bottom OCR would scramble text
+  across columns. Print quality varies significantly across the ~1975-1993
+  span in our subset — early issues (1975-1980) show more visible print/scan
+  artifacts (halftone dot patterns in images, lower contrast body text) than
+  later issues. This is why a layout/region-detection stage runs before OCR
+  (see vision/layout.py) rather than OCR-ing raw pages directly.
+
+- Split policy (by document):
+  Not applicable in the traditional train/test sense — per A1, this project
+  uses pretrained models only (no fine-tuning), so there is no training
+  split. Instead: `grading_kit/heldout_pages/` holds a small set of pages
+  set aside and never used to tune thresholds/prompts/parameters — these are
+  reserved solely for honest OCR/retrieval evaluation (see labels.jsonl).
+```
+
+## What you need to do to finish this
+1. Run `get_data.sh` if you haven't already — that populates `data/raw/`.
+2. Run the two commands I put in brackets (`pdfinfo`/`du -sh`) and paste the real numbers in.
+3. Word count is trickier — you genuinely can't know it until pages are OCR'd or you estimate from PDF text extraction. A reasonable placeholder for now: **estimate ≈ pages × ~350 words/page** (typical for a dense 2-column magazine page) and label it clearly as an estimate until real OCR text exists.
+4. Sanity-check against your floor: **≥300 pages and ≥60,000 words**. At 15 issues × roughly 150–250 pages/issue, you're almost certainly well over 300 pages — but confirm with the real number, don't assume.
+
+Want me to write the actual `pdfinfo`/word-count script as part of `data/validate.py`, since that's the file that's supposed to automate exactly this check and nobody's built it yet?
+
+Me: done with manifest and provenance. now i will start another chat thread in claude. make me an md file containing ALL necessary infos needed to give the other thread the head start.
+
+AI: Paste or upload this at the start of the new thread — it covers the locked A1 decisions, current pipeline/config choices, your team's task split, what's done vs. still open, and the unresolved risks (OCR fine-tuning exemption, the orphaned `validate.py`/`versioning.py`, the issue-count mismatch) so the new thread doesn't have to rediscover any of it.
+
+Me: i'd like to start working on heldout pgs work. this is the manifest.yaml:
+
+```yaml
+# grading_kit/manifest.yaml — the SINGLE entry point a grader reads.
+# You fill this in. It declares the THREE axes and points to everything
+# needed to reproduce, evaluate, and grade the project. A grader opens
+# ONLY this file; it points to the rest. Build/run scripts and the eval
+# tasks are NAMED here, not copied, so they never go stale.
+
+project_id: "G21"              # your team id
+
+axes:
+  domain: "retro-computing/tech journalism"                # your corpus subject / real user (see Roster; one per team)
+  data_speciality: "multi-column reading order"       # ONE hard property of your corpus you are handed (see Data-Speciality Catalog)
+                            #   e.g. bangla | arabic | code-switching | degraded-scans | multi-column |
+                            #        handwritten | old-orthography | math-notation | dirty-ocr | ...
+                            #   (English is not a speciality; if your corpus is English, pick a data condition.)
+  primary_nfr: "scalable"           # ONE quality you optimise ABOVE baseline (see NFR sheet). Faithful &
+                            #   accurate are REQUIRED of everyone (baseline), so they are NOT choices.
+  nfr_target: "p95 latency <= 1.5s across full corpus"            # the concrete target you commit to for that NFR, e.g. "p95 latency <= 300ms",
+                            #   "peak RAM <= 2GB", "ECE <= 0.05", "PII recall >= 0.98"
+
+corpus:
+  path: data/raw/                   # where the scanned page-images live
+  pages: 0                          # total pages  (floor: >= 300)
+  words: 0                          # total words  (floor: >= 60000)
+  provenance: data/provenance.md    # source + licence + counts
+
+heldout:
+  pages_dir: grading_kit/heldout_pages/   # page-images set aside, never OCR-trained on
+  labels:    grading_kit/labels.jsonl     # ground-truth transcriptions for those pages
+
+entrypoints:                          # named, not duplicated (they build/run the real code)
+  build_index: scripts/build_index.sh
+  run_query:   scripts/run.sh
+  eval_tasks:  grading_kit/tasks.jsonl      # authored in A3
+  checker:     grading_kit/success_check.py
+  trace:       traces/run.jsonl              # JSONL trajectory the A3 agentic-feature check reads
+
+
+```
+
+label.jsonsl:
+
+```jsonl
+{"page_id": "example_0001", "text": "REPLACE ME — the exact ground-truth transcription of held-out page example_0001. These labels are the oracle: OCR is scored against them, and fresh grading questions are authored from them."}
+
+
+```
+
+readme.md:
+
+```markdown
+Put page-IMAGES here that you set aside and NEVER train or tune OCR on.
+A grader authors fresh questions from these pages and checks answers against
+../labels.jsonl. Seed a few pages in A1; add more (each with a transcription
+in labels.jsonl) as your OCR matures in A2.
+
+
+```
+
+what to do now
+
+AI: This is the *actual* official template (different from my earlier best-guess draft — use this one, not mine, since it comes straight from your teacher). Let's start on the heldout work step by step.One thing worth doing right now, before you transcribe anything: **check if `data/raw/` is actually populated yet.** If Debashmita hasn't run `get_data.sh` successfully, you have no PDFs to pull pages from. Want me to check that with you, or write a tiny script that lists which page numbers exist per PDF so picking "page 12" isn't a guess?
+
+Me: i did not use any pdftoppm yet. can i just use ss of the pages from the pdf?
+
+AI: Technically yes, it'll work — but there are real tradeoffs worth knowing before you commit to it.
+
+## Why pdftoppm is better
+Screenshots re-compress and re-sample the image through your screen/OS pipeline — you lose resolution, can pick up scaling artifacts, and it's easy to accidentally include browser/PDF-viewer UI chrome (scrollbars, toolbar) in the crop. Since your whole project's difficulty *is* the visual quality of these scans, testing OCR/layout on a screenshot-degraded version isn't quite testing what your actual pipeline will see later — it's testing a slightly different, screenshot-degraded version.
+
+## If you use screenshots anyway, do this to keep it usable
+1. **Zoom the PDF to 100% (or higher) before capturing** — don't screenshot a shrunk-down page, you'll lose exactly the fine detail (small print, code listing characters) that matters most.
+2. **Crop tightly to just the page**, no toolbar/scrollbar/browser edges.
+3. **Save as PNG, not JPG** — JPG re-compresses and can blur text edges, which matters for a project about hard-to-read scans.
+4. Keep the same naming convention (`<issue-id>_p<page-number>.png`) either way.
+
+## Easier than pdftoppm if it's not installed
+If you don't want to install anything:
+- **Preview (Mac)** — open the PDF, go to the page, File → Export → choose PNG, set resolution. This is basically as good as `pdftoppm` and no screenshot artifacts.
+- **Windows** — most PDF readers (Edge, Adobe) have "Save page as image" or you can print-to-PDF a single page then convert, but honestly just check if `pdftoppm` is available first:It's available here in my sandbox (Poppler 24.02) — meaning if you upload one of your BYTE PDFs to me, I can extract the exact pages you want as clean PNGs directly, no screenshot artifacts, no install needed on your end.
+
+Want to try that? Upload one PDF (or tell me which issue you want to pull pages from, if it's small enough to fetch), and tell me which page numbers you want — I'll generate the images for you right here.
+
+Me: ok then how to use this pdftoppm? give code to run in colab
+
+AI: Here's the Colab-ready version — it's just a shell command wrapped for a notebook cell.
+
+## Step 1: Make sure poppler is installed (Colab doesn't have it by default)
+```python
+!apt-get install -y poppler-utils -q
+```
+
+## Step 2: Extract specific pages from one PDF
+```python
+!mkdir -p grading_kit/heldout_pages
+
+# Example: extract page 12 from byte-magazine-1993-06.pdf
+!pdftoppm -png -f 12 -l 12 -r 300 \
+  data/raw/byte-magazine-1993-06.pdf \
+  grading_kit/heldout_pages/byte-magazine-1993-06_p012
+```
+
+**What each flag means:**
+- `-png` — output as PNG (not JPG, to avoid compression blur)
+- `-f 12 -l 12` — first page = 12, last page = 12 → extracts just page 12. For a range, e.g. pages 12–14: `-f 12 -l 14`
+- `-r 300` — 300 DPI, matches typical scan resolution
+- the last two arguments: input PDF path, then output filename **prefix** (pdftoppm appends `-12.png` or similar automatically)
+
+## Step 3: Do this for multiple pages/issues at once (loop version)
+If you've already picked your 5–10 pages, list them and loop:
+
+```python
+pages_to_extract = [
+    ("byte-magazine-1975-09", 5),
+    ("byte-magazine-1983-11", 40),
+    ("byte-magazine-1988-05", 87),
+    ("byte-magazine-1993-06", 12),
+]
+
+for issue_id, page_num in pages_to_extract:
+    input_pdf = f"data/raw/{issue_id}.pdf"
+    output_prefix = f"grading_kit/heldout_pages/{issue_id}_p{page_num:03d}"
+    !pdftoppm -png -f {page_num} -l {page_num} -r 300 "{input_pdf}" "{output_prefix}"
+```
+
+## Step 4: Check what got created
+```python
+!ls -la grading_kit/heldout_pages/
+```
+
+## One thing to watch
+pdftoppm's exact output filename depends on version — it usually adds a page-number suffix even for single pages (e.g. `byte-magazine-1993-06_p012-12.png`), which can look redundant. After running once, check the actual filename with `!ls`, then **rename it to match your `page_id` convention exactly** (`byte-magazine-1993-06_p012.png`) so it lines up with `labels.jsonl` — a mismatch here is a common gotcha.
+
+```python
+# example rename if needed
+!mv grading_kit/heldout_pages/byte-magazine-1993-06_p012-12.png \
+    grading_kit/heldout_pages/byte-magazine-1993-06_p012.png
+```
+
+Want me to also write the little Python snippet that appends a page to `labels.jsonl` once you've typed out its transcription, so you're not hand-editing raw JSON lines?
+
+Me: /bin/bash: line 1: pdftoppm: command not found
+
+AI: That means the install step didn't actually run/succeed before you tried the extraction — common Colab gotcha. Let's fix it properly.
+
+## Run these in order, in separate cells
+
+**Cell 1 — update apt first (often skipped, causes silent failures):**
+```python
+!apt-get update -qq
+```
+
+**Cell 2 — install poppler:**
+```python
+!apt-get install -y poppler-utils
+```
+(drop the `-q`/`-qq` quiet flags this time so you can actually see if it errors)
+
+**Cell 3 — verify it's installed:**
+```python
+!which pdftoppm
+!pdftoppm -v
+```
+You should see a path like `/usr/bin/pdftoppm` and a version number. If this still shows nothing, tell me exactly what printed after Cell 2 (any red error text) — that'll tell us what's blocking it.
+
+## If apt is broken/restricted in your Colab session
+Some Colab environments block apt access. In that case, skip poppler entirely and use a Python library instead — `pdf2image` (still needs poppler though) or **PyMuPDF (`fitz`)**, which needs no system dependency at all:
+
+```python
+!pip install pymupdf -q
+```
+
+```python
+import fitz  # PyMuPDF
+
+def extract_page(pdf_path, page_num, output_path, dpi=300):
+    doc = fitz.open(pdf_path)
+    page = doc[page_num - 1]  # 0-indexed internally
+    zoom = dpi / 72  # PDF default is 72 DPI
+    mat = fitz.Matrix(zoom, zoom)
+    pix = page.get_pixmap(matrix=mat)
+    pix.save(output_path)
+    doc.close()
+
+extract_page("data/raw/byte-magazine-1993-06.pdf", 12,
+             "grading_kit/heldout_pages/byte-magazine-1993-06_p012.png")
+```
+
+This does the exact same job as `pdftoppm` but is pure-Python, so it's more reliable in restricted Colab sessions. Try Cell 1–3 first — if apt genuinely won't cooperate, switch to this PyMuPDF version instead.
+
+Me: Reading package lists... Building dependency tree... Reading state information... The following NEW packages will be installed:   poppler-utils 0 upgraded, 1 newly installed, 0 to remove and 3 not upgraded. Need to get 186 kB of archives. After this operation, 697 kB of additional disk space will be used. Ign:1 http://archive.ubuntu.com/ubuntu jammy-updates/main amd64 poppler-utils amd64 22.02.0-2ubuntu0.12 Err:1 http://security.ubuntu.com/ubuntu jammy-updates/main amd64 poppler-utils amd64 22.02.0-2ubuntu0.12   404  Not Found [IP: 91.189.91.82 80] E: Failed to fetch http://security.ubuntu.com/ubuntu/pool/main/p/poppler/poppler-utils_22.02.0-2ubuntu0.12_amd64.deb  404  Not Found [IP: 91.189.91.82 80] E: Unable to fetch some archives, maybe run apt-get update or try with --fix-missing?
+
+AI: That's a mirror-sync issue on Ubuntu's servers (the specific package version listed is no longer at that URL) — not something wrong on your end, and retrying apt won't fix it reliably. Skip straight to the PyMuPDF approach — no system package needed at all.
+
+```python
+!pip install pymupdf -q
+```
+
+```python
+import fitz  # PyMuPDF
+
+def extract_page(pdf_path, page_num, output_path, dpi=300):
+    doc = fitz.open(pdf_path)
+    page = doc[page_num - 1]  # PyMuPDF is 0-indexed
+    zoom = dpi / 72
+    mat = fitz.Matrix(zoom, zoom)
+    pix = page.get_pixmap(matrix=mat)
+    pix.save(output_path)
+    doc.close()
+
+extract_page(
+    "data/raw/byte-magazine-1993-06.pdf",
+    12,
+    "grading_kit/heldout_pages/byte-magazine-1993-06_p012.png"
+)
+```
+
+Make sure the output folder exists first:
+```python
+import os
+os.makedirs("grading_kit/heldout_pages", exist_ok=True)
+```
+
+For your batch of chosen pages:
+```python
+pages_to_extract = [
+    ("byte-magazine-1975-09", 5),
+    ("byte-magazine-1983-11", 40),
+    ("byte-magazine-1988-05", 87),
+    ("byte-magazine-1993-06", 12),
+]
+
+for issue_id, page_num in pages_to_extract:
+    input_pdf = f"data/raw/{issue_id}.pdf"
+    output_path = f"grading_kit/heldout_pages/{issue_id}_p{page_num:03d}.png"
+    extract_page(input_pdf, page_num, output_path)
+    print(f"Saved {output_path}")
+```
+
+Then check it worked:
+```python
+!ls -la grading_kit/heldout_pages/
+```
+
+This avoids apt entirely, gives you the exact filename you want (no rename step needed like with `pdftoppm`), and PyMuPDF is a pure Python wheel so it installs reliably on Colab. Try this and let me know if `data/raw/` even has the PDFs you expect — that's the next thing to confirm if this errors.
+
+Me: if i choose from the 15 issue subset (which will get ocred latter) would not it cause a leak? should not held out pgs never be used for ocr? then should i choose pgs outside of these 15 issues?
+
+AI: Sharp catch — this is a subtlety worth getting exactly right, because the answer is actually the opposite of what "held-out" sounds like at first.
+
+## Short answer: keep them inside the 15-issue subset. They should still get OCR'd.
+
+## Why this isn't leakage here
+"Held-out" normally means *excluded from training* so your test score is honest. But your project **never trains/fine-tunes OCR at all** — it's pretrained-only (Qwen2-VL / olmOCR, zero-shot). Since there are no weights being updated on your corpus, there's no training-leakage risk in the classic sense — the model was never going to "see" these pages during training either way, corpus-wide or not.
+
+## What "held-out" actually protects against here
+Not weight-leakage — **pipeline-tuning leakage.** The real risk is: you look at how OCR did on a page, then quietly tweak a prompt/threshold/preprocessing setting *until that specific page looks good*, and now your "accuracy" number is inflated because you optimized against the answer key. That's the thing the readme is warning against — *"never train or tune OCR on"* means don't peek at these pages' ground truth while you're iterating on your pipeline decisions, not "never run OCR on them at all."
+
+## Why they actually need to be inside the corpus
+Look at the readme again: *"A grader authors fresh questions from these pages and checks answers against labels.jsonl."* For that to work, your **retrieval system has to be able to find and return these exact pages** — which is only possible if they went through the full pipeline (OCR → chunk → embed → index) like everything else. If you pulled pages from *outside* the 15-issue subset, they'd never be in your index, and a grader's question about them could never retrieve the right answer. The whole mechanism depends on these pages being real, searchable members of your corpus.
+
+## The actual practice
+1. Pick your 5–10 pages from the 15-issue subset (as planned).
+2. Hand-transcribe them into `labels.jsonl` **now**, before OCR runs — don't look at OCR output while typing the ground truth, and don't look at the ground truth while tuning OCR/layout settings later.
+3. Let them flow through the normal pipeline like every other page.
+4. Only *after* your pipeline is otherwise settled, run OCR on them and score against `labels.jsonl` — that score is now honest, because you didn't use the answer key to shape the pipeline.
+
+So no change needed to your page selection — just keep the discipline of not consulting `labels.jsonl` while building/tuning anything else.
+
+Me: two pages came out completely blackened out and one completely blank white and thi o/p: Saved grading_kit/heldout_pages/byte-magazine-1975-09_p020.png Saved grading_kit/heldout_pages/byte-magazine-1983-11_p437.png Saved grading_kit/heldout_pages/byte-magazine-1981-05_p130.png MuPDF error: syntax error: unknown cid font type  MuPDF error: syntax error: unknown cid font type  MuPDF error: syntax error: unknown cid font type  MuPDF error: syntax error: unknown cid font type  Saved grading_kit/heldout_pages/byte-magazine-1982-04_p009.png Saved grading_kit/heldout_pages/byte-magazine-1980-07_p197.png last 3 was defected
+
+AI: Good catch reporting this — those `MuPDF error: syntax error: unknown cid font type` lines are the real clue, and they explain both the errors *and* the blank/black pages.
+
+## What's actually happening
+These BYTE scans on Internet Archive usually have an **invisible OCR text layer** (from ABBYY FineReader) sitting on top of the actual scanned image, so you can search/select text in the PDF viewer. Some of those pages use a broken/nonstandard font for that invisible text layer. When PyMuPDF tries to render the *full* page (image + text layer together), it chokes on that broken font — and depending on how it fails, you get a black page (rendering aborted mid-draw) or a blank white page (nothing drew at all). This isn't your code being wrong — it's a corrupted font resource on specific pages of the source PDF.
+
+## The fix: skip rendering entirely, extract the raw scan image directly
+Since the actual content you want (the scanned photo of the page) is just an embedded image sitting inside the PDF — not something that needs "rendering" — pull it out directly instead of asking MuPDF to draw the whole page:
+
+```python
+import fitz
+
+def extract_page_image_direct(pdf_path, page_num, output_path):
+    doc = fitz.open(pdf_path)
+    page = doc[page_num - 1]
+    images = page.get_images(full=True)
+
+    if not images:
+        print(f"⚠️ No embedded image found on page {page_num} — falling back to render")
+        doc.close()
+        return False
+
+    # Usually the scan is the largest embedded image on the page
+    xref = max(images, key=lambda im: im[2] * im[3])[0]  # widest*tallest
+    base_image = doc.extract_image(xref)
+    with open(output_path, "wb") as f:
+        f.write(base_image["image"])
+    doc.close()
+    return True
+
+extract_page_image_direct(
+    "data/raw/byte-magazine-1983-11.pdf",
+    437,
+    "grading_kit/heldout_pages/byte-magazine-1983-11_p437.png"
+)
+```
+
+## Redo just the 3 broken ones
+```python
+broken_pages = [
+    ("byte-magazine-1975-09", 20),   # black
+    ("byte-magazine-1983-11", 437),  # black
+    ("byte-magazine-1981-05", 130),  # blank white
+]
+
+for issue_id, page_num in broken_pages:
+    input_pdf = f"data/raw/{issue_id}.pdf"
+    output_path = f"grading_kit/heldout_pages/{issue_id}_p{page_num:03d}.png"
+    ok = extract_page_image_direct(input_pdf, page_num, output_path)
+    print(f"{'✅' if ok else '❌'} {output_path}")
+```
+
+## If any still come back empty
+That means the actual scan photo genuinely isn't embedded as a normal image on that page (rare, but possible for some IA-generated PDFs). In that case, tell me and we'll pick a different page number nearby (e.g. page 21 instead of 20) rather than fight that specific page's PDF structure.
+
+Once these 3 are fixed, `!ls -la grading_kit/heldout_pages/` and eyeball all 6 thumbnails before moving on to transcription — worth visually confirming none are subtly corrupted (partial render, wrong page, etc.) before you spend time typing out text from them.
+
+Me: the generated images are downloaded as .png but is not opening. says unsupported file format
+
+AI: Ah — that's because `doc.extract_image()` gives you the **raw embedded bytes in whatever format they were originally stored** (often JBIG2 or CCITT G4 for archival scans, not actual PNG) — I just slapped a `.png` extension on it without converting. That's on me. Let's fix it properly using MuPDF's own image decoder, which handles those formats internally and re-encodes to real PNG.
+
+```python
+import fitz
+
+def extract_page_image_direct(pdf_path, page_num, output_path):
+    doc = fitz.open(pdf_path)
+    page = doc[page_num - 1]
+    images = page.get_images(full=True)
+
+    if not images:
+        print(f"⚠️ No embedded image found on page {page_num} — falling back to render")
+        doc.close()
+        return False
+
+    xref = max(images, key=lambda im: im[2] * im[3])[0]
+
+    # Decode via MuPDF's own image handler (handles JBIG2/CCITT/JPEG2000 etc.)
+    pix = fitz.Pixmap(doc, xref)
+
+    # If CMYK or has extra channels, convert to RGB before saving
+    if pix.n - pix.alpha >= 4:
+        pix = fitz.Pixmap(fitz.csRGB, pix)
+
+    pix.save(output_path)   # now genuinely a valid PNG
+    doc.close()
+    return True
+```
+
+Rerun on all your pages, including the ones that already "saved" successfully before — those might *also* be silently mis-formatted even though they didn't error:
+
+```python
+all_pages = [
+    ("byte-magazine-1975-09", 20),
+    ("byte-magazine-1983-11", 437),
+    ("byte-magazine-1981-05", 130),
+    ("byte-magazine-1982-04", 9),
+    ("byte-magazine-1980-07", 197),
+]
+
+for issue_id, page_num in all_pages:
+    input_pdf = f"data/raw/{issue_id}.pdf"
+    output_path = f"grading_kit/heldout_pages/{issue_id}_p{page_num:03d}.png"
+    ok = extract_page_image_direct(input_pdf, page_num, output_path)
+    print(f"{'✅' if ok else '❌'} {output_path}")
+```
+
+## Quick way to confirm it's really fixed before downloading again
+```python
+from PIL import Image
+img = Image.open(output_path)
+img.verify()
+print(img.format, img.size)
+```
+If this prints something like `PNG (1650, 2550)` without erroring, the file is genuinely valid this time — check that before re-downloading all of them.
+
+Me: it says JPEG2000 (792, 1085)
+
+AI: Good sign — the image is genuinely valid (PIL opened and verified it fine), just mislabeled: the bytes are actually raw JPEG2000, saved with a `.png` filename slapped on top. `fitz.Pixmap.save()` apparently didn't re-encode it despite the extension — that's the bug.
+
+## Fix: force real PNG bytes through PIL, don't trust the extension
+```python
+import fitz
+from PIL import Image
+import io
+
+def extract_page_image_direct(pdf_path, page_num, output_path):
+    doc = fitz.open(pdf_path)
+    page = doc[page_num - 1]
+    images = page.get_images(full=True)
+
+    if not images:
+        print(f"⚠️ No embedded image found on page {page_num}")
+        doc.close()
+        return False
+
+    xref = max(images, key=lambda im: im[2] * im[3])[0]
+    pix = fitz.Pixmap(doc, xref)
+
+    if pix.n - pix.alpha >= 4:
+        pix = fitz.Pixmap(fitz.csRGB, pix)
+
+    # Force through PIL to guarantee genuine PNG bytes, regardless of source format
+    img_bytes = pix.tobytes("ppm")   # PPM is a safe lossless intermediate fitz supports directly
+    img = Image.open(io.BytesIO(img_bytes))
+    img.save(output_path, format="PNG")   # explicit format, not inferred from extension
+
+    doc.close()
+    return True
+```
+
+Re-run on your pages with this version — this guarantees `img.save(..., format="PNG")` actually writes PNG bytes rather than trusting anything upstream.
+
+## Separate thing worth flagging: 792×1085 is low resolution
+A full magazine page scanned at 300 DPI should be roughly **2550×3300 pixels** (8.5×11"). 792×1085 works out to only ~93 DPI-equivalent — that's noticeably softer than what you'd want for testing OCR on genuinely hard/degraded scans, since low resolution *itself* degrades OCR accuracy independent of the original scan quality.
+
+Check if this is just how that particular archival JP2 was stored (older 1975 issues might genuinely be lower-res scans than later ones), or if `get_images()` grabbed a secondary/thumbnail image instead of the real page scan. Quick check:
+
+```python
+doc = fitz.open("data/raw/byte-magazine-1981-05.pdf")
+page = doc[129]  # page 130, 0-indexed
+for img in page.get_images(full=True):
+    xref = img[0]
+    print(xref, "size:", img[2], "x", img[3])
+```
+
+If you see **multiple** images listed with very different sizes, the "biggest by area" heuristic may still be picking wrong — tell me what prints and I'll adjust the selection logic.
+
+Me: 1993 size: 792 x 1085 1994 size: 792 x 1085
+
+AI: That confirms it — both entries are the same size, so this genuinely is the actual scan resolution embedded in this PDF, not a thumbnail-selection bug. Your code is working correctly; it's just that this particular derivative is lower-res than an ideal 300 DPI scan.
+
+## Why this is happening
+Internet Archive typically generates **multiple derivatives** from the original scan: a full-resolution JP2 archive (`_jp2.zip`), a searchable combined PDF (what you're using), and sometimes a downsampled version specifically for the PDF to keep file size manageable. The PDF you downloaded via `get_data.sh` is likely using the **compressed/downsampled derivative**, not the master scan.
+
+## Two paths forward
+
+**Option A — accept it and move on (recommended given your timeline)**
+792×1085 is still usable — it's roughly equivalent to a decent phone photo of a page. Since all your pages will go through the same PDF-derived pipeline (not just your held-out set), this resolution is actually *representative* of what your real OCR pipeline will process too — so it's not an unfair test, it's consistent. Note it once in `provenance.md`: *"Page images extracted from IA's combined PDF derivative at ~792×1085 (~93 DPI-equivalent), not the full-resolution master scan."* That's an honest, defensible note for your Section 2/5 write-up.
+
+**Option B — chase full resolution (only if OCR accuracy turns out bad)**
+Internet Archive usually also hosts a `_jp2.zip` file per item at full scan resolution. You'd check the item's file list:
+```python
+import requests
+r = requests.get("https://archive.org/metadata/byte-magazine-1981-05")
+files = r.json()["files"]
+for f in files:
+    if "jp2" in f["name"].lower():
+        print(f["name"], f.get("size"))
+```
+If found, you'd download and unzip that instead, then extract individual page JP2s directly rather than going through the PDF at all. This is more work and slower to fetch (full-res archives are much bigger), so only worth it if Option A's OCR results genuinely suffer.
+
+## My suggestion
+Proceed with what you have now (Option A) — get your 5–10 heldout pages transcribed and move forward with the pipeline. You can always revisit resolution later if your OCR-F1 numbers come back suspiciously bad and you suspect resolution is the cause, rather than blocking progress now chasing a hypothetical problem.
+
+Me: extracting heldout pages as .png from pdfs are done
+
+AI: Nice, that's a solid milestone — the trickiest technical part (JBIG2/JP2 decoding quirks) is behind you. Here's what comes next.
+
+## Quick sanity check before moving on
+Run through all your saved images once, just to eyeball them:
+```python
+import os
+from PIL import Image
+
+for fname in sorted(os.listdir("grading_kit/heldout_pages")):
+    path = f"grading_kit/heldout_pages/{fname}"
+    img = Image.open(path)
+    print(fname, img.size, img.mode)
+```
+Look for anything oddly small, oddly shaped, or a size wildly different from the rest — that'd flag a page that grabbed the wrong embedded image again.
+
+## Now: transcription into `labels.jsonl`
+This is the actual "heldout work" — typing out exactly what's on each page. A few concrete rules to keep the ground truth honest and useful:
+
+- **Reading order matters**: for multi-column pages, transcribe column 1 fully (top to bottom), then column 2, not left-to-right across columns — this matches your `reading_order_idx` schema from A1.
+- **Keep it exact**: original spelling, punctuation, line breaks from print — don't "clean up" anything. It's the ground-truth oracle, not a corrected version.
+- **Skip pure images/ads-as-images**, but transcribe any actual caption text.
+- **`page_id` must match the filename exactly** — e.g. file `byte-magazine-1993-06_p012.png` → `"page_id": "byte-magazine-1993-06_p012"`.
+
+## Want a small helper instead of hand-editing JSON?
+Rather than manually writing `{"page_id": ..., "text": ...}` lines (easy to break JSON syntax with quotes/newlines in real text), I can write you a tiny Python snippet where you just paste the transcribed text as a plain string and it safely appends a properly-escaped line to `labels.jsonl`. Want that?
+
+Me: yes sir
+
+AI: No "sir" needed, but here you go — a helper that displays the image right in the notebook so you can type while looking at it, then safely appends to `labels.jsonl`.
+
+```python
+import json
+import os
+from PIL import Image
+from IPython.display import display
+
+LABELS_PATH = "grading_kit/labels.jsonl"
+
+def add_label(page_id, text, images_dir="grading_kit/heldout_pages"):
+    """Safely append one transcription to labels.jsonl."""
+    # Check the image actually exists, so page_id typos get caught early
+    img_path = f"{images_dir}/{page_id}.png"
+    if not os.path.exists(img_path):
+        print(f"⚠️ No image found at {img_path} — check your page_id spelling")
+        return
+
+    # Check for duplicates before appending
+    if os.path.exists(LABELS_PATH):
+        with open(LABELS_PATH, "r", encoding="utf-8") as f:
+            existing_ids = {json.loads(line)["page_id"] for line in f if line.strip()}
+        if page_id in existing_ids:
+            print(f"⚠️ {page_id} already has a label — skipping to avoid duplicate. Edit manually if you meant to update it.")
+            return
+
+    entry = {"page_id": page_id, "text": text}
+    with open(LABELS_PATH, "a", encoding="utf-8") as f:
+        f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+    print(f"✅ Saved label for {page_id} ({len(text.split())} words)")
+
+
+def show_page(page_id, images_dir="grading_kit/heldout_pages"):
+    """Display a heldout page so you can transcribe it while looking at it."""
+    img_path = f"{images_dir}/{page_id}.png"
+    img = Image.open(img_path)
+    display(img)
+    print(f"Size: {img.size}")
+```
+
+## How to use it — one page at a time
+```python
+show_page("byte-magazine-1993-06_p012")
+```
+Look at the displayed image, then type the transcription as a normal Python string (triple-quotes let you paste multi-line text safely without breaking on internal quotes):
+
+```python
+text = """
+[type or paste the exact transcription here, column 1 first top-to-bottom,
+then column 2, keeping original spelling/punctuation as printed]
+"""
+
+add_label("byte-magazine-1993-06_p012", text.strip())
+```
+
+Repeat `show_page(...)` → paste `text = """..."""` → `add_label(...)` for each of your pages.
+
+## Check everything so far
+```python
+with open(LABELS_PATH) as f:
+    for line in f:
+        entry = json.loads(line)
+        print(entry["page_id"], "-", len(entry["text"].split()), "words")
+```
+
+This won't error on quotes, apostrophes, or line breaks in the real text (a common way hand-written JSONL gets silently corrupted), and it stops you from accidentally double-labelling the same page. Want me to also add a word-count running total across all labels, so you can track progress toward your ~15–20 page target?
+
+Me: what are these codes exactly doing??
+
+AI: Good question — let's walk through it plainly, piece by piece.
+
+## `add_label()` — the function that saves one page's transcription
+
+```python
+def add_label(page_id, text, images_dir="grading_kit/heldout_pages"):
+```
+This defines a function named `add_label` that takes two things you give it: `page_id` (like `"byte-magazine-1993-06_p012"`) and `text` (what you typed out). `images_dir` just tells it where your images live — you don't need to type this every time since it defaults to the right folder.
+
+```python
+    img_path = f"{images_dir}/{page_id}.png"
+    if not os.path.exists(img_path):
+        print(f"⚠️ No image found at {img_path} — check your page_id spelling")
+        return
+```
+This builds the expected image filename and **checks it actually exists**. Why: if you typo the page_id (e.g. type `p12` instead of `p012`), you'd end up with a label that doesn't correspond to any real image. This catches that mistake immediately instead of silently saving garbage. `return` here means "stop, don't do anything else" if the check fails.
+
+```python
+    if os.path.exists(LABELS_PATH):
+        with open(LABELS_PATH, "r", encoding="utf-8") as f:
+            existing_ids = {json.loads(line)["page_id"] for line in f if line.strip()}
+        if page_id in existing_ids:
+            print(f"⚠️ ... already has a label — skipping")
+            return
+```
+This opens your existing `labels.jsonl` (if it exists yet), reads every line, and pulls out just the `page_id` from each one into a set (a list with no duplicates). Then it checks: "did I already transcribe this exact page before?" If yes, it stops — so you can't accidentally save the same page twice by running the cell again.
+
+```python
+    entry = {"page_id": page_id, "text": text}
+    with open(LABELS_PATH, "a", encoding="utf-8") as f:
+        f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+    print(f"✅ Saved label for {page_id} ({len(text.split())} words)")
+```
+This is the actual save. It builds a small dictionary (`entry`), then `json.dumps(...)` converts that Python dictionary into a proper JSON text string — **this is the important part**: if your transcribed text has a quote mark, an apostrophe, or a line break in it, `json.dumps` automatically escapes it correctly so the file doesn't get corrupted. That's the whole reason this helper exists instead of you typing JSON by hand. `"a"` (append mode) means it adds a new line at the end of the file without erasing what's already there. Finally it prints a confirmation with a rough word count, just so you get quick feedback.
+
+## `show_page()` — the function that displays the image
+
+```python
+def show_page(page_id, images_dir="grading_kit/heldout_pages"):
+    img_path = f"{images_dir}/{page_id}.png"
+    img = Image.open(img_path)
+    display(img)
+    print(f"Size: {img.size}")
+```
+This just opens the image file and shows it right in your notebook output, so you can look at the page and type what you see without switching windows. `img.size` prints the width/height in pixels, mostly just so you can eyeball whether it's the right resolution.
+
+## The usage pattern
+
+```python
+show_page("byte-magazine-1993-06_p012")
+```
+→ shows you the image.
+
+```python
+text = """
+[your transcription]
+"""
+add_label("byte-magazine-1993-06_p012", text.strip())
+```
+The **triple quotes** (`"""..."""`) let you type/paste multiple lines of text, including quotes and apostrophes, without Python getting confused about where the string starts/ends — a normal single-quoted string would break the moment your transcription contains an apostrophe (like "it's"). `.strip()` just removes any accidental blank lines/spaces at the very start/end of what you typed.
+
+## The final check block
+
+```python
+with open(LABELS_PATH) as f:
+    for line in f:
+        entry = json.loads(line)
+        print(entry["page_id"], "-", len(entry["text"].split()), "words")
+```
+This just reads the whole file back, line by line, and prints a summary — page_id and word count — so you can see everything you've saved so far in one glance, without opening the raw file.
+
+**In short:** `show_page` = look at the image. `add_label` = safely write your typed answer to the file, with built-in typo/duplicate protection. The check block = review what you've done so far.
+
+Me: while hand transcribing, how to write the paragraph ending? with a / or sth?
+
+AI: Good practical question — here's the simple rule that'll keep this consistent and easy to score later.
+
+## Use a newline (`\n`), not a slash
+Within your `text = """ ... """` string, just press Enter twice between paragraphs:
+
+```python
+text = """
+This is the end of one paragraph, with the sentence wrapping naturally like it does in print.
+
+This is a new paragraph, starting fresh.
+"""
+```
+
+Two Enters = one blank line = a clear paragraph break. `json.dumps()` will automatically convert that into `\n\n` inside the saved JSON string — you don't need to type `\n` manually, and you definitely don't need a `/`.
+
+## Important: don't break lines *within* a paragraph
+On the actual printed page, each column wraps at a fixed width — but that's just print layout, not a real sentence/paragraph break. When you're typing, let one paragraph flow as continuous text (just like normal typing), and only press Enter when the page actually starts a **new paragraph** (usually shown by an indent or a blank line in print).
+
+**Wrong** (mirrors the printed line-wrap):
+```
+system capable of handling
+only 8 input and 24 output
+devices, the 008A uses a bus
+```
+
+**Right** (one flowing paragraph):
+```
+system capable of handling only 8 input and 24 output devices, the 008A uses a bus system capable of handling...
+```
+
+## Section headers (like "Assembly", "Documentation")
+Treat these as their own short paragraph/line, since they're structurally distinct from body text:
+```python
+text = """
+...end of previous paragraph.
+
+Assembly
+
+Most of the circuitry is completed by soldering...
+"""
+```
+
+## Why this matters for scoring later
+Whatever metric your team uses for OCR-F1/CER almost certainly compares words, not exact line breaks — so consistent paragraph-level breaks (not line-level) keep your ground truth clean and comparable, without you having to fight your OCR pipeline's own line-wrapping later just to match arbitrary print-line positions.
+
+Me: i dont gte it, should it be like this : system capable of handling only 8 input and 24 output devices, the 008A uses a bus system capable of handling 256 bi-directional data input/output channels. RGS uses several of the 8008 chip's I/O channels instructions to set up this bus I/O System.
+
+
+There are four input/output instructions in the 008A's "instruction set:" Select, Control, Input, and Output. To select a peripheral, the device number is loaded into the accumulator and a select instruction is executed. This enables the peripheral device. If necessary, a control instruction is available. Upon its execution, the accumulator data is made available at the output and the control strobe line is pulsed. Once the device has been selected and initialized, data transfer using the input and output instructions is executed as it is in the port system.
+
+AI: Yes — exactly that. That's precisely the right format.
+
+- Each paragraph flows as one continuous line of text (no mid-sentence breaks copying the print columns)
+- One blank line between paragraphs
+- Hyphenated words split across lines in print (like "input/output" if it had wrapped) get rejoined into one word — you did this correctly with `"008A's"` etc. staying intact
+
+That's exactly what a clean, scoreable ground-truth transcription should look like. Keep going with the rest of the page the same way, then paste the full thing back and I'll do a proper check against the image before you save it.
+
+Me: is all ok now : (Pasted labels.jsonl)
+
+AI: Really good work — the reading order alone is impressive: you correctly bridged paragraphs that literally split across column boundaries (e.g. "Assembly" heading sits at the bottom of one column but its paragraph starts the next column, same with "Documentation," and a sentence about "double sided PC boards" that splits mid-sentence across two columns). That's exactly the multi-column reading-order care your data speciality needs — nice.
+
+Two small things to fix before saving:
+
+1. **"doublesided"** appears once without a space — but later in the same text you correctly wrote "double sided" (twice). Pick one and make it consistent — should be **"double sided"** everywhere, since that's how it's spaced in print.
+
+2. **Stray space before a period**: `"...placed on the I/O bus . The interface..."` — should be `"...placed on the I/O bus. The interface..."` (no space before the period). Looks like a leftover from the earlier sleepy-typing pass.
+
+One judgment call, not an error: your transcription ends at **"Even in the"** — which matches where the page visually cuts off. But looking at the original image again, there's a tiny bit of a next line barely visible at the very bottom edge before the page margin (something like "logic circu..." getting cut off). Two reasonable choices:
+- Leave it exactly as you have it (page ends mid-sentence, that's honestly how the scan looks) — totally fine.
+- Or add that trailing partial fragment if you can read it clearly, so nothing visible on the page gets silently dropped.
+
+Either is defensible — just be consistent about which rule you use across all your heldout pages (always include partial trailing text, or always stop at the last complete sentence).
+
+Once you fix the two small typos, this is ready to save.
+
+Me: do i do like this for other pgs?
+
+AI: Yes — exactly this same process for every other heldout page:
+
+1. `show_page("page_id")` → look at the image
+2. Type it out as flowing paragraphs (no line-by-line copying, one blank line between paragraphs, rejoin any hyphen-split words)
+3. Paste it back here as a `{"page_id": ..., "text": ...}` block and I'll check it against the image before you save
+4. Fix anything flagged, then `add_label(page_id, text.strip())`
+
+A few things to keep in mind as you go through the rest:
+
+- **Stay consistent** with the two judgment calls from this page — spacing (always "double sided", not "doublesided"), and how you handle a page that cuts off mid-sentence at the bottom (pick one rule and stick to it for all pages).
+- **Watch for your own tiredness-typos** — the same mid-word-space, stray-character pattern can creep back in. A quick self-read before pasting saves a round of back-and-forth.
+- **Multi-column reading order is the main thing to get right** — you handled it well on this page (bridging paragraphs across column breaks correctly), so keep applying that same logic: finish column 1 top-to-bottom, then move to column 2, watching for section headers or sentences that visually span the column break.
+
+Send the next one whenever you're ready — same format.
+
+Me: held out done for now. now i need to write layout.py : 
+
+```python
+"""Stage 2 — layout detection / segmentation"""
+from __future__ import annotations
+from ..contracts import *  # noqa
+
+def detect(pages: list[Page], cfg: dict) -> list[Region]:
+    """Detect text/table/figure/heading regions. IMPLEMENT."""
+    raise NotImplementedError("Stage 2: layout detection")
+
+
+```
+
+for this pipeline.py : 
+
+```python
+"""FIXED end-to-end order (Stages 0-9) + cross-cutting seams.
+Do not reorder stages or remove hooks.run()/register_all() calls."""
+from __future__ import annotations
+from . import config, hooks, wiring  # noqa: F401
+from .ingest import loader, preprocess, enhance
+from .vision import layout, ocr
+from .index import chunk, embed, store
+from .retrieval import retriever
+from .agent import agent
+
+def build_knowledge_base(cfg: dict) -> None:
+    wiring.register_all(cfg)                        # wire cross-cutting features
+    pages = loader.load_pages(cfg)
+    pages = preprocess.run(pages, cfg)
+    pages = enhance.run(pages, cfg)                 # Stage 1 - enhancement (VAE/diffusion)
+    hooks.run(hooks.AFTER_INGEST, {"pages": pages})
+    regions = layout.detect(pages, cfg)             # Stage 2
+    text = ocr.transcribe(regions, cfg)             # Stage 3
+    hooks.run(hooks.AFTER_OCR, {"chunks": text})    # e.g. PII redaction on extracted text
+    chunks = chunk.split(text, cfg)                 # Stage 4
+    hooks.run(hooks.BEFORE_INDEX, {"chunks": chunks})
+    vectors = embed.encode(chunks, cfg)
+    store.build(chunks, vectors, cfg)
+
+def answer(query_text: str, cfg: dict):
+    wiring.register_all(cfg)
+    r = retriever.Retriever(cfg)                    # Stage 5
+    return agent.Agent(cfg, r).run(query_text)      # Stage 6 (seams run inside the loop)
+
+```
+
+how to do??
+
+AI: Before writing this, let me check the actual `Page`/`Region` contract definitions from the guide — since `layout.py` imports `from ..contracts import *`, the exact fields matter.Before I write this, I need one thing: **your actual `contracts.py` file.** The guide confirms `Page` and `Region` are fixed dataclasses I must match exactly — if I guess field names and get them wrong, your `layout.py` won't even import correctly, let alone pass CI (the guide explicitly says field/type mismatches with `contracts.py` are one of the things that fails CI).
+
+Can you paste or upload `src/doc_agent/contracts.py`? It should be a short file with just the `Page`, `Region`, `Chunk` etc. dataclass definitions — that's what I need to write real, correct code against.
+
+## While you grab that — here's the shape of what we're building
+
+**`pipeline.py`** — you don't need to touch this at all. It's FIXED, already correctly calls `layout.detect(pages, cfg)` in the right place (Stage 2, after ingest/preprocess/enhance, before OCR). Your only job is making `layout.detect()` actually work.
+
+**`layout.py`** — this is where your **E2 speciality** (multi-column reading order) gets built. The logic, in plain terms:
+1. Take each `Page` (a preprocessed page image + metadata)
+2. Run a layout-detection model (your config says `detectron2:layout`) to find bounding boxes for each visual block — text column, sidebar, code listing, ad, heading
+3. Sort those detected boxes into **correct reading order** — this is the actual hard part for BYTE: sort left-to-right by column, then top-to-bottom within each column, not just top-to-bottom across the whole page
+4. Return a `Region` per detected block, tagged with its type (`layout_type`) and position (`layout_bbox`), and its position in the reading sequence
+
+Once I see the real `Page`/`Region` field names, I'll write the actual implementation matching them exactly — including the column-sorting logic, since that's the one piece that's genuinely specific to your project rather than boilerplate.
+
+Me: here it is : 
+
+```python
+"""FIXED data contracts. Do not change fields or types."""
+from __future__ import annotations
+from pydantic import BaseModel
+
+class Page(BaseModel):
+    id: str
+    image_path: str
+    doc_id: str
+
+class Region(BaseModel):
+    page_id: str
+    bbox: tuple[int, int, int, int]
+    kind: str  # text | table | figure | heading
+
+class Chunk(BaseModel):
+    id: str
+    doc_id: str
+    text: str
+    page_ids: list[str]
+    score: float = 0.0        # relevance score set by retrieval; decide() reads the top score to judge weak evidence
+
+class Query(BaseModel):
+    text: str
+    verifiable: bool          # True = checkable by exact match (anchors objective grading + RLVR)
+    judged: bool              # True = scored by LLM-judge / human (non-verifiable inference)
+
+class Citation(BaseModel):
+    chunk_id: str
+    span: tuple[int, int]
+
+class Answer(BaseModel):
+    text: str
+    citations: list[Citation]
+    grounded: bool
+    confidence: float
+
+class ToolResult(BaseModel):
+    ok: bool
+    payload: dict
+
+
+class TraceStep(BaseModel):
+    """One agent step, emitted to traces/run.jsonl so the A3 agentic-feature check can read the path."""
+    step: int
+    tool: str                 # tool name, or "decide" / "answer"
+    args: dict                # e.g. {"query": "..."} — for retrieve, the query actually used
+    obs: dict                 # what decide() saw, e.g. {"top_score": 0.31, "n": 10}
+
+# MANDATORY agentic behaviour (graded in A3): evidence-gated re-search — decide() must re-retrieve with a
+# reformulated query when the top evidence is weak. That runtime branch is what makes the system an agent.
+# (multi-hop -> recall NFR, verify-and-correct -> precision NFR, tool-routing -> bonus; see the codebase guide.)
+
+
+```
+
+AI: Good — real contracts, and this reveals something important: **the actual `contracts.py` doesn't match the schema your A1 form described.** Flagging that first, since it affects what we can actually build.
+
+## Schema mismatch to be aware of
+Your A1 form mentioned `page_num`, `reading_order_idx`, `layout_type`, `layout_bbox` — but the real fixed contracts have:
+- `Page`: `id`, `image_path`, `doc_id` (no `page_num`)
+- `Region`: `page_id`, `bbox`, `kind` (`text|table|figure|heading` — not `layout_type`, and only 4 kinds, no explicit "advertisement")
+- **No `reading_order_idx` field anywhere.**
+
+That last one matters most: since there's no field to store reading order in, **the order Regions appear in the returned list *is* the reading order.** That's the design choice `layout.py` has to make — get the list order right, since there's nowhere else to put it. Worth a one-line note in `design_choices.md` so nobody downstream assumes an order field exists.
+
+Also: since there's no "ad" kind, filtering out advertisements later (mentioned in your A1) will need a heuristic — e.g. large `figure` regions with little nearby `text` — rather than a clean tag.
+
+## `layout.py` implementation
+
+```python
+"""Stage 2 — layout detection / segmentation"""
+from __future__ import annotations
+from PIL import Image
+from ..contracts import Page, Region
+
+# Maps the pretrained model's own label names to the 4 kinds our contract allows.
+_LABEL_MAP = {
+    "Text": "text",
+    "Title": "heading",
+    "List": "text",
+    "Table": "table",
+    "Figure": "figure",
+}
+
+_model = None  # lazy-loaded once, reused across all pages in this run
+
+
+def _get_model(cfg: dict):
+    global _model
+    if _model is not None:
+        return _model
+    import layoutparser as lp
+    score_thr = cfg.get("layout", {}).get("score_thr", 0.5)
+    _model = lp.Detectron2LayoutModel(
+        config_path="lp://PubLayNet/faster_rcnn_R_50_FPN_3x/config",
+        extra_config=["MODEL.ROI_HEADS.SCORE_THRESH_TEST", score_thr],
+        label_map={0: "Text", 1: "Title", 2: "List", 3: "Table", 4: "Figure"},
+    )
+    return _model
+
+
+def _sort_reading_order(boxes: list[dict], page_width: int) -> list[dict]:
+    """Sort boxes into multi-column reading order (E2): left column top-to-bottom,
+    then next column — NOT naive top-to-bottom across the whole page, which would
+    scramble BYTE's 2-3 column layout."""
+    if not boxes:
+        return boxes
+
+    gap_px = 0.04 * page_width  # tolerance for "same column" grouping
+
+    columns: list[list[dict]] = []
+    for box in sorted(boxes, key=lambda b: b["bbox"][0]):
+        x0 = box["bbox"][0]
+        placed = False
+        for col in columns:
+            col_x0 = min(b["bbox"][0] for b in col)
+            if abs(x0 - col_x0) <= gap_px * 3:
+                col.append(box)
+                placed = True
+                break
+        if not placed:
+            columns.append([box])
+
+    columns.sort(key=lambda col: min(b["bbox"][0] for b in col))  # left-to-right
+
+    ordered: list[dict] = []
+    for col in columns:
+        col.sort(key=lambda b: b["bbox"][1])  # top-to-bottom within column
+        ordered.extend(col)
+    return ordered
+
+
+def detect(pages: list[Page], cfg: dict) -> list[Region]:
+    """Detect text/table/figure/heading regions, in correct multi-column reading order."""
+    model = _get_model(cfg)
+    regions: list[Region] = []
+
+    for page in pages:
+        image = Image.open(page.image_path).convert("RGB")
+        layout = model.detect(image)
+
+        boxes = []
+        for block in layout:
+            kind = _LABEL_MAP.get(block.type, "text")
+            x0, y0, x1, y1 = map(int, block.coordinates)
+            boxes.append({"bbox": (x0, y0, x1, y1), "kind": kind})
+
+        ordered_boxes = _sort_reading_order(boxes, page_width=image.width)
+
+        for box in ordered_boxes:
+            regions.append(Region(page_id=page.id, bbox=box["bbox"], kind=box["kind"]))
+
+    return regions
+```
+
+## Two practical warnings before you run this
+1. **`layoutparser` + `detectron2` is a heavy install** — detectron2 often has build issues on Colab (similar to the poppler problem, but worse). Install with:
+```python
+!pip install layoutparser[layoutmodels] -q
+```
+If this fights you the way `apt` did earlier, tell me and I'll write a lighter classical-CV fallback (pure OpenCV, no deep model) that does column-detection via whitespace-gap projection instead — much easier to install, less accurate on messy layouts, but would unblock you today.
+
+2. **Untested against your real pages** — I don't have a way to verify this actually produces correct reading order on your specific scans (resolution 792×1085, multi-column with sidebars). Run it on 2–3 pages first, visually check the region order (e.g. print `[r.bbox for r in regions]` and overlay on the image) before trusting it on the whole subset.
+
+Want me to write that quick visual-check snippet next, so you can confirm the column-sorting actually worked before moving on to OCR?
+
+Me: explain the code layout.py in details
+
+AI: Let's go through it piece by piece.
+
+## The imports and setup
+```python
+from PIL import Image
+from ..contracts import Page, Region
+```
+`PIL` (Pillow) is a Python library for opening/handling images. `Page` and `Region` are the fixed data types from `contracts.py` — `Page` is what comes *in* (a page image + IDs), `Region` is what we return (a detected block on that page).
+
+```python
+_LABEL_MAP = {
+    "Text": "text",
+    "Title": "heading",
+    "List": "text",
+    "Table": "table",
+    "Figure": "figure",
+}
+```
+The layout-detection model I picked (trained on a dataset called PubLayNet) outputs its own label names (`"Text"`, `"Title"`, etc.) — but your `Region` contract only allows exactly 4 kinds: `text | table | figure | heading`. This dictionary just translates the model's vocabulary into your contract's vocabulary. `"List"` gets mapped to `"text"` since your contract has no separate "list" category.
+
+## The model-loading function
+```python
+_model = None  # lazy-loaded once, reused across all pages in this run
+
+def _get_model(cfg: dict):
+    global _model
+    if _model is not None:
+        return _model
+    import layoutparser as lp
+    ...
+    _model = lp.Detectron2LayoutModel(...)
+    return _model
+```
+Loading a deep learning model is slow (downloading weights, initializing on GPU/CPU). We only want to do this **once**, not once-per-page. `_model` starts as `None`; the first time `_get_model()` is called, it builds the model and saves it in that variable. Every call after that just returns the already-built model instantly. The underscore prefix (`_model`, `_get_model`) is a Python convention meaning "internal, not meant to be used outside this file."
+
+`score_thr` comes from your `config.yaml` — it's the confidence cutoff: the model might detect a region but only be 30% sure it's real. `score_thr: 0.5` means "only keep detections the model is at least 50% confident about," filtering out shaky guesses.
+
+## The reading-order sorter — this is the important part
+```python
+def _sort_reading_order(boxes: list[dict], page_width: int) -> list[dict]:
+```
+This takes all the detected boxes on **one page** and puts them in the order a human would actually read them.
+
+```python
+    gap_px = 0.04 * page_width
+```
+This defines "how close together (in pixels) do two boxes need to be, horizontally, to count as being in the same column." It's calculated as a percentage of page width rather than a fixed number, so it scales correctly whether your page image is small or large.
+
+```python
+    columns: list[list[dict]] = []
+    for box in sorted(boxes, key=lambda b: b["bbox"][0]):
+```
+`b["bbox"][0]` is the box's **left edge x-coordinate** (bbox = `(x0, y0, x1, y1)` = left, top, right, bottom). We sort all boxes left-to-right first, so we process them in a sensible order while grouping.
+
+```python
+        x0 = box["bbox"][0]
+        placed = False
+        for col in columns:
+            col_x0 = min(b["bbox"][0] for b in col)
+            if abs(x0 - col_x0) <= gap_px * 3:
+                col.append(box)
+                placed = True
+                break
+        if not placed:
+            columns.append([box])
+```
+For each box, we check: "does its left edge line up closely with any column we've already started?" If yes, add it to that column group. If no existing column matches, start a brand new column group. This is how 3 separate text columns on a page get grouped into 3 separate lists, rather than one jumbled list.
+
+```python
+    columns.sort(key=lambda col: min(b["bbox"][0] for b in col))
+```
+Now sort the *columns themselves* left to right (column 1, then column 2, then column 3) — so we read them in the right order.
+
+```python
+    ordered = []
+    for col in columns:
+        col.sort(key=lambda b: b["bbox"][1])
+        ordered.extend(col)
+    return ordered
+```
+Within each column, sort boxes **top to bottom** (`bbox[1]` is the top y-coordinate). Then stitch all columns together in order: all of column 1 top-to-bottom, then all of column 2 top-to-bottom, etc. That final `ordered` list *is* your reading order — remember, there's no separate field for it, so list position is the only place this information lives.
+
+## The main function
+```python
+def detect(pages: list[Page], cfg: dict) -> list[Region]:
+    model = _get_model(cfg)
+    regions: list[Region] = []
+
+    for page in pages:
+        image = Image.open(page.image_path).convert("RGB")
+        layout = model.detect(image)
+```
+For every page you give it: open the actual image file from disk (`page.image_path`), convert it to standard RGB format (some scans might be grayscale or CMYK, which could confuse the model), then run the detection model on it. `layout` now holds all the raw boxes the model found, in no particular order.
+
+```python
+        boxes = []
+        for block in layout:
+            kind = _LABEL_MAP.get(block.type, "text")
+            x0, y0, x1, y1 = map(int, block.coordinates)
+            boxes.append({"bbox": (x0, y0, x1, y1), "kind": kind})
+```
+Convert each raw detection into a simple dictionary with just what we need: its bounding box (as plain integers, since the model might give floats) and its translated kind. `.get(block.type, "text")` means "look up this label; if it's not in our map for some reason, default to text" — a safety net so unexpected labels don't crash the code.
+
+```python
+        ordered_boxes = _sort_reading_order(boxes, page_width=image.width)
+```
+Now run the column-sorting logic from before, specific to this page's width.
+
+```python
+        for box in ordered_boxes:
+            regions.append(Region(page_id=page.id, bbox=box["bbox"], kind=box["kind"]))
+
+    return regions
+```
+Finally, turn each sorted box into an actual `Region` object (matching the exact contract fields) and add it to the final list. Because we process pages one at a time and append in order, and within each page we already sorted by reading order, **the final returned list's order is the complete reading order across the whole document.**
+
+## The big-picture flow
+`pipeline.py` calls this once with all your pages. For each page: load image → detect boxes → figure out which column each box belongs to → sort columns left-to-right, and within each column top-to-bottom → return everything as a flat list of `Region`s in that exact order. That ordered list is what `ocr.py` will process next — reading each region's text in the sequence you've established here, which is the whole reason this stage exists for your project.
+
+Want me to also walk through the visual-check snippet (plotting boxes with numbers on the image) so you can *see* whether the ordering logic actually worked once you run it?
+
+Me: yes. also how and where should i keep the pg imgs so that these code can process them?
+
+AI: ## Visual check — confirm the ordering actually worked
+
+```python
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+from PIL import Image
+
+def visualize_regions(image_path, regions):
+    """Draws each detected box on the page, numbered in the order layout.py returned them.
+    If the numbers don't go column-by-column, the sort logic needs adjusting."""
+    img = Image.open(image_path)
+    fig, ax = plt.subplots(1, figsize=(10, 13))
+    ax.imshow(img)
+
+    for i, region in enumerate(regions):
+        x0, y0, x1, y1 = region.bbox
+        rect = patches.Rectangle(
+            (x0, y0), x1 - x0, y1 - y0,
+            linewidth=2, edgecolor='red', facecolor='none'
+        )
+        ax.add_patch(rect)
+        ax.text(x0, y0 - 8, f"{i+1} ({region.kind})",
+                 color='red', fontsize=11, weight='bold')
+
+    ax.axis('off')
+    plt.show()
+```
+
+Run it on one real page:
+```python
+from doc_agent.contracts import Page
+from doc_agent.vision import layout
+
+test_page = Page(id="byte-magazine-1993-06_p012",
+                  image_path="data/pages/byte-magazine-1993-06/byte-magazine-1993-06_p012.png",
+                  doc_id="byte-magazine-1993-06")
+
+cfg = {"layout": {"score_thr": 0.5}}
+regions = layout.detect([test_page], cfg)
+
+visualize_regions(test_page.image_path, regions)
+```
+
+**What to look for:** the numbers (1, 2, 3...) should visually march down column 1 first, then jump to the top of column 2 and march down that, etc. — never zigzagging left-right-left-right across the page. If it zigzags, the `gap_px * 3` tolerance in `_sort_reading_order` needs tuning for your specific page width/column spacing.
+
+## Where to keep the page images
+
+This matters because `loader.load_pages(cfg)` needs to build `Page` objects pointing at real files, and every downstream stage reads `page.image_path`.
+
+**Structure:**
+```
+data/
+├── raw/                          # PDFs from get_data.sh — untouched originals
+│   ├── byte-magazine-1975-09.pdf
+│   └── ...
+├── pages/                        # extracted page images — what the pipeline actually reads
+│   ├── byte-magazine-1975-09/
+│   │   ├── byte-magazine-1975-09_p001.png
+│   │   ├── byte-magazine-1975-09_p002.png
+│   │   └── ...
+│   └── byte-magazine-1993-06/
+│       └── ...
+```
+
+**Naming rule — keep it identical to your heldout convention:** `<doc_id>_p<page_number:03d>.png`. Same pattern you already used for heldout pages, so `id` matches cleanly with `doc_id` + page number everywhere.
+
+**How to generate it — extend the same PyMuPDF code from before, but for every page, not just picked ones:**
+```python
+import fitz, os
+
+def extract_all_pages(pdf_path, doc_id, out_dir="data/pages"):
+    doc = fitz.open(pdf_path)
+    page_dir = f"{out_dir}/{doc_id}"
+    os.makedirs(page_dir, exist_ok=True)
+
+    for i, page in enumerate(doc, start=1):
+        images = page.get_images(full=True)
+        if not images:
+            continue
+        xref = max(images, key=lambda im: im[2] * im[3])[0]
+        pix = fitz.Pixmap(doc, xref)
+        if pix.n - pix.alpha >= 4:
+            pix = fitz.Pixmap(fitz.csRGB, pix)
+
+        out_path = f"{page_dir}/{doc_id}_p{i:03d}.png"
+        img_bytes = pix.tobytes("ppm")
+        from PIL import Image
+        import io
+        Image.open(io.BytesIO(img_bytes)).save(out_path, format="PNG")
+
+    doc.close()
+    print(f"Extracted {i} pages for {doc_id}")
+
+# run once per issue
+for pdf_file in os.listdir("data/raw"):
+    if pdf_file.endswith(".pdf"):
+        doc_id = pdf_file.replace(".pdf", "")
+        extract_all_pages(f"data/raw/{pdf_file}", doc_id)
+```
+
+## Two practical warnings
+1. **This will take a while and use real disk space** — 15 issues × maybe 150–300 pages each × ~1–2MB per PNG could easily be several GB. On Colab, your session's disk resets when it disconnects, so either mount Google Drive (`from google.colab import drive; drive.mount(...)`) and save there, or budget time to re-extract if the session drops.
+2. **`loader.load_pages(cfg)` is Anisa's file, not yours** — but since your `layout.py` depends entirely on how she structures `Page` objects, it's worth confirming with her *right now* that she's building `Page.image_path` to point at exactly this `data/pages/<doc_id>/<id>.png` structure — otherwise your tested code won't match what actually runs in the real pipeline.
+
+Me: ok, now we need to do chunk.py: 
+
+```python
+"""Stage 4 — chunk text"""
+from __future__ import annotations
+from ..contracts import *  # noqa
+
+def split(chunks: list[Chunk], cfg: dict) -> list[Chunk]:
+    """Re-chunk to cfg['index'] size/overlap. IMPLEMENT."""
+    raise NotImplementedError("Stage 4: chunk")
+
+
+```
+
+AI: Confirmed — `split(chunks, cfg)` takes chunks in (so `ocr.transcribe()` must already return a `Chunk` per region), and re-chunks them to your target size. Here's the implementation.
+
+## `chunk.py`
+
+```python
+"""Stage 4 — chunk text"""
+from __future__ import annotations
+from ..contracts import Chunk
+
+# Simple whitespace-based token approximation. Real subword tokenizers (BPE etc.)
+# would count differently, but for a first pass this keeps chunk.py dependency-free.
+# NOTE this is a design choice — write it in design_choices.md, since a more precise
+# option (e.g. the embedding model's own tokenizer) exists but adds a dependency here.
+
+def _token_count(text: str) -> int:
+    return len(text.split())
+
+
+def split(chunks: list[Chunk], cfg: dict) -> list[Chunk]:
+    """Re-chunk to cfg['index'] size/overlap.
+
+    Input: one raw Chunk per OCR'd region (small, region-sized pieces, already in
+    correct multi-column reading order from layout.py — this function must NOT
+    reorder them, only regroup them).
+
+    Output: Chunks resized to ~chunk_tokens words each, with ~overlap words of
+    context repeated between consecutive chunks, never crossing a doc_id boundary.
+    """
+    index_cfg = cfg.get("index", {})
+    target_tokens = index_cfg.get("chunk_tokens", 256)
+    overlap_tokens = index_cfg.get("overlap", 32)
+
+    # Group by doc_id first, preserving input order within each group.
+    # This guarantees we never merge text from two different issues together,
+    # and never scramble the reading order layout.py already established.
+    by_doc: dict[str, list[Chunk]] = {}
+    for c in chunks:
+        by_doc.setdefault(c.doc_id, []).append(c)
+
+    output: list[Chunk] = []
+
+    for doc_id, doc_chunks in by_doc.items():
+        buffer_words: list[str] = []
+        buffer_page_ids: list[str] = []
+        chunk_idx = 0
+
+        def flush():
+            nonlocal chunk_idx
+            if not buffer_words:
+                return
+            text = " ".join(buffer_words)
+            # de-duplicate page_ids while preserving order
+            seen = set()
+            ordered_pages = [p for p in buffer_page_ids if not (p in seen or seen.add(p))]
+            output.append(Chunk(
+                id=f"{doc_id}_c{chunk_idx:04d}",
+                doc_id=doc_id,
+                text=text,
+                page_ids=ordered_pages,
+            ))
+            chunk_idx += 1
+
+        for c in doc_chunks:
+            words = c.text.split()
+            for w in words:
+                buffer_words.append(w)
+                if c.page_ids:
+                    buffer_page_ids.extend(c.page_ids)
+
+                if len(buffer_words) >= target_tokens:
+                    flush()
+                    # start next chunk with the last `overlap_tokens` words carried over,
+                    # so context isn't lost right at a chunk boundary
+                    carry = buffer_words[-overlap_tokens:] if overlap_tokens > 0 else []
+                    carry_pages = buffer_page_ids[-1:] if buffer_page_ids else []
+                    buffer_words = list(carry)
+                    buffer_page_ids = list(carry_pages)
+
+        flush()  # final partial chunk for this doc, if any words remain
+
+    return output
+```
+
+## Key design decisions explained
+
+**Grouped by `doc_id` before chunking, not chunked globally.** If we didn't do this, the tail end of one BYTE issue could get merged with the start of the next issue into one chunk — nonsensical, and would corrupt `page_ids`/citations.
+
+**No re-sorting anywhere.** Since `Region`/`Chunk` have no `reading_order_idx` field (per our earlier finding), the *only* thing preserving reading order is never touching list order — this function only groups and merges, never sorts.
+
+**Overlap carries words, not full chunks.** `chunk_tokens: 256, overlap: 32` means: build up to 256 words, cut, then start the *next* chunk with the last 32 words repeated — so a sentence split awkwardly at a chunk boundary still has some context on both sides. This is standard RAG chunking practice.
+
+**Token approximation via whitespace split** — flagged clearly as a simplification. Real subword tokenizers (what your embedding model actually uses internally) count differently than raw word-count. Worth noting as a limitation in `design_choices.md`; a more precise version would tokenize with the actual Jina model's tokenizer, at the cost of adding that dependency here.
+
+## One thing to verify before trusting this
+I'm inferring `ocr.transcribe()` outputs one `Chunk` per `Region` (i.e., roughly page/column-block sized pieces) based on the type signature — but I haven't seen `ocr.py`'s actual output. Once Debashmita's OCR code is further along, sanity-check: does each input `Chunk` here roughly correspond to one region's worth of text? If OCR instead dumps one giant `Chunk` per whole page, the per-word accumulation logic still works fine, but worth confirming the assumption either way.
+
+Me: now we do validate.py : 
+
+```python
+"""Data — data schema/quality validation at ingest"""
+from __future__ import annotations
+from ..contracts import *  # noqa
+
+def validate(pages: list[Page]) -> None:
+    """Assert min pages/words, format, no leakage across splits. IMPLEMENT."""
+    raise NotImplementedError("Data: validate")
+
+
+```
+
+and versioning.py: 
+
+```python
+"""Data — corpus versioning (which corpus version -> which result)"""
+from __future__ import annotations
+from ..contracts import *  # noqa
+
+def snapshot(corpus_dir: str) -> str:
+    """Hash + record a corpus version id. IMPLEMENT (or wire DVC)."""
+    raise NotImplementedError("Data: version snapshot")
+
+
+```
+
+i think we need info from A1 here
+
+AI: These pull directly from your A1 numbers (`min_pages: 300`, `min_words: 60000`) — but there's a real design problem to solve first: **`validate()` only receives `list[Page]` (image paths), and word count can't be known from an image without running OCR.** Let's work through that.
+
+## The word-count problem
+Running your actual OCR pipeline (Qwen2-VL) just to validate corpus size would be circular and slow. The practical fix: Internet Archive's PDFs already have an **embedded ABBYY-generated text layer** (that's what made them searchable in the first place) — we can extract *that* text purely as a rough word-count sanity check, completely separate from your project's own OCR quality claims (which get properly measured against `labels.jsonl` instead).
+
+## `validate.py`
+
+```python
+"""Data — data schema/quality validation at ingest"""
+from __future__ import annotations
+import os
+import fitz  # PyMuPDF
+from ..contracts import Page
+
+MIN_PAGES = 300
+MIN_WORDS = 60000
+RAW_DIR = "data/raw"
+
+
+def _estimate_words_for_doc(doc_id: str, raw_dir: str = RAW_DIR) -> int:
+    """Rough word count using the PDF's existing embedded text layer (from IA's own
+    ABBYY OCR), purely for a corpus-size sanity check. This is NOT how our own OCR
+    quality is measured — that's done separately against grading_kit/labels.jsonl."""
+    pdf_path = os.path.join(raw_dir, f"{doc_id}.pdf")
+    if not os.path.exists(pdf_path):
+        return 0
+    doc = fitz.open(pdf_path)
+    total = sum(len(page.get_text().split()) for page in doc)
+    doc.close()
+    return total
+
+
+def validate(pages: list[Page]) -> None:
+    """Assert min pages/words, format, no leakage across splits."""
+
+    # --- 1. Page count ---
+    n_pages = len(pages)
+    assert n_pages >= MIN_PAGES, (
+        f"Corpus has {n_pages} pages, below the required floor of {MIN_PAGES}."
+    )
+
+    # --- 2. Format checks ---
+    for p in pages:
+        assert os.path.exists(p.image_path), f"Missing image file: {p.image_path}"
+        assert p.image_path.lower().endswith((".png", ".jpg", ".jpeg")), (
+            f"Unexpected image format: {p.image_path}"
+        )
+        assert p.doc_id, f"Page {p.id} has no doc_id"
+
+    # --- 3. Word count (via IA's embedded text layer, see note above) ---
+    doc_ids = sorted({p.doc_id for p in pages})
+    total_words = sum(_estimate_words_for_doc(d) for d in doc_ids)
+    assert total_words >= MIN_WORDS, (
+        f"Estimated {total_words} words across {len(doc_ids)} docs, "
+        f"below the required floor of {MIN_WORDS}."
+    )
+
+    # --- 4. Split / leakage check ---
+    # BYTE Retriever uses pretrained models only (no fine-tuning), per the A1
+    # large-corpus exemption — there is no train/test split to check leakage on.
+    # grading_kit/heldout_pages/ instead holds a small set never used to TUNE the
+    # pipeline (prompts/thresholds), which is a different guarantee than a
+    # train/test split and is not something validate() can enforce automatically.
+    pass
+
+    print(f"✅ Validation passed: {n_pages} pages, ~{total_words} words across {len(doc_ids)} docs.")
+```
+
+## `versioning.py`
+
+```python
+"""Data — corpus versioning (which corpus version -> which result)"""
+from __future__ import annotations
+import hashlib
+import json
+import os
+from datetime import datetime, timezone
+
+
+def snapshot(corpus_dir: str) -> str:
+    """Hash + record a corpus version id."""
+    file_records = []
+    for root, _, files in os.walk(corpus_dir):
+        for fname in sorted(files):
+            fpath = os.path.join(root, fname)
+            size = os.path.getsize(fpath)
+            with open(fpath, "rb") as f:
+                content_hash = hashlib.sha256(f.read()).hexdigest()[:16]
+            file_records.append(f"{os.path.relpath(fpath, corpus_dir)}:{size}:{content_hash}")
+
+    file_records.sort()
+    combined = "\n".join(file_records)
+    version_id = hashlib.sha256(combined.encode()).hexdigest()[:12]
+
+    record = {
+        "version_id": version_id,
+        "corpus_dir": corpus_dir,
+        "n_files": len(file_records),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+    os.makedirs("data/versions", exist_ok=True)
+    out_path = f"data/versions/{version_id}.json"
+    with open(out_path, "w") as f:
+        json.dump(record, f, indent=2)
+
+    print(f"✅ Corpus snapshot saved: {version_id} ({len(file_records)} files) → {out_path}")
+    return version_id
+```
+
+## Two things worth flagging
+1. **`validate()`'s word count is only an estimate**, dependent on IA's PDFs actually having a text layer for every issue — some very old/poorly-scanned issues might not. If `total_words` comes back suspiciously low, check whether specific docs returned `0` (missing PDF or no text layer) rather than assuming the corpus genuinely falls short.
+2. **`snapshot()` hashes whichever directory you point it at** — decide with your team whether that should be `data/raw/` (the original PDFs) or `data/pages/` (extracted page images). Hashing `data/raw/` is cheaper and is really "which source files produced this run," which is probably the more useful version to track.
+
+Want me to also write the one-line call that wires `validate()` into `get_data.sh` or `loader.py`, so it actually runs automatically rather than needing to be called by hand?
+
+Me: is my labels.json broken or all good? my teamamte says her metric.py wont work cause there is problem in my j.son file?her o/p: Line 1 broken: Unterminated string starting at: line 1 column 51 (char 50)
+Line 4 broken: Expecting value: line 1 column 1 (char 0)
+Line 7 broken: Expecting value: line 1 column 1 (char 0)
+Line 8 broken: Expecting value: line 1 column 1 (char 0)
+Line 11 broken: Expecting value: line 1 column 1 (char 0)
+Line 14 broken: Expecting value: line 1 column 1 (char 0)
+Line 17 broken: Expecting value: line 1 column 1 (char 0)
+Line 19 broken: Expecting value: line 1 column 1 (char 0)
+Line 22 broken: Expecting value: line 1 column 1 (char 0)
+Line 25 broken: Expecting value: line 1 column 1 (char 0)
+Line 28 broken: Expecting value: line 1 column 1 (char 0)
+Line 31 broken: Expecting value: line 1 column 1 (char 0)
+Line 34 broken: Expecting value: line 1 column 1 (char 0)
+Line 37 broken: Expecting value: line 1 column 1 (char 0)
+Line 40 broken: Expecting value: line 1 column 1 (char 0)
+Line 43 broken: Expecting value: line 1 column 1 (char 0)
+Line 46 broken: Unterminated string starting at: line 1 column 51 (char 50)
+Line 48 broken: Expecting value: line 1 column 1 (char 0)
+Line 50 broken: Expecting value: line 1 column 1 (char 0)
+Line 51 broken: Expecting value: line 1 column 1 (char 0)
+Line 52 broken: Extra data: line 1 column 6 (char 5)
+Line 53 broken: Expecting value: line 1 column 1 (char 0)
+Line 56 broken: Expecting value: line 1 column 1 (char 0)
+Line 58 broken: Expecting value: line 1 column 1 (char 0)
+Line 60 broken: Expecting value: line 1 column 1 (char 0)
+Line 61 broken: Expecting value: line 1 column 1 (char 0)
+Line 62 broken: Expecting value: line 1 column 1 (char 0)
+Line 63 broken: Expecting value: line 1 column 1 (char 0)
+Line 65 broken: Expecting value: line 1 column 1 (char 0)
+Line 67 broken: Expecting value: line 1 column 1 (char 0)
+Line 69 broken: Expecting value: line 1 column 1 (char 0)
+Line 72 broken: Unterminated string starting at: line 1 column 51 (char 50)
+Line 74 broken: Expecting value: line 1 column 1 (char 0)
+Line 76 broken: Expecting value: line 1 column 1 (char 0)
+Line 78 broken: Expecting value: line 1 column 1 (char 0)
+Line 80 broken: Expecting value: line 1 column 1 (char 0)
+Line 82 broken: Expecting value: line 1 column 1 (char 0)
+Line 84 broken: Expecting value: line 1 column 1 (char 0)
+Line 85 broken: Expecting value: line 1 column 1 (char 0)
+Line 86 broken: Expecting value: line 1 column 1 (char 0)
+Line 88 broken: Expecting value: line 1 column 1 (char 0)
+Line 90 broken: Expecting value: line 1 column 1 (char 0)
+Line 92 broken: Expecting value: line 1 column 1 (char 0)
+Line 94 broken: Expecting value: line 1 column 1 (char 0)
+Line 96 broken: Expecting value: line 1 column 1 (char 0)
+Line 98 broken: Expecting value: line 1 column 1 (char 0)
+Line 100 broken: Expecting value: line 1 column 1 (char 0)
+Line 101 broken: Expecting value: line 1 column 1 (char 0)
+Line 102 broken: Expecting value: line 1 column 1 (char 0)
+Line 104 broken: Expecting value: line 1 column 1 (char 0)
+Line 105 broken: Expecting value: line 1 column 1 (char 0)
+Line 107 broken: Expecting value: line 1 column 1 (char 0)
+Line 108 broken: Extra data: line 1 column 2 (char 1)
+Line 110 broken: Expecting value: line 1 column 1 (char 0)
+Line 111 broken: Expecting value: line 1 column 1 (char 0)
+Line 112 broken: Expecting value: line 1 column 1 (char 0)
+Line 114 broken: Extra data: line 1 column 3 (char 2)
+Line 115 broken: Expecting value: line 1 column 1 (char 0)
+Line 116 broken: Expecting value: line 1 column 1 (char 0)
+Line 117 broken: Expecting value: line 1 column 1 (char 0)
+Line 119 broken: Expecting value: line 1 column 1 (char 0)
+Line 121 broken: Expecting value: line 1 column 1 (char 0)
+Line 124 broken: Unterminated string starting at: line 1 column 51 (char 50)
+Line 126 broken: Expecting value: line 1 column 1 (char 0)
+Line 127 broken: Expecting value: line 1 column 1 (char 0)
+Line 129 broken: Expecting value: line 1 column 1 (char 0)
+Line 131 broken: Expecting value: line 1 column 1 (char 0)
+Line 133 broken: Expecting value: line 1 column 1 (char 0)
+Line 135 broken: Expecting value: line 1 column 1 (char 0)
+Line 137 broken: ... 0 valid lines, 266 broken lines
+debashmita@debashmita-HP:~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$ every entry has raw line breaks inside the text field instead of \n escapes.
+
+AI: Confirmed — that's exactly the bug. You (or whoever saved this) pasted the raw text directly into the file instead of running it through the `add_label()` Python helper, so the newlines never got converted to escaped `\n`, and there's also an unescaped quote (`"instruction set:"`) sitting unescaped inside the text. JSON can't have literal line breaks or unescaped quotes inside a string — that's the "Unterminated string" and "Expecting value" errors cascading through the whole file.
+
+Let me check how many real page entries are actually in here before fixing it.Good — 15 real page entries spread across 733 raw lines. That matches your Day 1–2 target count, nothing's missing, it's purely a formatting problem. Let me write a repair script that reconstructs proper JSONL from this.All 15 records parsed cleanly. Let me verify the fixed file is genuinely valid JSONL now.All 15 lines valid now — 15 pages, ~8,200 words total transcribed. Nice work, that's more than the 5–10 target.## What actually went wrong
+Your teammate's diagnosis was exactly right: **the file was created by pasting raw multi-line text directly, not by running it through the `add_label()` Python helper** I gave you earlier. `json.dumps()` would have automatically converted every real line break into `\n` and every internal quote into `\"` — that's the entire reason that function exists. Somewhere along the way, the text got written straight into the file (maybe copy-pasted from a notebook cell's *displayed* string rather than actually calling `add_label()`), which skipped that escaping step entirely.
+
+## Going forward — replace this file with the fixed one
+1. Download `labels.jsonl` above, replace your broken one in `grading_kit/labels.jsonl`.
+2. Send Debashmita this fixed version — her `metrics.py` should parse it cleanly now.
+3. **For every future page you add**: only ever call `add_label(page_id, text.strip())` — never manually type or paste directly into the `.jsonl` file itself. That function is specifically what prevents this exact problem.
+
+## Quick check for you
+Want me to also show you how to open `labels.jsonl` and manually re-verify a couple of entries against their original page images, just to confirm the repair didn't accidentally mangle any text during the regex-based reconstruction (I'm fairly confident it didn't, but worth a spot-check given how much was rewritten)?
+
+Me: my teammate changed the layout.py like this. now i have to do chunk.py, embed.py. she has gave us this notebook to run, where chunking is happening ig?? then what do i do in my chunk.py??
+
+AI: Good news: the notebook does **not** actually do your chunking work — it stops right after OCR. Let me trace exactly where it ends and why that confirms what you need to build.
+
+## What the notebook actually does (step by step)
+1. Clone repo → install deps → download 1981-05 issue
+2. `loader.load_pages()` → `preprocess.run()` → `layout.detect()` (her DocLayout-YOLO code)
+3. `ocr.transcribe(regions, cfg)` → produces `chunks` and saves them to `data/interim/ocr/chunks.json`
+4. **Last cell**: just reloads `chunks.json` and prints the first entry to sanity-check it
+
+That's it — it ends at raw OCR output. Notice the print statement: `test_chunks = ocr.transcribe(regions[:5], cfg)` then iterates `c.id`, `c.text[:300]` — this confirms exactly what I guessed earlier: **OCR produces roughly one raw `Chunk` per region**, not properly-sized final chunks. These are almost certainly small (one column-block's worth of text each), not yet resized to your `chunk_tokens: 256` target.
+
+## So what's actually your job
+Your `chunk.py` is the very next stage after where her notebook stops: take these small, one-per-region `Chunk` objects out of `chunks.json`, and **re-chunk them into ~256-word pieces with 32-word overlap**, merging multiple regions together where needed — while never crossing a `doc_id` boundary and never disturbing the reading order her `layout.py` already established.
+
+The `chunk.py` I wrote earlier for you still applies exactly as-is — nothing about her `layout.py` change affects your contract-level logic, since she's still producing/consuming the same `Region`→`Chunk` shapes. But let's match her style (she checkpoints every stage to `data/interim/.../*.json` for resumability) so your code fits the pattern the rest of the pipeline is using.
+
+## `chunk.py` — updated to match the team's checkpoint pattern
+
+```python
+"""Stage 4 — chunk text"""
+from __future__ import annotations
+import json
+from pathlib import Path
+from ..contracts import Chunk
+
+CHUNK_DIR = Path("data/interim/chunks")
+
+
+def _token_count(text: str) -> int:
+    return len(text.split())
+
+
+def split(chunks: list[Chunk], cfg: dict) -> list[Chunk]:
+    """Re-chunk raw per-region OCR chunks to cfg['index'] size/overlap.
+
+    Input: small, region-sized Chunks from ocr.transcribe() (one per detected
+    region — text/table/heading blocks), already in correct multi-column
+    reading order from layout.py. This function regroups them, never reorders.
+    """
+    index_cfg = cfg.get("index", {})
+    target_tokens = index_cfg.get("chunk_tokens", 256)
+    overlap_tokens = index_cfg.get("overlap", 32)
+
+    by_doc: dict[str, list[Chunk]] = {}
+    for c in chunks:
+        by_doc.setdefault(c.doc_id, []).append(c)
+
+    output: list[Chunk] = []
+
+    for doc_id, doc_chunks in by_doc.items():
+        buffer_words: list[str] = []
+        buffer_page_ids: list[str] = []
+        chunk_idx = 0
+
+        def flush():
+            nonlocal chunk_idx
+            if not buffer_words:
+                return
+            text = " ".join(buffer_words)
+            seen = set()
+            ordered_pages = [p for p in buffer_page_ids if not (p in seen or seen.add(p))]
+            output.append(Chunk(
+                id=f"{doc_id}_c{chunk_idx:04d}",
+                doc_id=doc_id,
+                text=text,
+                page_ids=ordered_pages,
+            ))
+            chunk_idx += 1
+
+        for c in doc_chunks:
+            words = c.text.split()
+            for w in words:
+                buffer_words.append(w)
+                if c.page_ids:
+                    buffer_page_ids.extend(c.page_ids)
+
+                if len(buffer_words) >= target_tokens:
+                    flush()
+                    carry = buffer_words[-overlap_tokens:] if overlap_tokens > 0 else []
+                    carry_pages = buffer_page_ids[-1:] if buffer_page_ids else []
+                    buffer_words = list(carry)
+                    buffer_page_ids = list(carry_pages)
+
+        flush()
+
+    # Checkpoint, matching layout.py/ocr.py's pattern — lets embed.py (or you,
+    # re-running this notebook later) reload without recomputing.
+    CHUNK_DIR.mkdir(parents=True, exist_ok=True)
+    out_path = CHUNK_DIR / "chunks.json"
+    with out_path.open("w", encoding="utf-8") as f:
+        json.dump([c.model_dump() for c in output], f, indent=2, ensure_ascii=False)
+    print(f"Saved {len(output)} final chunks to {out_path}")
+
+    return output
+```
+
+## `embed.py`
+
+```python
+"""Stage 4 — embed chunks"""
+from __future__ import annotations
+import json
+from pathlib import Path
+import numpy as np
+from ..contracts import Chunk
+
+EMBED_DIR = Path("data/interim/embed")
+_model = None
+
+
+def _get_model(cfg: dict):
+    global _model
+    if _model is not None:
+        return _model
+    from sentence_transformers import SentenceTransformer
+    model_name = cfg.get("embed", {}).get("model", "jinaai/jina-embeddings-v5-text-small")
+    _model = SentenceTransformer(model_name, trust_remote_code=True)
+    return _model
+
+
+def encode(chunks: list[Chunk], cfg: dict) -> np.ndarray:
+    """Embed with cfg['embed']['model']."""
+    model = _get_model(cfg)
+    texts = [c.text for c in chunks]
+
+    vectors = model.encode(
+        texts,
+        batch_size=32,
+        show_progress_bar=True,
+        convert_to_numpy=True,
+    )
+
+    expected_dim = cfg.get("embed", {}).get("dim")
+    if expected_dim and vectors.shape[1] != expected_dim:
+        print(f"⚠️ Warning: got dim {vectors.shape[1]}, config expected {expected_dim}")
+
+    EMBED_DIR.mkdir(parents=True, exist_ok=True)
+    np.save(EMBED_DIR / "vectors.npy", vectors)
+    with open(EMBED_DIR / "chunk_ids.json", "w") as f:
+        json.dump([c.id for c in chunks], f)
+    print(f"Saved {vectors.shape[0]} vectors (dim={vectors.shape[1]}) to {EMBED_DIR}")
+
+    return vectors
+```
+
+## Two things worth flagging about her `layout.py`
+1. **The hardcoded model path** (`/root/.cache/huggingface/hub/models--juliozhao--.../snapshots/8c3299a3.../`) is fragile — that exact snapshot hash may not exist on your machine or Colab session, since it depends on when/where `hf_hub_download` first cached it. If your `layout.detect()` errors with `FileNotFoundError`, that's why — worth switching to just calling `hf_hub_download(...)` directly inside `_get_model()` instead of a hardcoded path, so it re-resolves correctly on any machine.
+2. Her notebook cell that runs OCR says results are saved to `data/interim/ocr/chunks.json` — you'll want to actually load from there (or however `pipeline.py`'s real wiring passes it) rather than assuming; confirm the loading step with her before you run your `split()`.
+
+Want me to add the loading cell (reading her `chunks.json` checkpoint) so you can test your `chunk.py` end-to-end using her already-produced OCR output, without needing to rerun the whole pipeline yourself?
+
+Me: tell me sth. i had worked in another capstone project. there we uploaded chapters of nctb textbooks, gemini api would slice them into chunks and embed and then store in vector db in qdrant. how would thing happen here though?
+
+AI: Good comparison to draw — the *concept* is identical, but nearly every implementation detail differs. Let's map it side by side.
+
+## The core idea is the same
+Both projects follow: **raw content → break into pieces → turn pieces into vectors → store vectors → search vectors later.** That's universal to any RAG system, yours included. What differs is who does each step and how.
+
+## Side-by-side
+
+| Step | Your NCTB project | This project (BYTE Retriever) |
+|---|---|---|
+| **Input format** | Chapters — already clean, digital text (PDF/text, likely already selectable) | **Scanned photographs of magazine pages** — no text exists yet, just pixels |
+| **Getting text out** | Not needed — text was already there | **This is the whole extra stage you don't have in the NCTB project**: layout detection (find columns/regions) → OCR (actually read the pixels into text) |
+| **Chunking** | Gemini API did it for you — you handed it a chapter, it sliced it internally | **You write the slicing logic yourself** — that's literally your `chunk.py`: split into ~256-word pieces with 32-word overlap, using plain Python, no API magic |
+| **Embedding** | Gemini API's embedding endpoint — a network call, you never touch model weights | **You load an actual open-weight model yourself** (`jinaai/jina-embeddings-v5-text-small`) and run it locally — no API call, no internet dependency at inference time |
+| **Vector DB** | Qdrant — a hosted/managed vector database service | **FAISS** — a library, not a service. There's no server to talk to; you build an index *file* and load it directly in Python |
+
+## Why the differences exist
+- **No OCR needed in NCTB** because your input was already digitized text — that project skipped straight to "text → chunks." Yours is BYTE **because BYTE only exists as photographs of 1970s–90s print pages** — reading the pixels correctly (respecting multi-column layout) is your project's actual hard problem, which NCTB's project never had to solve.
+- **API vs. self-hosted** isn't a random choice — it's your NFR. Gemini's API involves a network round-trip per request; you don't control its latency. Your NFR is **scalable, P95 ≤ 1.5s** — running everything locally (Jina + FAISS, no external API calls at query time) is *how you get control* over that latency number. An API call to Google's servers introduces variance you can't engineer around.
+- **FAISS vs Qdrant** is a similar story: Qdrant is a full database (handles concurrent users, persistence, filtering, a server process) — more infrastructure than a single coursework project needs. FAISS's HNSW index is just "a fast approximate-search data structure in a file" — lighter weight, and specifically chosen because HNSW's whole design purpose is fast approximate search at scale, which is exactly your NFR target.
+
+## What this means practically for you
+Think of your `chunk.py`/`embed.py` as **doing manually, in your own code, what Gemini's API silently did behind the scenes for you in NCTB.** You're not missing some hidden magic step — the "API called a black box" step has just been replaced by "you load the model yourself and call `.encode()` directly." Same job, different level of control (and different amount of code you have to write).
+
+Me: now how to write store.py : 
+
+```python
+"""Stage 4 — vector store"""
+from __future__ import annotations
+from ..contracts import *  # noqa
+
+def build(chunks, vectors, cfg: dict) -> None:
+    """Persist a vector index (cfg['index']['type']). IMPLEMENT."""
+    raise NotImplementedError("Stage 4: build index")
+def load(cfg: dict):
+    raise NotImplementedError("Stage 4: load index")
+
+
+```
+
+also where will be the code for FAISS's HNSW index?
+
+AI: Here's `store.py` — this is exactly where the **E5 NFR** (your scalability commitment) gets built, so I'll explain the HNSW parameters carefully since tuning them is literally how you hit your ≤1.5s P95 target.
+
+## `store.py`
+
+```python
+"""Stage 4 — vector store"""
+from __future__ import annotations
+import json
+from pathlib import Path
+import numpy as np
+import faiss
+from ..contracts import Chunk
+
+INDEX_DIR = Path("data/index")
+
+
+def build(chunks: list[Chunk], vectors: np.ndarray, cfg: dict) -> None:
+    """Persist a vector index (cfg['index']['type'])."""
+    index_cfg = cfg.get("index", {})
+    dim = vectors.shape[1]
+
+    # HNSW ("Hierarchical Navigable Small World") — an approximate index.
+    # M = how many links each vector keeps to its neighbors in the graph.
+    # Bigger M = more accurate search, slower to build, bigger file on disk.
+    m = index_cfg.get("hnsw_m", 32)
+
+    index = faiss.IndexHNSWFlat(dim, m)
+
+    # efConstruction: how hard the graph tries to find good neighbors while
+    # BUILDING the index. Higher = better quality index, slower one-time build.
+    index.hnsw.efConstruction = index_cfg.get("ef_construction", 200)
+
+    # efSearch: how hard it searches at QUERY time. This is your main lever
+    # for the scalability NFR — higher efSearch = more accurate but slower
+    # per query; lower = faster but risks missing the true best match.
+    # Tune this against your P95 <= 1.5s target directly.
+    index.hnsw.efSearch = index_cfg.get("ef_search", 64)
+
+    vectors = np.ascontiguousarray(vectors.astype("float32"))
+    index.add(vectors)
+
+    INDEX_DIR.mkdir(parents=True, exist_ok=True)
+    faiss.write_index(index, str(INDEX_DIR / "index.faiss"))
+
+    # FAISS only stores vectors + an internal integer id (0, 1, 2...) — it
+    # knows nothing about your Chunk objects. We save this side-table so
+    # retriever.py can map "FAISS returned internal id 47" back to a real
+    # Chunk (its text, doc_id, page_ids) for citations.
+    metadata = [c.model_dump() for c in chunks]
+    with open(INDEX_DIR / "chunks_meta.json", "w", encoding="utf-8") as f:
+        json.dump(metadata, f, ensure_ascii=False, indent=2)
+
+    # These are exactly the numbers your A2 Section 4 report needs.
+    size_mb = (INDEX_DIR / "index.faiss").stat().st_size / (1024 ** 2)
+    print(f"✅ Built HNSW index: {len(chunks)} chunks, dim={dim}, "
+          f"M={m}, size={size_mb:.2f} MB → {INDEX_DIR / 'index.faiss'}")
+
+
+def load(cfg: dict):
+    """Load the persisted index + its chunk metadata."""
+    index_path = INDEX_DIR / "index.faiss"
+    meta_path = INDEX_DIR / "chunks_meta.json"
+
+    if not index_path.exists():
+        raise FileNotFoundError(f"No index found at {index_path} — run build() first.")
+
+    index = faiss.read_index(str(index_path))
+
+    # efSearch doesn't get saved with the index — reset it here in case
+    # something changed in cfg since build() ran.
+    index_cfg = cfg.get("index", {})
+    index.hnsw.efSearch = index_cfg.get("ef_search", 64)
+
+    with open(meta_path, "r", encoding="utf-8") as f:
+        chunk_dicts = json.load(f)
+
+    chunks = [Chunk(**d) for d in chunk_dicts]
+
+    print(f"Loaded index: {index.ntotal} vectors, dim={index.d}")
+    return index, chunks
+```
+
+## Answering "where is the FAISS HNSW code" directly
+It's the single line:
+```python
+index = faiss.IndexHNSWFlat(dim, m)
+```
+`faiss` is a real library (Facebook AI's vector search library) — you don't implement HNSW's graph algorithm yourself, you just construct this object and call `.add()`. The actual "smart" part (approximate nearest-neighbor graph search) is inside FAISS's C++ core; your job is choosing the right parameters (`M`, `efConstruction`, `efSearch`) for your specific accuracy/speed tradeoff.
+
+## Install
+```python
+!pip install faiss-cpu -q
+```
+(use `faiss-gpu` only if you're confident about CUDA version compatibility — `faiss-cpu` is usually the safer/easier install for a project this size)
+
+## One important thing to actually test, not guess
+`efSearch: 64` is a starting guess, same situation as `weak_threshold` earlier — **you need to actually time queries** against your real index once it's built, and adjust `ef_search` up/down until you're comfortably under 1.5s P95 on the full subset. Higher `efSearch` = better retrieval quality but slower; this is the actual dial you have for your NFR. Worth a small benchmark cell in the notebook: run ~20 queries, record latencies, compute P95, adjust, repeat.
+
+Want me to write that benchmarking cell next, so you have real numbers to put in your Section 5 evidence instead of a guessed config value?
