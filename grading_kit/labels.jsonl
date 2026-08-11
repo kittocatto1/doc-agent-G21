@@ -268,6 +268,51 @@ Much of the tools' source code is now in the public domain and freely distribute
 The standardization procedure used by the tools group is unusual. New utilities are collected and distributed early in their development phase, allowing users to experiment with new ideas and reject those that prove unportable or functionally undesirable. Code sharing also allows users and developers to glean ideas from new offerings and incorporate them into their own developments. As ideas are distilled and utilities enhanced or extended, the utilities are redistributed, and those receiving popular support are eventually returned to the tools group. There they pass to the Implementers Committee,"}
 
 
+{"page_id": "byte-magazine-1983-12_p019", "text": "Letters
+
+Before teaching the course, I had considered writing my own book on FORTH, one that would explain the really subtle and powerful features of the basic system. After studying Brodie's text and teaching from it, I decided that that particular publishing niche is well filled already.
+
+I do agree with Tom Clune on a couple of points: \"...[Starting FORTH] desperately needs a real index. Nonetheless, if you want to learn FORTH, you will need this book.\"
+
+Vernor Vinge
+Associate Professor
+Department of Math Sciences
+San Diego State University
+San Diego, CA 92182
+
+Wrong Aliases
+
+Having an interest in the use of Unix in the commercial marketplace, I read \"The Unix Tutorial Part 2: Unix as an Applications-Programs Base\" (September, page 257) with anticipation. Since David Fiedler's intended audience was apparently the Unix novice, I thought I had better point out a problem with his examples of renaming the \"terse\" command names.
+
+While all of Mr. Fiedler's examples would work in most cases, he unfortunately decided to rename the \"mv\" and \"cp\" command. I use the term \"command\" rather than \"commands\" because they are one and the same program as in the \"ln\" command. This program knows which function it is to perform by the name used. If a name other than \"cp,\" \"mv,\" or \"ln\" is used, the program will default to the \"cp\" (copy) function. In this particular case, the user would not achieve the desired result either by renaming the command or by linking the desired name.
+
+The alternative solutions of using the \"alias\" function for the UCB C-Shell or creating a shell program for the Bourne Shell are not only desirable in this case, but also necessary.
+
+Ron Spizzirri, Technical Manager
+Analysts International Corporation
+650 Woodfield Dr.
+Schaumburg, IL 60195
+
+C Source-Code Formatting
+
+I was overjoyed to see my preferred style of C source-code formatting in Houston, Brodrick, and Kent's article on CP/M-86 C compilers (page 82) in the August issue. I have always instinctively used that format, despite pressure to conform to convention, because it feels better to me.
+
+I feel strongly that the matching-braces-in-the-same-column formatting style is preferable and hope that it will find wide acceptance, or at least tolerance, particularly by anyone who imposes formatting standards on programmers.
+
+Peter Cann
+Atari Incorporated
+5 Cambridge Center
+Cambridge, MA 02142
+
+Unix Wasn't the First
+
+\"The History of Unix\" (August, page 188) is interesting, but there is a major problem with the statement: \"Until Unix, operating systems were written exclusively in assembly language.\"
+
+18 December 1983 © BYTE Publications Inc.
+
+Circle 129 on inquiry card."}
+
+
 
 
 
