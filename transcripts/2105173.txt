@@ -2604,3 +2604,253 @@ index = faiss.IndexHNSWFlat(dim, m)
 `efSearch: 64` is a starting guess, same situation as `weak_threshold` earlier — **you need to actually time queries** against your real index once it's built, and adjust `ef_search` up/down until you're comfortably under 1.5s P95 on the full subset. Higher `efSearch` = better retrieval quality but slower; this is the actual dial you have for your NFR. Worth a small benchmark cell in the notebook: run ~20 queries, record latencies, compute P95, adjust, repeat.
 
 Want me to write that benchmarking cell next, so you have real numbers to put in your Section 5 evidence instead of a guessed config value?
+
+
+(2nd chat, as i faced claude limit)
+Me: # BYTE Retriever — A2 Handoff Doc
+*Context dump for a new chat thread. Paste/upload this first before asking for more help.*
+
+## Who I am
+I'm **Sunanda**, one of 3 members on team **G21**. Teammates: **Anisa**, **Debashmita**.
+This is a Deep Learning capstone: build an Agentic-RAG system over scanned books/magazines,
+graded via 4 milestones (A1→A4), submitted as GitHub tags (`a1-submit`, `a2-submit`, etc.).
+Currently working on **A2**. A1 is already submitted and locked.
+
+## Project: "BYTE Retriever"
+A citation-grounded Q&A agent over scanned **BYTE magazine** issues (1975–1998), for
+hobbyists/preservation researchers/tech historians (e.g. "was the IBM PC covered before
+launch, and what did reviewers say?").
+
+## A1 decisions (LOCKED — must match exactly in every later milestone)
+- **group_id:** G21
+- **domain:** retro-computing/tech journalism
+- **data_speciality:** multi-column reading order (BYTE pages have 2–3 columns, sidebars,
+  boxed code listings, full-page ads that break normal reading order → forces a
+  layout/region-segmentation stage before OCR)
+- **primary_nfr:** scalable → **target: P95 query latency ≤ 1.5s across the full corpus**
+- **agentic feature:** evidence-gated re-search — widen retrieval `k` and retry if the top
+  retrieval score is weak; abstain once `k_max` is reached without confidence
+- **success metric:** Groundedness ≥ 0.85
+- **baseline to beat:** naive top-1-chunk-verbatim ≈ 0.4 answer-F1
+- **corpus:** all BYTE issues on Internet Archive (`archive.org/details/byte-magazine`,
+  individual items like `byte-magazine-1993-06`). Full corpus ~200+ issues (A1 said ~224,
+  get_data.sh comment says ~176 — **not yet reconciled, needs a decision**).
+  Licence: **no explicit license/rights statement found on IA item pages** → treated as
+  unclear/all-rights-reserved. We do NOT redistribute scans — only a fetch script is
+  committed to the repo.
+- **A2 subset:** 15 issues spanning 1975–1993 (see `scripts/get_data.sh`), meant to later
+  extend toward the full corpus.
+- **Schema (from A1):** `doc_id`, `page_num`, `chunk_id`, `reading_order_idx`, `ocr_text`,
+  `layout_type`, `layout_bbox`
+
+## Pipeline (what A2 builds)
+`ingest → enhance (conditional) → layout → OCR → chunk → embed → index`
+
+| Stage | Tool/model chosen |
+|---|---|
+| Ingest | Load BYTE page images/PDFs from `data/raw/` |
+| Enhance | Conditional OpenCV: deskew/denoise/CLAHE (only when needed — plain classical CV, NOT a deep model) |
+| Layout | Multi-column/region detection (candidate: `detectron2:layout`) — **this is the E2 speciality stage** |
+| OCR | Benchmarking **Qwen2-VL-2B-Instruct** vs **olmOCR-2 7B** (VLM-based). `finetune: false` — **⚠️ UNRESOLVED: A2 spec's baseline expectation is to fine-tune a pretrained OCR model; need written confirmation from instructor that BYTE Retriever is exempt (per "large-corpus/pretrained-only" exemption noted in A1). Confirm before relying on zero-shot OCR.** |
+| Chunk | `reading_order_idx` + `layout_bbox`-aware splitting; filter out `advertisement` layout_type |
+| Embed | `jinaai/jina-embeddings-v5-text-small`, dim=1024 (confirmed via model card; supports Matryoshka truncation down to 32 dims if needed later for latency) |
+| Index | FAISS **HNSW** (not flat) — **this is the E5 NFR stage**, chosen specifically to hit the ≤1.5s P95 target |
+| Retrieve | Hybrid: dense (Jina) + BM25, k=10/k_step=10/k_max=40, weak_threshold=0.35 (placeholder — needs real tuning against labelled examples), reranked with `Qwen/Qwen3-Reranker-0.6B` (use the 0.6B size — bigger sizes hurt the latency NFR since reranking can run multiple times per query) |
+
+## Config files — status
+- **`configs/task.yaml`** — ✅ done (axes + corpus block filled)
+- **`configs/config.yaml`** — mostly drafted; reranker field should be the full HF path
+  `Qwen/Qwen3-Reranker-0.6B`, not just `"Qwen3-Reranker"` (that's a family name, not a
+  loadable model id)
+- **`grading_kit/manifest.yaml`** — ✅ done (mirrors task.yaml axes + points to corpus,
+  heldout pages, labels, build/run/eval commands)
+- **`data/provenance.md`** — ✅ done, EXCEPT pages/words/size-on-disk are placeholders —
+  need to actually run `get_data.sh`, then `pdfinfo`/`du -sh` to fill real numbers
+- **`scripts/get_data.sh`** — written (fetches 15-issue subset via `ia download`), but
+  **had a leftover duplicate stub (double shebang, double `set -euo pipefail`, stray
+  `echo "TODO"`) that needs deleting** — check if this was cleaned up already
+- **`data/validate.py`, `data/versioning.py`** — ⚠️ **NOT YET ASSIGNED TO ANYONE.**
+  These are required A1-carryover files (enforce ≥300 pages/≥60k words; snapshot corpus
+  version) but got dropped in the team's task split. Needs an owner — suggested: whoever
+  owns `get_data.sh` (Debashmita), since validate.py logically runs right after fetch.
+
+## Team split (4-day plan, originally: Aug 8–11)
+- **Anisa:** task.yaml/config.yaml, settings.py/.env, logging_conf.py → loader.py,
+  preprocess.py → pipeline.py wiring + build_index.sh, retriever.py (early/A3-pulled-forward)
+  → design_choices.md, finalize provenance/manifest
+- **Debashmita:** get_data.sh, provenance.md → OCR benchmarking (ocr.py), heldout labelling
+  → finalize OCR across subset, eval/metrics.py's ocr_f1() (A3-pulled-forward) → pipeline_diagram.md, Section 5 evidence incl. honest worst-failure case
+- **Sunanda (me):**
+  - Day 1: `grading_kit/manifest.yaml` (✅ done); start hand-transcribing 5–10 heldout pages into `labels.jsonl`
+  - Day 2: `vision/layout.py → detect()` — multi-column region detection (**E2**) — depends on Anisa's preprocess output
+  - Day 3: `index/chunk.py → split()`, `index/embed.py → encode()` (Jina), `index/store.py → build()/load()` (FAISS HNSW, **E5**) — depends on Debashmita's OCR output
+  - Day 4: `notebooks/kb_demo.ipynb` — show OCR quality + one verified retrieval example
+
+## Known open risks (flagged, not yet resolved)
+1. **OCR fine-tuning exemption unconfirmed** — biggest risk, blocks Day 2–3 OCR approach if not exempted in writing.
+2. **Days 2–3 are a serial relay, not parallel** — each person is blocked waiting on the previous person's output same-day. Recommend unblocking with a small hand-cropped sample (3–5 pages) to start against before the real pipeline output is ready.
+3. **`validate.py`/`versioning.py` orphaned** — nobody owns these yet.
+4. **Issue-count inconsistency** — "14" vs "15" issues in get_data.sh comment vs actual array; "176" vs A1's "224" total corpus size — needs reconciling across task.yaml/provenance.md/manifest.yaml.
+5. **`weak_threshold: 0.35`** in retrieve config is a guess, not tested — needs real tuning once labelled examples exist (Section 5 evidence work).
+6. Debashmita's Day 3 full-subset OCR run is a likely bottleneck (VLM inference over thousands of pages takes real compute time) — everything downstream (chunk/embed/store/wiring/evidence) depends on it finishing.
+
+## What's next for me (Sunanda)
+Immediate next task: **`vision/layout.py → detect()`** — multi-column region detection.
+Waiting on Anisa's `preprocess.py` output, but can prototype against raw/sample pages first.
+
+## A2 deliverables still needed (full picture)
+- Code: 11 core files + layout.py (E2) + store.py (E5) — see pipeline table above
+- The **A2 form** (Word doc) — Sections 1–8, separate grading from the code, includes the
+  comparison table (Section 3), KB report + index stats (Section 4), evidence with real
+  OCR F1/retrieval example/worst-failure (Section 5)
+- Manual ground-truth labelling in `grading_kit/labels.jsonl` (grows through A2–A3)
+- Each member's own AI-use transcript file
+
+AI: I've read through the handoff doc — got the full picture on G21's BYTE Retriever project, A1 locks, pipeline, team split, and the open risks.
+
+Since this is a context dump with no specific ask yet, what would you like to start with? A few obvious candidates based on where you left off:
+
+1. **`vision/layout.py → detect()`** — your Day 2 task, multi-column region detection (E2). Can prototype against raw sample pages even without Anisa's `preprocess.py` output yet.
+2. **`labels.jsonl`** — continue hand-transcribing heldout pages (Day 1 carryover).
+3. Help think through one of the **open risks** — e.g., drafting the note to the instructor about the OCR fine-tuning exemption, or proposing a fix for the 15 vs 14 issues / 176 vs 224 corpus-count inconsistency.
+
+Just let me know which, or something else entirely.
+
+Me: how to do this one: `labels.jsonl` — continue hand-transcribing heldout pages (Day 1 carryover).
+
+AI: Here's a concrete schema for each line, built off your A1 schema so nothing needs renaming later:
+
+```json
+{
+  "doc_id": "byte-magazine-1982-04",
+  "page_num": 37,
+  "chunk_id": "byte-magazine-1982-04_p37_c1",
+  "reading_order_idx": 1,
+  "layout_type": "body_text",
+  "layout_bbox": [72, 90, 300, 640],
+  "gold_ocr_text": "The IBM Personal Computer, announced in August, brings...",
+  "question": "Did BYTE cover the IBM PC before its official launch?",
+  "expected_answer": "Yes — BYTE ran early coverage in the same period as the launch announcement, noting...",
+  "supporting_chunk_ids": ["byte-magazine-1982-04_p37_c1"]
+}
+```
+
+Notes on the fields:
+
+- **`gold_ocr_text`** — this is what Debashmita's `ocr_f1()` will diff against your VLM output later, so it has to be verbatim, not cleaned up.
+- **`layout_bbox`** — rough pixel coords are fine (eyeball it), it just needs to be in the right ballpark for layout.py sanity checks. Doesn't need to be pixel-perfect.
+- **`question` / `expected_answer` / `supporting_chunk_ids`** — this is the groundedness eval half. One page can have zero, one, or a couple of these if a page naturally supports more than one question — don't force it.
+- If a page has multiple layout regions (e.g. body text + a sidebar), give each region its own `chunk_id` and `reading_order_idx`, but they can share `doc_id`/`page_num`.
+
+A few things worth flagging while you do this:
+
+1. **Coordinate with Debashmita before finalizing** — she owns `get_data.sh` and the OCR benchmarking, and her heldout labelling task overlaps with yours. Worth a quick sync so you're not duplicating pages or using inconsistent `chunk_id` conventions.
+2. **This doubles as Section 5 evidence** — the "worst-failure case" Debashmita needs for the A2 form should ideally come from a page you've already hand-transcribed, so a genuinely hard page (dense code listing, or a torn/skewed scan) is worth including deliberately, not just easy pages.
+3. If you want, I can write you a small Python helper that takes your transcribed text + a page image and auto-generates the JSONL skeleton (fills in doc_id/page_num/chunk_id, leaves the text fields blank for you to fill) — just say the word and send me a sample page image or two.
+
+Me: this is the manifest.yaml: 
+
+```yaml
+# grading_kit/manifest.yaml — the SINGLE entry point a grader reads.
+# You fill this in. It declares the THREE axes and points to everything
+# needed to reproduce, evaluate, and grade the project. A grader opens
+# ONLY this file; it points to the rest. Build/run scripts and the eval
+# tasks are NAMED here, not copied, so they never go stale.
+
+project_id: "G21"              # your team id
+
+axes:
+  domain: "retro-computing/tech journalism"                # your corpus subject / real user (see Roster; one per team)
+  data_speciality: "multi-column reading order"       # ONE hard property of your corpus you are handed (see Data-Speciality Catalog)
+                            #   e.g. bangla | arabic | code-switching | degraded-scans | multi-column |
+                            #        handwritten | old-orthography | math-notation | dirty-ocr | ...
+                            #   (English is not a speciality; if your corpus is English, pick a data condition.)
+  primary_nfr: "scalable"           # ONE quality you optimise ABOVE baseline (see NFR sheet). Faithful &
+                            #   accurate are REQUIRED of everyone (baseline), so they are NOT choices.
+  nfr_target: "p95 latency <= 1.5s across full corpus"            # the concrete target you commit to for that NFR, e.g. "p95 latency <= 300ms",
+                            #   "peak RAM <= 2GB", "ECE <= 0.05", "PII recall >= 0.98"
+
+corpus:
+  path: data/raw/                   # where the scanned page-images live
+  pages: 0                          # total pages  (floor: >= 300)
+  words: 0                          # total words  (floor: >= 60000)
+  provenance: data/provenance.md    # source + licence + counts
+
+heldout:
+  pages_dir: grading_kit/heldout_pages/   # page-images set aside, never OCR-trained on
+  labels:    grading_kit/labels.jsonl     # ground-truth transcriptions for those pages
+
+entrypoints:                          # named, not duplicated (they build/run the real code)
+  build_index: scripts/build_index.sh
+  run_query:   scripts/run.sh
+  eval_tasks:  grading_kit/tasks.jsonl      # authored in A3
+  checker:     grading_kit/success_check.py
+  trace:       traces/run.jsonl              # JSONL trajectory the A3 agentic-feature check reads
+
+```
+
+label.jsonsl: 
+
+```jsonl
+{"page_id": "example_0001", "text": "REPLACE ME — the exact ground-truth transcription of held-out page example_0001. These labels are the oracle: OCR is scored against them, and fresh grading questions are authored from them."}
+
+```
+
+readme.md: 
+
+```markdown
+Put page-IMAGES here that you set aside and NEVER train or tune OCR on.
+A grader authors fresh questions from these pages and checks answers against
+../labels.jsonl. Seed a few pages in A1; add more (each with a transcription
+in labels.jsonl) as your OCR matures in A2.
+
+```
+
+what to do now
+
+AI: Good — this is much simpler than what I described before. Only two fields needed: `page_id` and `text`. No layout/bbox/question fields — those come later (grading questions are authored fresh by the grader from your transcriptions, and `tasks.jsonl` in A3 is where Q&A actually lives). Ignore my earlier schema for the JSONL part.
+
+Here's the corrected process:
+
+**1. Pick/confirm which pages go in `heldout_pages/`**
+These must be pages you set aside and never OCR-train or tune on. If none are seeded yet from A1, pick 5–10 now across a few issues/years — mix a dense text page, a code listing, a multi-column page, and one rougher scan (fold, skew, low contrast). Variety matters because the grader will write questions against whatever's in here.
+
+**2. Name each page image consistently**
+Something like `byte-magazine-1982-04_p037.png` (issue + page number baked into the filename). Whatever convention you pick, `page_id` in labels.jsonl should exactly match the image filename (minus extension) so the grader's script can pair them without guessing.
+
+**3. Transcribe verbatim**
+Type exactly what's printed — preserve original typos, line breaks in code listings, hyphenation, weird punctuation. Don't clean it up. This is the OCR oracle, so it needs to be literally what's on the page.
+
+**4. Append one line per page to `labels.jsonl`:**
+```jsonl
+{"page_id": "byte-magazine-1982-04_p037", "text": "The IBM Personal Computer, announced in August, brings a new..."}
+{"page_id": "byte-magazine-1993-06_p112", "text": "10 PRINT \"HELLO WORLD\"\n20 GOTO 10\n..."}
+```
+
+**5. Delete the placeholder line** (`example_0001`) once you have real entries — leaving it in will likely break the checker or pollute counts.
+
+**6. Don't touch `tasks.jsonl`** — that's explicitly "authored in A3," so it's not your job right now even though it depends on what you transcribe.
+
+A couple of practical notes:
+
+- Since `heldout_pages/` holds images and this is the file the grader visually reads, resolution/legibility matters more than volume — a crisp scan of a tricky page beats five easy ones.
+- Coordinate with Debashmita on page selection since she's doing OCR benchmarking — it'd help if the pages you transcribe by hand overlap with pages she's already running OCR on, so you get a natural OCR-vs-ground-truth comparison for free (useful for her Section 5 worst-failure case too).
+
+If you upload a page image or two, I can transcribe alongside you and format the JSONL line directly — just paste/upload what you've got.
+
+Me: did not get this. did not u say use pages that are never ocred? then why will i use her ocred pages?
+
+AI: You're right, that was a mistake — good catch.
+
+The rule is: heldout pages must never be used to **choose or tune** the OCR approach. Debashmita's benchmarking (Qwen2-VL vs olmOCR, prompt tweaks, model selection) needs to happen on separate pages — if she looks at how those two models perform on your heldout pages and that influences which one gets picked or how it's configured, you've contaminated your eval set. It's no longer a fair test.
+
+What *should* happen, and matches the readme's line "OCR is scored against them," is different: **once** the OCR model/config is locked in (chosen using non-heldout pages), that final fixed pipeline gets run once on the heldout pages, and its output is compared against your `labels.jsonl` transcriptions to get the actual OCR F1 score. That's evaluation, not tuning — it's fine, and it's the whole point of the heldout set existing.
+
+So the correct coordination point isn't "pick pages she's already OCR'ing for benchmarking" — it's the opposite: pick your heldout pages independently of whatever she's using for benchmarking/tuning, and make sure she knows which pages are off-limits for that tuning process. The overlap only happens at the end, when the finished OCR pipeline gets run on your heldout set for scoring.
+
+Sorry for the confusion — want me to redo that coordination note so it's accurate before you send anything to her?
+
+
+(Continuation of 1st chat)
+
+Me: 
