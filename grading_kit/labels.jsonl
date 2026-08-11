@@ -703,6 +703,27 @@ NORTHGATE COMPUTER SYSTEMS, INC.
 CODE B2603"}
 
 
+{"page_id": "byte-magazine-1993-06_p140", "text": "State of the Art
+
+MAKE WAY FOR DATA
+
+Middleware, such as RPCs and message-passing systems, helps data move smoothly through client/server networks. Soon these capabilities will become a part of your operating system.
+
+PAUL KORZENIOWSKI
+
+The term middleware is becoming quite fashionable, and many suppliers are bandying it about. But what is it, and how does it work? It's difficult to define, because thorny matters relating to building distributed applications (e.g., having an application function consistently while running on different operating systems) don't fit neatly under a single term. And further blurring middleware's identity is its transparent nature. \"Users want transparent access to information, so the goal of middleware is to make itself invisible,\" states Martin Goetz, president of Martin Goetz Associates, a consulting firm based in Teaneck, New Jersey.
+
+Middleware is a breed of client/server software that helps move data between applications running on your computer and your network. The software gives your programming team standard APIs that save development time, because the programmers don't have to modify applications to accommodate network protocols. With middleware, your programming team wastes less time trying to make an application work with your network's protocols or operating system and is free to spend more time fine-tuning your application.
+
+For example, IBM's Logical Unit 6.2 network protocol has 32 verbs (e.g., SEND and RECEIVE). Some of them have more than 100 parameters. Your programmers have to tinker with more than 1400 error conditions to get everything to work. But middleware, such as Message Express from Horizon Strategies (Needham, MA), can reduce the number of verbs to five and the parameters to about a dozen.
+
+OLTP (on-line transaction processing) monitors, which speed the exchange of data in various transactions (e.g., booking airline reservations) between databases and data sources, often provide middleware features. And many database companies, such as Gupta Technologies (Menlo Park, CA),
+
+NIGEL BUCHANAN © 1993
+
+JUNE 1993 BYTE 113"}
+
+
 
 
 
