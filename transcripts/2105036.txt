@@ -1756,4 +1756,1672 @@ It'll ask for IA account credentials (free to create at archive.org if you don't
 
 Also — small thing to notice in your terminal output: `TODO: fetch corpus into data/raw/` printed *before* the real fetching logic ran. That means the stub file's placeholder `echo` line is still present above Debashmita's real implementation in the actual `get_data.sh` on disk (the version you showed me last had both the stub template *and* the real script pasted together, likely accidentally). Worth having her check the file and delete that leftover `echo "TODO: ..."` line — harmless right now, but confusing output otherwise.
 
-Me: 
+Me: from pathlib import Path
+
+loader\_path = Path("src/doc\_agent/ingest/loader.py")
+
+loader\_path.write\_text('''"""Stage 1 — load scanned page-images."""
+
+from **future** import annotations
+
+from pathlib import Path
+
+from pdf2image import convert\_from\_path
+
+from ..contracts import Page
+
+RAW\_DIR = Path("data/raw")
+PAGE\_DIR = Path("data/interim/pages")
+
+def load\_pages(cfg: dict) -> list[Page]:
+"""Read data/raw/ and return scanned pages as Page objects."""
+
+```
+pdf_files = sorted(RAW_DIR.glob("*.pdf"))
+
+if not pdf_files:
+    raise FileNotFoundError(
+        f"No PDF files found in {RAW_DIR.resolve()}"
+    )
+
+if len(pdf_files) > 1:
+    raise ValueError(
+        f"Expected one PDF in {RAW_DIR}, "
+        f"but found {len(pdf_files)}. "
+        "Process one issue at a time."
+    )
+
+pdf_path = pdf_files[0]
+doc_id = pdf_path.stem
+
+output_dir = PAGE_DIR / doc_id
+output_dir.mkdir(parents=True, exist_ok=True)
+
+pages: list[Page] = []
+
+page_count = 1
+
+while True:
+    image_path = output_dir / f"page_{page_count:04d}.png"
+
+    if image_path.exists():
+        pages.append(
+            Page(
+                id=f"{doc_id}_p{page_count:04d}",
+                image_path=str(image_path),
+                doc_id=doc_id,
+            )
+        )
+        page_count += 1
+        continue
+
+    try:
+        images = convert_from_path(
+            str(pdf_path),
+            dpi=150,
+            first_page=page_count,
+            last_page=page_count,
+            fmt="png",
+        )
+    except Exception as exc:
+        if page_count == 1:
+            raise RuntimeError(
+                f"Failed to convert the first page of {pdf_path}"
+            ) from exc
+        break
+
+    if not images:
+        break
+
+    image = images[0]
+    image.save(image_path, "PNG")
+
+    pages.append(
+        Page(
+            id=f"{doc_id}_p{page_count:04d}",
+            image_path=str(image_path),
+            doc_id=doc_id,
+        )
+    )
+
+    page_count += 1
+
+return pages
+```
+
+''')
+
+print(f"Updated {loader\_path}")
+
+
+
+
+
+what is this doing 
+
+AI: Ah yes — this cell is basically **editing your `loader.py` file from inside the Kaggle notebook**. It is **not running the loader** yet.
+
+Think of it as:
+
+```text
+Kaggle notebook
+      ↓
+writes this code
+      ↓
+src/doc_agent/ingest/loader.py
+```
+
+### What each part does
+
+```python
+loader_path = Path("src/doc_agent/ingest/loader.py")
+```
+
+Finds the `loader.py` file in your cloned repository.
+
+Then:
+
+```python
+loader_path.write_text(''' ... ''')
+```
+
+**replaces the entire contents of `loader.py`** with the Python code between the triple quotes.
+
+So after this cell runs, your actual file contains the loader implementation.
+
+---
+
+### What the loader itself does
+
+The code inside the triple quotes does:
+
+```text
+data/raw/
+    ↓
+find PDFs
+    ↓
+make sure exactly ONE exists
+    ↓
+take that PDF
+    ↓
+convert page 1 → PNG
+    ↓
+save PNG
+    ↓
+create Page object
+    ↓
+convert page 2 → PNG
+    ↓
+...
+```
+
+This part:
+
+```python
+pdf_files = sorted(RAW_DIR.glob("*.pdf"))
+```
+
+finds all PDFs in:
+
+```text
+data/raw/
+```
+
+This:
+
+```python
+if len(pdf_files) > 1:
+    raise ValueError(...)
+```
+
+makes sure you don't accidentally process multiple issues at once.
+
+Then:
+
+```python
+pdf_path = pdf_files[0]
+doc_id = pdf_path.stem
+```
+
+selects the PDF and derives its document ID from the filename.
+
+For example:
+
+```text
+1975_09_BYTE_00-01_The_Worlds_Greatest_Toy.pdf
+```
+
+becomes:
+
+```text
+doc_id =
+1975_09_BYTE_00-01_The_Worlds_Greatest_Toy
+```
+
+Then:
+
+```python
+output_dir = PAGE_DIR / doc_id
+```
+
+creates:
+
+```text
+data/interim/pages/
+└── 1975_09_BYTE_00-01_The_Worlds_Greatest_Toy/
+```
+
+---
+
+### The important bit
+
+This:
+
+```python
+images = convert_from_path(
+    str(pdf_path),
+    dpi=150,
+    first_page=page_count,
+    last_page=page_count,
+    fmt="png",
+)
+```
+
+means:
+
+> "Give me **only this one PDF page** as an image."
+
+So instead of converting the whole magazine at once, it does:
+
+```text
+page 1 → convert → save
+page 2 → convert → save
+page 3 → convert → save
+...
+```
+
+That's why this implementation is much more memory-friendly.
+
+---
+
+### And this creates your `Page`
+
+```python
+pages.append(
+    Page(
+        id=f"{doc_id}_p{page_count:04d}",
+        image_path=str(image_path),
+        doc_id=doc_id,
+    )
+)
+```
+
+So eventually you get:
+
+```python
+pages = [
+    Page(
+        id="1975_09_BYTE_00-01_The_Worlds_Greatest_Toy_p0001",
+        image_path="data/interim/pages/.../page_0001.png",
+        doc_id="1975_09_BYTE_00-01_The_Worlds_Greatest_Toy"
+    ),
+    ...
+]
+```
+
+which exactly matches your **fixed `Page` contract**.
+
+### One important clarification
+
+This cell:
+
+```python
+loader_path.write_text(...)
+```
+
+**does not call `load_pages()`**.
+
+After this cell, you still need to run:
+
+```python
+from doc_agent import config
+from doc_agent.ingest.loader import load_pages
+
+cfg = config.load()
+
+pages = load_pages(cfg)
+
+print(f"Loaded {len(pages)} pages")
+print(pages[0])
+```
+
+That's the cell that actually starts converting the PDF.
+
+Also, **don't push this to GitHub yet**. Let's get it working in Kaggle first, then we can clean up the implementation and commit it.
+
+Me: to test this , how much time is needed?
+
+AI: If you're testing the **current loader on the entire 1975 issue**, it could take several minutes, and we don't need to wait that long just to prove the loader works.
+
+### For a proper quick test: ~5–30 seconds
+
+Let's test **only the first page**. Temporarily change the conversion part in `loader.py` to:
+
+```python
+images = convert_from_path(
+    str(pdf_path),
+    dpi=150,
+    first_page=1,
+    last_page=1,
+    fmt="png",
+)
+```
+
+Then run:
+
+```python
+from doc_agent import config
+from doc_agent.ingest.loader import load_pages
+
+cfg = config.load()
+
+pages = load_pages(cfg)
+
+print(f"Loaded {len(pages)} pages")
+print(pages[0])
+```
+
+You should get:
+
+```text
+Loaded 1 pages
+id='...' image_path='...' doc_id='...'
+```
+
+Then visually verify:
+
+```python
+from PIL import Image
+from IPython.display import display
+
+display(Image.open(pages[0].image_path))
+```
+
+If you see the scanned BYTE page, **Stage 1 is confirmed working.** ✅
+
+### After that
+
+We restore the incremental loop and process the whole issue. At that point, **don't guess the runtime**—we can time the first few pages and estimate the full issue accurately.
+
+So: **don't wait 10+ minutes right now. Test one page first.**
+
+Me: Why is it taking forever to run?
+
+AI: AHA. I think we found the likely culprit. 😭
+
+**You edited `loader.py`, but your notebook may still be using the old imported version of `load_pages`.**
+
+Python imports a module once and caches it. So if you previously did:
+
+```python
+from doc_agent.ingest.loader import load_pages
+```
+
+and *then* changed `loader.py`, the already-imported `load_pages` may still be the old function that converts the entire PDF.
+
+### Do this first
+
+Run this **exact cell**:
+
+```python
+import importlib
+import doc_agent.ingest.loader as loader
+
+importlib.reload(loader)
+
+from doc_agent import config
+
+cfg = config.load()
+
+pages = loader.load_pages(cfg)
+
+print(f"Loaded {len(pages)} pages")
+print(pages[0])
+```
+
+This explicitly reloads the modified `loader.py`.
+
+---
+
+### Even better: verify what code Kaggle is actually running
+
+Before calling it, run:
+
+```python
+import inspect
+import doc_agent.ingest.loader as loader
+
+print(inspect.getsource(loader.load_pages))
+```
+
+You should see:
+
+```python
+page_number = 1
+```
+
+and:
+
+```python
+first_page=page_number,
+last_page=page_number,
+```
+
+If instead you see:
+
+```python
+while True:
+```
+
+then you're still looking at the old version.
+
+---
+
+### One more thing
+
+Check that you really have only one PDF:
+
+```python
+from pathlib import Path
+
+for p in Path("data/raw").glob("*.pdf"):
+    print(p)
+```
+
+You should have only:
+
+```text
+data/raw/1975_09_BYTE_00-01_The_Worlds_Greatest_Toy.pdf
+```
+
+So the immediate sequence is:
+
+```text
+1. Edit loader.py
+        ↓
+2. importlib.reload(loader)
+        ↓
+3. call loader.load_pages(cfg)
+        ↓
+4. should convert ONLY page 1
+```
+
+**Don't wait for the current cell anymore if it's been running forever — interrupt it.** Then do the reload cell above.
+
+Me: from doc_agent import config
+from doc_agent.ingest.loader import load_pages
+
+cfg = config.load()
+
+pages = load_pages(cfg)
+
+print(f"Loaded {len(pages)} pages")
+print(pages[0])
+
+what should be the code of this test cell on kaggle 
+
+AI: Yep — since you're editing `loader.py` **from the notebook itself**, use `importlib.reload()` so Kaggle definitely picks up the latest version.
+
+### Test cell
+
+```python
+import importlib
+from doc_agent import config
+import doc_agent.ingest.loader as loader
+
+# Reload loader.py so the notebook uses the latest code
+importlib.reload(loader)
+
+# Load the actual configs/config.yaml
+cfg = config.load()
+
+# Run Stage 1
+pages = loader.load_pages(cfg)
+
+print(f"Loaded {len(pages)} pages")
+print(pages[0])
+```
+
+For your **current one-page test version** of `loader.py`, this should output:
+
+```text
+Loaded 1 pages
+id='...' image_path='...' doc_id='...'
+```
+
+If it still takes a long time, **interrupt the cell** rather than waiting. Then we should inspect exactly which version of `loader.py` Kaggle is executing.
+
+Me: yes, i got this output, what should i do next?
+
+AI: YESSS 😭 **Stage 1 is working.** You now have:
+
+```text
+PDF → page image → Page object
+```
+
+Before moving on, let's visually verify the generated page.
+
+### 1. Display the page
+
+Run this cell:
+
+```python
+from PIL import Image
+from IPython.display import display
+
+page_image = Image.open(pages[0].image_path)
+
+print(f"Image path: {pages[0].image_path}")
+print(f"Image size: {page_image.size}")
+
+display(page_image)
+```
+
+You should see the first scanned BYTE page.
+
+---
+
+### 2. If the image looks correct
+
+Then **don't immediately run the full corpus yet**.
+
+Your current `loader.py` is deliberately a **one-page test implementation**. We now know that:
+
+* `data/raw/*.pdf` is being found ✅
+* PDF conversion works ✅
+* Poppler works ✅
+* PNG is being generated ✅
+* `Page` matches your fixed contract ✅
+* `config.load()` works with the pipeline interface ✅
+
+### 3. Next, we should make the actual loader
+
+After confirming the image looks right, we'll change the loader from:
+
+```text
+PDF
+ ↓
+page 1 only
+ ↓
+Page
+```
+
+to:
+
+```text
+PDF
+ ↓
+page 1 → save → Page
+page 2 → save → Page
+page 3 → save → Page
+...
+ ↓
+list[Page]
+```
+
+**without loading the whole PDF into memory at once.**
+
+And importantly, we'll keep your architecture intact:
+
+```text
+config.yaml
+     ↓
+config.load()
+     ↓
+cfg
+     ↓
+loader.load_pages(cfg)
+     ↓
+list[Page]
+     ↓
+preprocess.run()
+     ↓
+enhance.run()
+     ↓
+...
+```
+
+So **right now, just display the page**. If it looks sane, tell me and we'll make the full Stage 1 loader.
+
+Me: I want to test it for 3 pages, then i can trust that this loader will run properly for the full corpus so for that tell me how should i edit the loader.py 
+
+
+
+from pathlib import Path
+
+loader\_path = Path("src/doc\_agent/ingest/loader.py")
+
+loader\_path.write\_text('''"""Stage 1 — load scanned page-images."""
+
+from **future** import annotations
+
+from pathlib import Path
+
+from pdf2image import convert\_from\_path
+
+from ..contracts import Page
+
+RAW\_DIR = Path("data/raw")
+PAGE\_DIR = Path("data/interim/pages")
+
+def load\_pages(cfg: dict) -> list[Page]:
+"""Read data/raw/ and load the first page as a Page object."""
+
+```
+pdf_files = sorted(RAW_DIR.glob("*.pdf"))
+
+if not pdf_files:
+    raise FileNotFoundError(
+        f"No PDF files found in {RAW_DIR.resolve()}"
+    )
+
+if len(pdf_files) > 1:
+    raise ValueError(
+        f"Expected one PDF in {RAW_DIR}, "
+        f"but found {len(pdf_files)}. "
+        "Process one issue at a time."
+    )
+
+pdf_path = pdf_files[0]
+doc_id = pdf_path.stem
+
+output_dir = PAGE_DIR / doc_id
+output_dir.mkdir(parents=True, exist_ok=True)
+
+page_number = 1
+image_path = output_dir / f"page_{page_number:04d}.png"
+
+if not image_path.exists():
+    images = convert_from_path(
+        str(pdf_path),
+        dpi=150,
+        first_page=page_number,
+        last_page=page_number,
+        fmt="png",
+    )
+
+    if not images:
+        raise RuntimeError(
+            f"Failed to convert page {page_number} of {pdf_path}"
+        )
+
+    images[0].save(image_path, "PNG")
+
+page = Page(
+    id=f"{doc_id}_p{page_number:04d}",
+    image_path=str(image_path),
+    doc_id=doc_id,
+)
+
+return [page]
+```
+
+''')
+
+print(f"Updated {loader\_path}")
+
+
+
+
+
+
+
+and these too 
+
+import importlib
+from doc\_agent import config
+import doc\_agent.ingest.loader as loader
+
+# Reload loader.py so the notebook uses the latest code
+
+importlib.reload(loader)
+
+# Load the actual configs/config.yaml
+
+cfg = config.load()
+
+# Run Stage 1
+
+pages = loader.load\_pages(cfg)
+
+print(f"Loaded {len(pages)} pages")
+print(pages[0])
+
+
+
+
+
+and lastly 
+
+import importlib
+from doc\_agent import config
+import doc\_agent.ingest.loader as loader
+
+# Reload loader.py so the notebook uses the latest code
+
+importlib.reload(loader)
+
+# Load the actual configs/config.yaml
+
+cfg = config.load()
+
+# Run Stage 1
+
+pages = loader.load\_pages(cfg)
+
+print(f"Loaded {len(pages)} pages")
+print(pages[0])
+
+AI: Yep — **3 pages is a much better sanity test**. If all 3 convert, save correctly, and come back as valid `Page` objects, we have much more confidence in the loader before letting it loose on the whole issue.
+
+You only need to change **two things**: the `loader.py` cell and the test cell. Your last two test cells are duplicates, so you only need **one**.
+
+### 1. Replace your `loader.py` notebook cell with this
+
+```python
+from pathlib import Path
+
+loader_path = Path("src/doc_agent/ingest/loader.py")
+
+loader_path.write_text('''"""Stage 1 — load scanned page-images."""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+from pdf2image import convert_from_path
+
+from ..contracts import Page
+
+
+RAW_DIR = Path("data/raw")
+PAGE_DIR = Path("data/interim/pages")
+
+
+def load_pages(cfg: dict) -> list[Page]:
+    """Read data/raw/ and load the first three pages as Page objects."""
+
+    pdf_files = sorted(RAW_DIR.glob("*.pdf"))
+
+    if not pdf_files:
+        raise FileNotFoundError(
+            f"No PDF files found in {RAW_DIR.resolve()}"
+        )
+
+    if len(pdf_files) > 1:
+        raise ValueError(
+            f"Expected one PDF in {RAW_DIR}, "
+            f"but found {len(pdf_files)}. "
+            "Process one issue at a time."
+        )
+
+    pdf_path = pdf_files[0]
+    doc_id = pdf_path.stem
+
+    output_dir = PAGE_DIR / doc_id
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    pages: list[Page] = []
+
+    for page_number in range(1, 4):
+        image_path = output_dir / f"page_{page_number:04d}.png"
+
+        if not image_path.exists():
+            images = convert_from_path(
+                str(pdf_path),
+                dpi=150,
+                first_page=page_number,
+                last_page=page_number,
+                fmt="png",
+            )
+
+            if not images:
+                raise RuntimeError(
+                    f"Failed to convert page {page_number} of {pdf_path}"
+                )
+
+            images[0].save(image_path, "PNG")
+
+        pages.append(
+            Page(
+                id=f"{doc_id}_p{page_number:04d}",
+                image_path=str(image_path),
+                doc_id=doc_id,
+            )
+        )
+
+    return pages
+''')
+
+print(f"Updated {loader_path}")
+```
+
+This will do:
+
+```text
+PDF
+ ├── page 1 → PNG → Page
+ ├── page 2 → PNG → Page
+ └── page 3 → PNG → Page
+```
+
+and **not** convert the entire PDF.
+
+---
+
+### 2. Use ONE test cell
+
+Delete/ignore the duplicate test cells and use this:
+
+```python
+import importlib
+from doc_agent import config
+import doc_agent.ingest.loader as loader
+
+# Reload the modified loader.py
+importlib.reload(loader)
+
+# Load the real configs/config.yaml
+cfg = config.load()
+
+# Run Stage 1
+pages = loader.load_pages(cfg)
+
+print(f"Loaded {len(pages)} pages")
+
+for page in pages:
+    print(page)
+```
+
+You should get:
+
+```text
+Loaded 3 pages
+id='..._p0001' image_path='...' doc_id='...'
+id='..._p0002' image_path='...' doc_id='...'
+id='..._p0003' image_path='...' doc_id='...'
+```
+
+### 3. Visually verify all 3
+
+Run:
+
+```python
+from PIL import Image
+from IPython.display import display
+
+for page in pages:
+    print(f"{page.id} → {page.image_path}")
+    display(Image.open(page.image_path))
+```
+
+If all three images look correct, we've verified the important parts of Stage 1.
+
+**One caveat:** 3 pages proves that the conversion mechanism works, but it doesn't *guarantee* the full-corpus run will succeed. The full issue introduces things like runtime, disk usage, and potentially unusual/corrupt pages. But it is a very reasonable sanity check before processing the whole issue.
+
+And once the 3-page test passes, **we should make the production loader incremental over all pages** rather than just changing `range(1, 4)` to `range(1, N)`. That way it remains memory-efficient and can resume pages that were already converted.
+
+Me: okay this works, so should i update the loader.py in my main repo, but pls tell me exactly which part is responsible for fixing the range in that code 
+
+AI: Yep — **now that the 3-page test works, you should update the actual `loader.py` in your repo**, but I would **not** copy the 3-page version into the repo. That version has a hard-coded test range.
+
+The exact line responsible for limiting the test to 3 pages is:
+
+```python
+for page_number in range(1, 4):
+```
+
+### For your 3-page test
+
+```python
+for page_number in range(1, 4):
+```
+
+means:
+
+```text
+1, 2, 3
+```
+
+because Python's `range` excludes the ending number.
+
+### For the real full-issue loader
+
+You **shouldn't change it to something like `range(1, 200)`**, because you don't know the number of pages in advance.
+
+Instead, use the incremental `while True` approach we had earlier, where:
+
+```python
+page_number = 1
+
+while True:
+    ...
+    images = convert_from_path(
+        ...,
+        first_page=page_number,
+        last_page=page_number,
+    )
+
+    if not images:
+        break
+
+    ...
+    page_number += 1
+```
+
+The important part is:
+
+```python
+first_page=page_number,
+last_page=page_number,
+```
+
+That means **only one PDF page is rendered at a time**.
+
+And:
+
+```python
+page_number += 1
+```
+
+moves to the next page.
+
+When Poppler eventually returns no image:
+
+```python
+if not images:
+    break
+```
+
+the loader knows it has reached the end of the PDF.
+
+### So your final architecture should be
+
+```text
+PDF
+ │
+ ├── page_number = 1
+ │      ↓
+ │   render page 1
+ │      ↓
+ │   save page_0001.png
+ │      ↓
+ │   Page(...)
+ │
+ ├── page_number = 2
+ │      ↓
+ │   render page 2
+ │      ↓
+ │   save page_0002.png
+ │      ↓
+ │   Page(...)
+ │
+ ├── ...
+ │
+ └── no more pages
+        ↓
+       break
+        ↓
+   return list[Page]
+```
+
+**So yes: update the repo's `loader.py`, but use the incremental `while True` version, not the `range(1, 4)` test version.**
+
+And your Kaggle test cell can stay exactly as:
+
+```python
+import importlib
+from doc_agent import config
+import doc_agent.ingest.loader as loader
+
+importlib.reload(loader)
+
+cfg = config.load()
+
+pages = loader.load_pages(cfg)
+
+print(f"Loaded {len(pages)} pages")
+
+for page in pages:
+    print(page)
+```
+
+Once you update the repo, the next thing I'd do is **commit `loader.py` only**. Don't commit `data/raw/` or the generated `data/interim/pages/` images.
+
+Me: Give me the edited code 
+
+from pathlib import Path
+
+loader\_path = Path("src/doc\_agent/ingest/loader.py")
+
+loader\_path.write\_text('''"""Stage 1 — load scanned page-images."""
+
+from **future** import annotations
+
+from pathlib import Path
+
+from pdf2image import convert\_from\_path
+
+from ..contracts import Page
+
+RAW\_DIR = Path("data/raw")
+PAGE\_DIR = Path("data/interim/pages")
+
+def load\_pages(cfg: dict) -> list[Page]:
+"""Read data/raw/ and load the first three pages as Page objects."""
+
+```
+pdf_files = sorted(RAW_DIR.glob("*.pdf"))
+
+if not pdf_files:
+    raise FileNotFoundError(
+        f"No PDF files found in {RAW_DIR.resolve()}"
+    )
+
+if len(pdf_files) > 1:
+    raise ValueError(
+        f"Expected one PDF in {RAW_DIR}, "
+        f"but found {len(pdf_files)}. "
+        "Process one issue at a time."
+    )
+
+pdf_path = pdf_files[0]
+doc_id = pdf_path.stem
+
+output_dir = PAGE_DIR / doc_id
+output_dir.mkdir(parents=True, exist_ok=True)
+
+pages: list[Page] = []
+
+for page_number in range(1, 4):
+    image_path = output_dir / f"page_{page_number:04d}.png"
+
+    if not image_path.exists():
+        images = convert_from_path(
+            str(pdf_path),
+            dpi=150,
+            first_page=page_number,
+            last_page=page_number,
+            fmt="png",
+        )
+
+        if not images:
+            raise RuntimeError(
+                f"Failed to convert page {page_number} of {pdf_path}"
+            )
+
+        images[0].save(image_path, "PNG")
+
+    pages.append(
+        Page(
+            id=f"{doc_id}_p{page_number:04d}",
+            image_path=str(image_path),
+            doc_id=doc_id,
+        )
+    )
+
+return pages
+```
+
+''')
+
+print(f"Updated {loader\_path}")
+
+AI: Yep — here's the **full production version**. This removes the `range(1, 4)` limitation and processes the PDF **one page at a time until the PDF ends**.
+
+```python
+from pathlib import Path
+
+loader_path = Path("src/doc_agent/ingest/loader.py")
+
+loader_path.write_text('''"""Stage 1 — load scanned page-images."""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+from pdf2image import convert_from_path
+
+from ..contracts import Page
+
+RAW_DIR = Path("data/raw")
+PAGE_DIR = Path("data/interim/pages")
+
+
+def load_pages(cfg: dict) -> list[Page]:
+    """Read data/raw/ and return scanned pages as Page objects."""
+
+    pdf_files = sorted(RAW_DIR.glob("*.pdf"))
+
+    if not pdf_files:
+        raise FileNotFoundError(
+            f"No PDF files found in {RAW_DIR.resolve()}"
+        )
+
+    if len(pdf_files) > 1:
+        raise ValueError(
+            f"Expected one PDF in {RAW_DIR}, "
+            f"but found {len(pdf_files)}. "
+            "Process one issue at a time."
+        )
+
+    pdf_path = pdf_files[0]
+    doc_id = pdf_path.stem
+
+    output_dir = PAGE_DIR / doc_id
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    pages: list[Page] = []
+    page_number = 1
+
+    while True:
+        image_path = output_dir / f"page_{page_number:04d}.png"
+
+        # Reuse an already-converted page if it exists.
+        if image_path.exists():
+            pages.append(
+                Page(
+                    id=f"{doc_id}_p{page_number:04d}",
+                    image_path=str(image_path),
+                    doc_id=doc_id,
+                )
+            )
+            page_number += 1
+            continue
+
+        try:
+            images = convert_from_path(
+                str(pdf_path),
+                dpi=150,
+                first_page=page_number,
+                last_page=page_number,
+                fmt="png",
+            )
+        except Exception as exc:
+            if page_number == 1:
+                raise RuntimeError(
+                    f"Failed to convert the first page of {pdf_path}"
+                ) from exc
+            break
+
+        # No image means we have reached the end of the PDF.
+        if not images:
+            break
+
+        images[0].save(image_path, "PNG")
+
+        pages.append(
+            Page(
+                id=f"{doc_id}_p{page_number:04d}",
+                image_path=str(image_path),
+                doc_id=doc_id,
+            )
+        )
+
+        page_number += 1
+
+    return pages
+''')
+
+print(f"Updated {loader_path}")
+```
+
+### The key difference
+
+Your test version had:
+
+```python
+for page_number in range(1, 4):
+```
+
+The production version has:
+
+```python
+page_number = 1
+
+while True:
+```
+
+and increments:
+
+```python
+page_number += 1
+```
+
+until:
+
+```python
+if not images:
+    break
+```
+
+So you **don't need to know how many pages the issue has**.
+
+Also, this line:
+
+```python
+if image_path.exists():
+```
+
+means if the loader gets interrupted halfway through, rerunning it can **reuse pages that were already converted** instead of unnecessarily rendering those pages again. That's particularly useful for your large BYTE corpus.
+
+Me: """Stage 1 — load scanned page-images."""
+
+from **future** import annotations
+
+from pathlib import Path
+
+from pdf2image import convert\_from\_path
+
+from ..contracts import Page
+
+RAW\_DIR = Path("data/raw")
+PAGE\_DIR = Path("data/interim/pages")
+
+def load\_pages(cfg: dict) -> list[Page]:
+"""Read data/raw/ and return scanned pages as Page objects."""
+
+```
+pdf_files = sorted(RAW_DIR.glob("*.pdf"))
+
+if not pdf_files:
+    raise FileNotFoundError(
+        f"No PDF files found in {RAW_DIR.resolve()}"
+    )
+
+if len(pdf_files) > 1:
+    raise ValueError(
+        f"Expected one PDF in {RAW_DIR}, "
+        f"but found {len(pdf_files)}. "
+        "Process one issue at a time."
+    )
+
+pdf_path = pdf_files[0]
+doc_id = pdf_path.stem
+
+output_dir = PAGE_DIR / doc_id
+output_dir.mkdir(parents=True, exist_ok=True)
+
+pages: list[Page] = []
+page_number = 1
+
+while True:
+    image_path = output_dir / f"page_{page_number:04d}.png"
+
+    # Reuse an already-converted page if it exists.
+    if image_path.exists():
+        pages.append(
+            Page(
+                id=f"{doc_id}_p{page_number:04d}",
+                image_path=str(image_path),
+                doc_id=doc_id,
+            )
+        )
+        page_number += 1
+        continue
+
+    try:
+        images = convert_from_path(
+            str(pdf_path),
+            dpi=150,
+            first_page=page_number,
+            last_page=page_number,
+            fmt="png",
+        )
+    except Exception as exc:
+        if page_number == 1:
+            raise RuntimeError(
+                f"Failed to convert the first page of {pdf_path}"
+            ) from exc
+        break
+
+    # No image means we have reached the end of the PDF.
+    if not images:
+        break
+
+    images[0].save(image_path, "PNG")
+
+    pages.append(
+        Page(
+            id=f"{doc_id}_p{page_number:04d}",
+            image_path=str(image_path),
+            doc_id=doc_id,
+        )
+    )
+
+    page_number += 1
+
+return pages
+
+
+is this code ok for my vscode , not kaggle btw 
+```
+
+AI: Yes — **the logic is fine for your VS Code repo**, and it's actually better suited to the real project than the 3-page test version.
+
+There is just **one important thing to consider**: your pasted code has formatting artifacts from the chat (`**future**`, `convert\_from\_path`). In the actual `.py` file, they must be normal Python syntax.
+
+Your actual `loader.py` should look exactly like this:
+
+```python
+"""Stage 1 — load scanned page-images."""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+from pdf2image import convert_from_path
+
+from ..contracts import Page
+
+RAW_DIR = Path("data/raw")
+PAGE_DIR = Path("data/interim/pages")
+
+
+def load_pages(cfg: dict) -> list[Page]:
+    """Read data/raw/ and return scanned pages as Page objects."""
+
+    pdf_files = sorted(RAW_DIR.glob("*.pdf"))
+
+    if not pdf_files:
+        raise FileNotFoundError(
+            f"No PDF files found in {RAW_DIR.resolve()}"
+        )
+
+    if len(pdf_files) > 1:
+        raise ValueError(
+            f"Expected one PDF in {RAW_DIR}, "
+            f"but found {len(pdf_files)}. "
+            "Process one issue at a time."
+        )
+
+    pdf_path = pdf_files[0]
+    doc_id = pdf_path.stem
+
+    output_dir = PAGE_DIR / doc_id
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    pages: list[Page] = []
+    page_number = 1
+
+    while True:
+        image_path = output_dir / f"page_{page_number:04d}.png"
+
+        # Reuse an already-converted page if it exists.
+        if image_path.exists():
+            pages.append(
+                Page(
+                    id=f"{doc_id}_p{page_number:04d}",
+                    image_path=str(image_path),
+                    doc_id=doc_id,
+                )
+            )
+            page_number += 1
+            continue
+
+        try:
+            images = convert_from_path(
+                str(pdf_path),
+                dpi=150,
+                first_page=page_number,
+                last_page=page_number,
+                fmt="png",
+            )
+        except Exception as exc:
+            if page_number == 1:
+                raise RuntimeError(
+                    f"Failed to convert the first page of {pdf_path}"
+                ) from exc
+            break
+
+        # No image means we have reached the end of the PDF.
+        if not images:
+            break
+
+        images[0].save(image_path, "PNG")
+
+        pages.append(
+            Page(
+                id=f"{doc_id}_p{page_number:04d}",
+                image_path=str(image_path),
+                doc_id=doc_id,
+            )
+        )
+
+        page_number += 1
+
+    return pages
+```
+
+### One VS Code-specific thing ⚠️
+
+You'll need **Poppler installed on your local machine** for `pdf2image` to work.
+
+On Ubuntu, for example:
+
+```bash
+sudo apt update
+sudo apt install poppler-utils
+```
+
+Then verify:
+
+```bash
+which pdftoppm
+```
+
+You should get something like:
+
+```text
+/usr/bin/pdftoppm
+```
+
+And make sure your Python environment has:
+
+```bash
+pip install pdf2image
+```
+
+### One architectural note
+
+Your current loader deliberately enforces:
+
+```python
+if len(pdf_files) > 1:
+    raise ValueError(...)
+```
+
+That's **consistent with your current "one issue at a time" workflow**.
+
+So:
+
+```text
+data/raw/
+└── one_issue.pdf
+        ↓
+loader
+        ↓
+data/interim/pages/
+└── one_issue/
+    ├── page_0001.png
+    ├── page_0002.png
+    └── ...
+```
+
+That's perfectly reasonable for A2.
+
+Later, when you want to ingest multiple issues into the corpus incrementally, we can modify the loader to process **each PDF independently** rather than forcing exactly one PDF in `data/raw/`. That change is separate from the page-by-page rendering logic.
+
+Me: ok what is next 
+T-T 
+preprocessing file right?
+"""Stage 1 — deskew / denoise / binarize / augment"""
+from **future** import annotations
+from ..contracts import \*  # noqa
+def run(pages: list[Page], cfg: dict) -> list[Page]:
+"""Classical preprocessing. IMPLEMENT."""
+raise NotImplementedError("Stage 1: preprocess")
+
+
+this, but need to test in kaggle first and then previous workflow 
+
+AI: Yes 😭 — **next is `preprocess.py`**, and we can follow exactly the same workflow:
+
+**implement → test on Kaggle → verify → move implementation into VS Code repo.**
+
+One important thing first: your current `Page` contract only has:
+
+```python
+id
+image_path
+doc_id
+```
+
+So preprocessing should **modify/create processed page images and return new `Page` objects**. We shouldn't invent new fields.
+
+For your BYTE scans, I'd keep the first implementation conservative: **grayscale + light contrast enhancement + optional denoising**, rather than aggressive binarization. Aggressive thresholding can destroy tiny text/code in old magazines.
+
+## 1. Kaggle: implement `preprocess.py`
+
+Since you're editing the repository from the Kaggle notebook, use this cell:
+
+```python
+from pathlib import Path
+
+preprocess_path = Path("src/doc_agent/ingest/preprocess.py")
+
+preprocess_path.write_text('''"""Stage 1 — deskew / denoise / binarize / augment."""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+from PIL import Image, ImageEnhance, ImageFilter
+
+from ..contracts import Page
+
+
+PROCESSED_DIR = Path("data/interim/preprocessed")
+
+
+def run(pages: list[Page], cfg: dict) -> list[Page]:
+    """Apply lightweight preprocessing and return processed Page objects."""
+
+    PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
+
+    processed_pages: list[Page] = []
+
+    for page in pages:
+        input_path = Path(page.image_path)
+
+        output_dir = PROCESSED_DIR / page.doc_id
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        output_path = output_dir / input_path.name
+
+        # Reuse an already-preprocessed page.
+        if not output_path.exists():
+            image = Image.open(input_path).convert("L")
+
+            # Light contrast enhancement.
+            image = ImageEnhance.Contrast(image).enhance(1.2)
+
+            # Mild denoising.
+            image = image.filter(ImageFilter.MedianFilter(size=3))
+
+            image.save(output_path, "PNG")
+
+        processed_pages.append(
+            Page(
+                id=page.id,
+                image_path=str(output_path),
+                doc_id=page.doc_id,
+            )
+        )
+
+    return processed_pages
+''')
+
+print(f"Updated {preprocess_path}")
+```
+
+This is intentionally **lightweight** for the first test.
+
+---
+
+## 2. Test it with your existing 3 pages
+
+Since your `pages` variable already contains the three `Page` objects from the loader test, run:
+
+```python
+import importlib
+import doc_agent.ingest.preprocess as preprocess
+
+importlib.reload(preprocess)
+
+processed_pages = preprocess.run(pages, cfg)
+
+print(f"Processed {len(processed_pages)} pages")
+
+for page in processed_pages:
+    print(page)
+```
+
+You should get:
+
+```text
+Processed 3 pages
+id='...' image_path='data/interim/preprocessed/.../page_0001.png' ...
+id='...' image_path='data/interim/preprocessed/.../page_0002.png' ...
+id='...' image_path='data/interim/preprocessed/.../page_0003.png' ...
+```
+
+---
+
+## 3. Visually compare them
+
+This is **really important** for preprocessing.
+
+```python
+from PIL import Image
+from IPython.display import display
+
+for original, processed in zip(pages, processed_pages):
+    print(f"\n{original.id}")
+
+    print("Original:")
+    display(Image.open(original.image_path))
+
+    print("Processed:")
+    display(Image.open(processed.image_path))
+```
+
+You want the processed version to remain **readable**, especially:
+
+* tiny text
+* multi-column text
+* headings
+* code listings
+* diagrams
+
+If the processed image looks worse, **don't proceed to OCR yet**. We adjust preprocessing first.
+
+---
+
+## 4. Then put it in your VS Code repo
+
+Once the 3-page Kaggle test works, your actual:
+
+```text
+src/doc_agent/ingest/preprocess.py
+```
+
+should contain the same implementation.
+
+Then your pipeline becomes:
+
+```text
+PDF
+ ↓
+loader.load_pages()
+ ↓
+list[Page]
+ ↓
+preprocess.run()
+ ↓
+list[Page]
+ ↓
+enhance.run()
+ ↓
+...
+```
+
+And your existing `pipeline.py` already expects exactly this:
+
+```python
+pages = loader.load_pages(cfg)
+pages = preprocess.run(pages, cfg)
+pages = enhance.run(pages, cfg)
+```
+
+So **we don't need to modify `pipeline.py` for this stage.**
+
+### One caveat
+
+Your stub says:
+
+> `deskew / denoise / binarize / augment`
+
+but I would **not implement all four blindly just because they're in the comment**. For scanned BYTE pages, deskew and binarization need to be validated visually, and "augment" usually isn't something you want during inference/index construction unless the assignment specifically requires it.
+
+So first let's get **light preprocessing working and visually validated on 3 pages**. Then we can decide whether deskew/binarization actually improves your OCR.
