@@ -313,6 +313,27 @@ Unix Wasn't the First
 Circle 129 on inquiry card."}
 
 
+{"page_id": "byte-magazine-1984-01_p023", "text": "Letters
+
+Perhaps Radio Shack should have taken the money that was spent on incorporating that insipid attempt at a sound statement and spent it on providing the Model 4's keyboard with a functioning \"ON\" light. After the computer has been turned on and before TRSDOS has been booted up, there is absolutely no way to tell that it is on: no cursor on the screen and no lights on the keyboard or front panel. It's such a simple thing, yet it seems to have completely slipped the attention of the engineers at Radio Shack. And it is important: I've had my Model
+
+4 for only two months and I've already inadvertently left it on overnight several times (once with the cover on it).
+
+And, of course, there are the seemingly obligatory documentation typos and ambiguities. When attempting to get the communications software that is included with TRSDOS 6.0 (a useful and sophisticated program, I might add) up and running, the unsuspecting Model 4 user is led on a wild goose chase for an appendix that doesn't exist: the included reference to Appendix L should have been to Appendix I. Once I got the Comm program going and experienced difficulty in downloading a file from my disk space in Compuserve, I discovered that the problem lay with the instructions for transferring a file from a mainframe to a TRS-80. We are first told to \"Type in the command which causes the mainframe to list the file, but do not press <ENTER>.\" The next instruction tells us to \"Specify your receive file by pressing <CLEAR><6> followed by <CLEAR><9>,\" after which we are to type in the filename in response to the prompt. The third step begins by instructing the user to \"Press <CLEAR><6> followed by <CLEAR><:> to open the receive area of memory.\" If the file to be downloaded is smaller than the available area of memory, we go to the next instruction. We are then told to \"Press <ENTER> to start the file listing.\" The instructions are both clear and quite detailed, but the confusion results from assuming the user, who is being walked through the procedure verbatim, will suddenly break out of the rote mold and provide one key step that they have assumed to be one of common sense. When I attempted to carry out these instructions, I began by issuing the prescribed FILGE command to list my file:
+
+TYPE filename
+
+but did not press <ENTER>. I then did the <CLEAR><6><CLEAR><9> to specify my receive file. The Comm program responded with the appropriate prompt and I typed in the filename
+
+Filename: filename
+
+Now, anyone with an ounce of computer literacy knows that, ordinarily, in order to get the computer to \"take\" the information that has just been typed on the keyboard, the user must press <ENTER>; but remember, the instructions have been set up for the user to follow precisely, step-by-step. The first instruction told us not to press <ENTER> in a situation where we normally would have, and the first half of the second instruction had us press keys that caused the computer to do something without having to press <ENTER>. So the immediate assumption, at least on my part, was that I was not to press <ENTER> again until explicitly instructed to do so in the fourth step of the procedure. Therefore, without pressing <ENTER> after typing in the name of the receiving file, I tried to open the receive area of
+
+22 January 1984 © BYTE Publications Inc.
+
+Circle 352 on inquiry card. →"}
+
+
 
 
 
