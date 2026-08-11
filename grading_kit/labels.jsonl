@@ -379,6 +379,46 @@ Inquiry 340
 JUNE 1985 • BYTE 17"}
 
 
+{"page_id": "byte-magazine-1986-08_p032", "text": "W·H·A·T'S N·E·W
+
+Graphics Package Works in Medium and High Resolution
+
+VCN Concorde, an integrated graphics program, provides tools for freehand painting, animation, creating charts, and mixing text and images in medium or high resolution. It can plot graphs from Multiplan, Lotus 1-2-3, Symphony, and DIF spreadsheets. Painting capabilities include multilevel zoom, 64 colors, and scaling. A database comes with 2000 icons and symbols, but you can also draw your own.
+
+You can send Concorde output to a printer (dot-matrix, ink-jet, or laser) or plotter, or use it in a 35mm slide program or self-running presentation (dissolve and fade options are included).
+
+The package runs on the IBM PC series and workalikes. It functions with machines using the Enhanced Graphics Adapter (and compatible cards) and with the AT&T 6300/Olivetti line using the Display Enhancement Board. Price is $695. Contact Visual Communications Network Inc., 238 Main St., Cambridge, MA 02142, (617) 497-4000. Inquiry 550.
+
+Images produced using VCN Concorde.
+
+The Data General/One Model 2
+
+Data General announced a second version of its Data General/One portable computer. The new model, which weighs less than 12
+
+pounds, is equipped with an electroluminescent display or a liquid-crystal display that, the company claims, provides twice the contrast of the previous model's LCD.
+
+Like the first version of the portable, the Data General/One Model 2 is compatible with the IBM PC. It runs on an 80C88 processor and comes with 256K bytes of NMOS RAM (expandable to 640K) and a 3½-inch floppy disk drive. Prices start at $2795 for a base configuration with an electroluminescent display or $1795 for the same configuration with an LCD screen.
+
+The electroluminescent screen displays 80 columns by 25 lines and 640 by 200 pixels. The LCD screen also displays 80 columns by 25 lines and features a resolution of 640 by 256 pixels. According to the company, the LCD displays characters with a 2:1 height/width ratio, which enables it to display IBM PC-compatible graphics without distortion. The Model 2 EL has an optional external battery pack that reportedly will power the
+
+system for up to 3 hours; with the LCD version, internal nickel-cadmium batteries provide up to 7 hours of power.
+
+Other standard features of the Model 2 include a serial and a parallel interface, a 79-key keyboard, and two slots at the rear of the machine for expansion cards. Among the available options are a 10-megabyte internal hard disk drive, a second 3½-inch floppy drive, an 8087 math coprocessor, an internal 300/1200-bps modem, an interface card for an external monitor, an external 5¼-inch floppy disk drive, and an expansion chassis that will hold PC-compatible expansion cards.
+
+An LCD unit with two floppy drives sells for $1995; with one floppy drive and a 10-megabyte hard disk drive, it costs $2995. An electroluminescent model with two floppy drives costs $2995; with a floppy and a hard disk drive, it sells for $3995. The company has also reduced the price of the Data General One/Model 1 from $2195 to $1495. Contact Data General Corp., 4400 Computer Dr., Westboro, MA 01580, (617) 366-8911. Inquiry 551.
+
+Graphics Chips from Intel and TI
+
+Intel has developed a graphics coprocessor chip, the 82786, that can manipulate windows and other graphics elements as much as 100 times faster, the company says, than is possible through software. Designed
+
+[continued]
+
+AUGUST 1986 • BYTE 29"}
+
+
+
+
+
 
 
 
