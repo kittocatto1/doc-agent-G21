@@ -2,6 +2,7 @@
 from __future__ import annotations
 from pathlib import Path
 import torch
+import json 
 from PIL import Image
 from ..contracts import Chunk, Region
 
@@ -53,9 +54,8 @@ def _find_page_image(page_id: str) -> Path:
     filename = f"page_{page_number}.png"
 
     search_dirs = [
-        Path("data/raw/preprocessed"),
         Path("data/interim/preprocessed"),
-        Path("data/interim/pages"),
+        Path("data/interim/pages")
     ]
 
     for directory in search_dirs:
@@ -206,34 +206,51 @@ def transcribe(
     regions: list[Region],
     cfg: dict,
 ) -> list[Chunk]:
-    """Convert layout regions into OCR text chunks."""
+    """Convert layout regions into OCR text chunks.
+    Checkpoints incrementally to OCR_DIR/chunks.json and resumes from it
+    on restart (skips regions whose chunk_id was already OCR'd) -- Kaggle
+    sessions can die mid-run, this avoids losing completed work."""
+
+    OCR_DIR.mkdir(parents=True, exist_ok=True)
+    output_path = OCR_DIR / "chunks.json"
+    checkpoint_every = cfg["ocr"].get("checkpoint_every", 25)
+
+    # Resume: load any chunks already OCR'd from a previous run.
+    chunks: list[Chunk] = []
+    already_done_ids: set[str] = set()
+    if output_path.exists():
+        with output_path.open("r", encoding="utf-8") as f:
+            existing = json.load(f)
+        chunks = [Chunk(**item) for item in existing]
+        already_done_ids = {c.id for c in chunks}
+        print(f"Resuming: {len(chunks)} chunks already OCR'd, skipping those.")
 
     reader = Reader(cfg)
 
-    chunks: list[Chunk] = []
-
     for index, region in enumerate(regions):
-        text = reader.transcribe_region(region)
+        doc_id = region.page_id.rsplit("_p", 1)[0]
+        chunk_id = f"{region.page_id}_region_{index:04d}"
+
+        if chunk_id in already_done_ids:
+            continue  # already OCR'd in a previous (interrupted) run
+
+        try:
+            text = reader.transcribe_region(region)
+        except Exception as exc:
+            print(f"WARNING: OCR failed for region {index}/{len(regions)} ({chunk_id}): {exc}")
+            continue
 
         if not text:
             continue
 
-        doc_id = region.page_id.rsplit(
-            "_p", 1
-        )[0]
+        chunks.append(Chunk(
+            id=chunk_id, doc_id=doc_id, text=text,
+            page_ids=[region.page_id], score=0.0,
+        ))
 
-        chunk_id = (
-            f"{region.page_id}_region_{index:04d}"
-        )
-
-        chunks.append(
-            Chunk(
-                id=chunk_id,
-                doc_id=doc_id,
-                text=text,
-                page_ids=[region.page_id],
-                score=0.0,
-            )
-        )
+        if (index + 1) % checkpoint_every == 0 or (index + 1) == len(regions):
+            with output_path.open("w", encoding="utf-8") as f:
+                json.dump([c.model_dump() for c in chunks], f, ensure_ascii=False, indent=2)
+            print(f"[{index + 1}/{len(regions)}] checkpoint saved -- {len(chunks)} chunks total")
 
     return chunks
