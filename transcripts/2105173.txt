@@ -2853,4 +2853,1013 @@ Sorry for the confusion — want me to redo that coordination note so it's accur
 
 (Continuation of 1st chat)
 
-Me: 
+Me: i have got the chunks.json from running the notebook in kaggle. how do i test whether all codes are working?? give me a unit test type to run on kaggle to see whether it is working for 10-12 chunks? it should be independent, so that i dont have to bring up whole repo manually. or just write the git clone code with it. remember, it will be a standalone code. also what will be the i/p to kaggle? the gotten o/p looks like: (its huge, i am giving u snippet) 
+  {
+    "id": "1983_11_BYTE_08-11_Inside_the_IBM_PC_p0001_region_0000",
+    "doc_id": "1983_11_BYTE_08-11_Inside_the_IBM_PC",
+    "text": "thesmallsystemsjournal",
+    "page_ids": [
+      "1983_11_BYTE_08-11_Inside_the_IBM_PC_p0001"
+    ],
+    "score": 0.0
+  },
+  {
+    "id": "1983_11_BYTE_08-11_Inside_the_IBM_PC_p0001_region_0001",
+    "doc_id": "1983_11_BYTE_08-11_Inside_the_IBM_PC",
+    "text": "Inside the IBM PC",
+    "page_ids": [
+      "1983_11_BYTE_08-11_Inside_the_IBM_PC_p0001"
+    ],
+    "score": 0.0
+  },
+  {
+    "id": "1983_11_BYTE_08-11_Inside_the_IBM_PC_p0001_region_0002",
+    "doc_id": "1983_11_BYTE_08-11_Inside_the_IBM_PC",
+    "text": "Inside the IBM PC",
+    "page_ids": [
+      "1983_11_BYTE_08-11_Inside_the_IBM_PC_p0001"
+    ],
+    "score": 0.0
+  },
+  {
+    "id": "1983_11_BYTE_08-11_Inside_the_IBM_PC_p0001_region_0003",
+    "doc_id": "1983_11_BYTE_08-11_Inside_the_IBM_PC",
+    "text": "Hundreds of Peripheral Boards\nBig Blue Goes Japanese\nThe Compatibility Question",
+    "page_ids": [
+      "1983_11_BYTE_08-11_Inside_the_IBM_PC_p0001"
+    ],
+    "score": 0.0
+  },
+  {
+    "id": "1983_11_BYTE_08-11_Inside_the_IBM_PC_p0001_region_0004",
+    "doc_id": "1983_11_BYTE_08-11_Inside_the_IBM_PC",
+    "text": "NOVEMBER 1983 Vol. 8, No. 11",
+    "page_ids": [
+      "1983_11_BYTE_08-11_Inside_the_IBM_PC_p0001"
+    ],
+    "score": 0.0
+  },
+  {
+    "id": "1983_11_BYTE_08-11_Inside_the_IBM_PC_p0001_region_0005",
+    "doc_id": "1983_11_BYTE_08-11_Inside_the_IBM_PC",
+    "text": "Workslate-A Dedicated Portable",
+    "page_ids": [
+      "1983_11_BYTE_08-11_Inside_the_IBM_PC_p0001"
+    ],
+    "score": 0.0
+  },
+  {
+    "id": "1983_11_BYTE_08-11_Inside_the_IBM_PC_p0002_region_0006",
+    "doc_id": "1983_11_BYTE_08-11_Inside_the_IBM_PC",
+    "text": "Inside Apple",
+    "page_ids": [
+      "1983_11_BYTE_08-11_Inside_the_IBM_PC_p0002"
+    ],
+    "score": 0.0
+  },
+  {
+    "id": "1983_11_BYTE_08-11_Inside_the_IBM_PC_p0002_region_0007",
+    "doc_id": "1983_11_BYTE_08-11_Inside_the_IBM_PC",
+    "text": "Apple's new Monitor II. A sight for sore eyes.",
+    "page_ids": [
+      "1983_11_BYTE_08-11_Inside_the_IBM_PC_p0002"
+    ],
+    "score": 0.0
+  },
+  {
+    "id": "1983_11_BYTE_08-11_Inside_the_IBM_PC_p0002_region_0008",
+    "doc_id": "1983_11_BYTE_08-11_Inside_the_IBM_PC",
+    "text": "If you've been using a TV as a monitor, perhaps you can get a friend to read this for you.",
+    "page_ids": [
+      "1983_11_BYTE_08-11_Inside_the_IBM_PC_p0002"
+    ],
+    "score": 0.0
+  },
+
+  AI: Good instinct to test with a small slice before trusting the full pipeline. Here's a fully standalone Kaggle cell — no git clone, no repo import, just the actual logic copy-pasted so you can verify it in isolation.
+
+## Input: paste your 10-12 sample chunks directly into the script
+Since you already have the real output, just take a small slice of it as a Python literal — no file upload needed.
+
+```python
+# ============================================================
+# STANDALONE TEST — chunk.py + embed.py + store.py
+# No repo clone needed. Run top to bottom in one Kaggle cell block.
+# ============================================================
+
+!pip install -q faiss-cpu sentence-transformers
+
+import json
+from pathlib import Path
+from pydantic import BaseModel
+import numpy as np
+
+# --- Minimal stand-in for contracts.Chunk (mirrors the real one for this test) ---
+class Chunk(BaseModel):
+    id: str
+    doc_id: str
+    text: str
+    page_ids: list[str]
+    score: float = 0.0
+
+# --- Your 10-12 sample chunks, taken directly from your real chunks.json ---
+sample_data = [
+  {"id": "1983_11_BYTE_08-11_Inside_the_IBM_PC_p0001_region_0000", "doc_id": "1983_11_BYTE_08-11_Inside_the_IBM_PC", "text": "thesmallsystemsjournal", "page_ids": ["1983_11_BYTE_08-11_Inside_the_IBM_PC_p0001"], "score": 0.0},
+  {"id": "1983_11_BYTE_08-11_Inside_the_IBM_PC_p0001_region_0001", "doc_id": "1983_11_BYTE_08-11_Inside_the_IBM_PC", "text": "Inside the IBM PC", "page_ids": ["1983_11_BYTE_08-11_Inside_the_IBM_PC_p0001"], "score": 0.0},
+  {"id": "1983_11_BYTE_08-11_Inside_the_IBM_PC_p0001_region_0002", "doc_id": "1983_11_BYTE_08-11_Inside_the_IBM_PC", "text": "Inside the IBM PC", "page_ids": ["1983_11_BYTE_08-11_Inside_the_IBM_PC_p0001"], "score": 0.0},
+  {"id": "1983_11_BYTE_08-11_Inside_the_IBM_PC_p0001_region_0003", "doc_id": "1983_11_BYTE_08-11_Inside_the_IBM_PC", "text": "Hundreds of Peripheral Boards\nBig Blue Goes Japanese\nThe Compatibility Question", "page_ids": ["1983_11_BYTE_08-11_Inside_the_IBM_PC_p0001"], "score": 0.0},
+  {"id": "1983_11_BYTE_08-11_Inside_the_IBM_PC_p0001_region_0004", "doc_id": "1983_11_BYTE_08-11_Inside_the_IBM_PC", "text": "NOVEMBER 1983 Vol. 8, No. 11", "page_ids": ["1983_11_BYTE_08-11_Inside_the_IBM_PC_p0001"], "score": 0.0},
+  {"id": "1983_11_BYTE_08-11_Inside_the_IBM_PC_p0001_region_0005", "doc_id": "1983_11_BYTE_08-11_Inside_the_IBM_PC", "text": "Workslate-A Dedicated Portable", "page_ids": ["1983_11_BYTE_08-11_Inside_the_IBM_PC_p0001"], "score": 0.0},
+  {"id": "1983_11_BYTE_08-11_Inside_the_IBM_PC_p0002_region_0006", "doc_id": "1983_11_BYTE_08-11_Inside_the_IBM_PC", "text": "Inside Apple", "page_ids": ["1983_11_BYTE_08-11_Inside_the_IBM_PC_p0002"], "score": 0.0},
+  {"id": "1983_11_BYTE_08-11_Inside_the_IBM_PC_p0002_region_0007", "doc_id": "1983_11_BYTE_08-11_Inside_the_IBM_PC", "text": "Apple's new Monitor II. A sight for sore eyes.", "page_ids": ["1983_11_BYTE_08-11_Inside_the_IBM_PC_p0002"], "score": 0.0},
+  {"id": "1983_11_BYTE_08-11_Inside_the_IBM_PC_p0002_region_0008", "doc_id": "1983_11_BYTE_08-11_Inside_the_IBM_PC", "text": "If you've been using a TV as a monitor, perhaps you can get a friend to read this for you.", "page_ids": ["1983_11_BYTE_08-11_Inside_the_IBM_PC_p0002"], "score": 0.0},
+]
+
+raw_chunks = [Chunk(**d) for d in sample_data]
+print(f"Loaded {len(raw_chunks)} raw test chunks")
+```
+
+## Cell 2 — the actual `chunk.py` logic (copied in directly)
+
+```python
+def split(chunks: list[Chunk], cfg: dict) -> list[Chunk]:
+    index_cfg = cfg.get("index", {})
+    target_tokens = index_cfg.get("chunk_tokens", 256)
+    overlap_tokens = index_cfg.get("overlap", 32)
+
+    by_doc: dict[str, list[Chunk]] = {}
+    for c in chunks:
+        by_doc.setdefault(c.doc_id, []).append(c)
+
+    output: list[Chunk] = []
+    for doc_id, doc_chunks in by_doc.items():
+        buffer_words, buffer_page_ids, chunk_idx = [], [], 0
+
+        def flush():
+            nonlocal chunk_idx
+            if not buffer_words:
+                return
+            text = " ".join(buffer_words)
+            seen = set()
+            ordered_pages = [p for p in buffer_page_ids if not (p in seen or seen.add(p))]
+            output.append(Chunk(id=f"{doc_id}_c{chunk_idx:04d}", doc_id=doc_id, text=text, page_ids=ordered_pages))
+            chunk_idx += 1
+
+        for c in doc_chunks:
+            for w in c.text.split():
+                buffer_words.append(w)
+                if c.page_ids:
+                    buffer_page_ids.extend(c.page_ids)
+                if len(buffer_words) >= target_tokens:
+                    flush()
+                    carry = buffer_words[-overlap_tokens:] if overlap_tokens > 0 else []
+                    carry_pages = buffer_page_ids[-1:] if buffer_page_ids else []
+                    buffer_words, buffer_page_ids = list(carry), list(carry_pages)
+        flush()
+    return output
+
+
+# --- TEST: use a SMALL target so these tiny title-page fragments actually
+# produce multiple chunks — with the real 256-word target, all 9 samples
+# combined (~35 words total) would collapse into just ONE chunk, which
+# wouldn't test the splitting/overlap logic at all.
+test_cfg = {"index": {"chunk_tokens": 15, "overlap": 3}}
+
+final_chunks = split(raw_chunks, test_cfg)
+
+print(f"\n{len(raw_chunks)} raw chunks -> {len(final_chunks)} final chunks\n")
+for c in final_chunks:
+    print(f"[{c.id}] pages={c.page_ids}")
+    print(f"  text: {c.text}\n")
+
+# --- Sanity checks ---
+assert len(final_chunks) > 0, "No chunks produced!"
+assert all(c.doc_id == raw_chunks[0].doc_id for c in final_chunks), "doc_id got mixed up!"
+all_output_text = " ".join(c.text for c in final_chunks)
+assert "IBM PC" in all_output_text, "Expected text missing — merge logic may have dropped content"
+print("✅ chunk.py sanity checks passed")
+```
+
+## Cell 3 — the actual `embed.py` logic
+
+```python
+from sentence_transformers import SentenceTransformer
+
+def encode(chunks: list[Chunk], cfg: dict) -> np.ndarray:
+    model_name = cfg.get("embed", {}).get("model", "jinaai/jina-embeddings-v5-text-small")
+    model = SentenceTransformer(model_name, trust_remote_code=True)
+    texts = [c.text for c in chunks]
+    vectors = model.encode(texts, batch_size=8, show_progress_bar=True, convert_to_numpy=True)
+    return vectors
+
+embed_cfg = {"embed": {"model": "jinaai/jina-embeddings-v5-text-small", "dim": 1024}}
+vectors = encode(final_chunks, embed_cfg)
+
+print(f"\nEmbedding shape: {vectors.shape}")
+assert vectors.shape[0] == len(final_chunks), "Vector count doesn't match chunk count!"
+assert vectors.shape[1] == 1024, f"Expected dim 1024, got {vectors.shape[1]}"
+print("✅ embed.py sanity checks passed")
+```
+
+## Cell 4 — the actual `store.py` logic, build → load → query round-trip
+
+```python
+import faiss
+
+def build_index(vectors, m=32, ef_construction=200):
+    dim = vectors.shape[1]
+    index = faiss.IndexHNSWFlat(dim, m)
+    index.hnsw.efConstruction = ef_construction
+    index.add(np.ascontiguousarray(vectors.astype("float32")))
+    return index
+
+test_index = build_index(vectors)
+test_index.hnsw.efSearch = 32
+
+print(f"Index built: {test_index.ntotal} vectors, dim={test_index.d}")
+assert test_index.ntotal == len(final_chunks), "Index didn't ingest all vectors!"
+
+# Round-trip test: save, reload, and confirm a real query returns a sensible match
+faiss.write_index(test_index, "test_index.faiss")
+reloaded = faiss.read_index("test_index.faiss")
+reloaded.hnsw.efSearch = 32
+
+query_vec = vectors[0:1]  # pretend we're searching for something like chunk 0's content
+distances, indices = reloaded.search(query_vec, k=3)
+
+print(f"\nTop-3 nearest to chunk 0's own vector: {indices[0]} (should include 0 itself, distance ~0)")
+assert indices[0][0] == 0, "Self-match failed — index/search isn't working correctly"
+print("✅ store.py sanity checks passed — full pipeline round-trip OK")
+```
+
+## What this tells you if it all runs clean
+Chunks merge correctly within a doc → embeddings come out the right shape → FAISS index builds, saves, reloads, and correctly finds a known match. That's your whole `chunk.py → embed.py → store.py` chain verified in isolation, using real data, without needing the full repo cloned.
+
+**One limitation to know**: these 9 samples are all short title/headline fragments from a cover page — they won't stress-test how your code handles a *long* flowing body-text paragraph (like your heldout page transcriptions). Once you're confident this passes, grab a slightly bigger slice from later in `chunks.json` (actual article body text, not the cover page) and rerun the same cells for a more realistic check.
+
+Me: Loading weights: 100% 310/310 [00:00<00:00, 4381.08it/s]Download complete: :   0.00B            Reconstruction complete:   0.00B /  0.00B            Fetching 8 files: 100% 8/8 [00:00<00:00, 369.44it/s]WARNING:torchao:Failed to load /usr/local/lib/python3.12/dist-packages/torchao/_C_cutlass_90a.abi3.so: Could not load this library: /usr/local/lib/python3.12/dist-packages/torchao/_C_cutlass_90a.abi3.so
+WARNING:torchao:Failed to load /usr/local/lib/python3.12/dist-packages/torchao/_C_mxfp8.cpython-310-x86_64-linux-gnu.so: Could not load this library: /usr/local/lib/python3.12/dist-packages/torchao/_C_mxfp8.cpython-310-x86_64-linux-gnu.so
+tokenizer_config.json: 100% 9.73k/9.73k [00:00<00:00, 972kB/s]vocab.json: 100% 2.78M/2.78M [00:00<00:00, 58.9MB/s]merges.txt: 100% 1.67M/1.67M [00:00<00:00, 57.1MB/s]tokenizer.json: reconstructing file: 100% 11.4MB / 11.4MB, 1.12MB/s  tokenizer.json: downloading bytes:  3.40MB,  332kB/s  WARNING:sentence_transformers.base.model:Default prompt name is set to 'document'. This prompt will be applied to all inference calls, except if a `prompt` or `prompt_name` parameter is provided.
+Batches:   0% 0/1 [00:00<?, ?it/s]---------------------------------------------------------------------------
+ValueError                                Traceback (most recent call last)
+/tmp/ipykernel_1908/752867083.py in <cell line: 0>()
+      9 
+     10 embed_cfg = {"embed": {"model": "jinaai/jina-embeddings-v5-text-small", "dim": 1024}}
+---> 11 vectors = encode(final_chunks, embed_cfg)
+     12 
+     13 print(f"\nEmbedding shape: {vectors.shape}")
+
+7 frames/tmp/ipykernel_1908/752867083.py in encode(chunks, cfg)
+      5     model = SentenceTransformer(model_name, trust_remote_code=True)
+      6     texts = [c.text for c in chunks]
+----> 7     vectors = model.encode(texts, batch_size=8, show_progress_bar=True, convert_to_numpy=True)
+      8     return vectors
+      9 
+
+/usr/local/lib/python3.12/dist-packages/torch/utils/_contextlib.py in decorate_context(*args, **kwargs)
+    122         # pyrefly: ignore [bad-context-manager]
+    123         with ctx_factory():
+--> 124             return func(*args, **kwargs)
+    125 
+    126     return decorate_context
+
+/usr/local/lib/python3.12/dist-packages/sentence_transformers/util/decorators.py in wrapper(*args, **kwargs)
+     39                     else:
+     40                         kwargs.pop(old_name)
+---> 41             return func(*args, **kwargs)
+     42 
+     43         return wrapper
+
+/usr/local/lib/python3.12/dist-packages/sentence_transformers/sentence_transformer/model.py in encode(self, inputs, prompt_name, prompt, batch_size, show_progress_bar, output_value, precision, convert_to_numpy, convert_to_tensor, device, normalize_embeddings, truncate_dim, pool, chunk_size, **kwargs)
+    659             features = batch_to_device(features, device)
+    660 
+--> 661             out_features = self.forward(features, **kwargs)
+    662             if is_hpu:
+    663                 out_features = copy.deepcopy(out_features)
+
+/usr/local/lib/python3.12/dist-packages/sentence_transformers/base/model.py in forward(self, input, **kwargs)
+    509                     if key in module_kwarg_keys or (hasattr(module, "forward_kwargs") and key in module.forward_kwargs)
+    510                 }
+--> 511             input = module(input, **module_kwargs)
+    512         return input
+    513 
+
+/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py in _wrapped_call_impl(self, *args, **kwargs)
+   1777             return self._compiled_call_impl(*args, **kwargs)  # type: ignore[misc]
+   1778         else:
+-> 1779             return self._call_impl(*args, **kwargs)
+   1780 
+   1781     # torchrec tests the code consistency with the following code
+
+/usr/local/lib/python3.12/dist-packages/torch/nn/modules/module.py in _call_impl(self, *args, **kwargs)
+   1788                 or _global_backward_pre_hooks or _global_backward_hooks
+   1789                 or _global_forward_hooks or _global_forward_pre_hooks):
+-> 1790             return forward_call(*args, **kwargs)
+   1791 
+   1792         result = None
+
+~/.cache/huggingface/modules/transformers_modules/jinaai/jina_hyphen_embeddings_hyphen_v5_hyphen_text_hyphen_small/dd76d535f5447ca3897a9c893fb1e612ead98192/custom_st.py in forward(self, features, task, truncate_dim)
+     73         if task is None:
+     74             if self.default_task is None:
+---> 75                 raise ValueError(
+     76                     "Task must be specified before encoding data. You can set it either during "
+     77                     "loading the model (e.g., model_kwargs={'default_task': 'retrieval'}) or "
+
+ValueError: Task must be specified before encoding data. You can set it either during loading the model (e.g., model_kwargs={'default_task': 'retrieval'}) or pass it as an argument to the encode method (e.g., model.encode(texts, task='retrieval')).
+
+AI: Two separate errors, fixed in sequence — good news, both are simple fixes, not fundamental problems with your code.
+
+## Error 1: `torchao` version too old
+Jina v5 uses LoRA adapters (PEFT) internally, which needs a newer `torchao` than Kaggle ships by default.
+
+```python
+!pip install -q -U torchao
+```
+Then **restart the Kaggle kernel** (Run → Restart Session) — this is essential, `pip install -U` on an already-imported package won't take effect without a fresh Python process. Re-run your cells from the top after restarting.
+
+## Error 2: Jina v5 needs a `task` specified
+This is expected behavior, not a bug — Jina v5 requires the task to be specified before encoding, either when loading the model or as an argument to the encode method. This model has multiple internal adapters for different jobs (retrieval, text-matching, classification, etc.), and it won't guess which one you want.
+
+Fix `encode()`:
+
+```python
+from sentence_transformers import SentenceTransformer
+
+def encode(chunks: list[Chunk], cfg: dict) -> np.ndarray:
+    model_name = cfg.get("embed", {}).get("model", "jinaai/jina-embeddings-v5-text-small")
+    model = SentenceTransformer(
+        model_name,
+        trust_remote_code=True,
+        model_kwargs={"default_task": "retrieval"},   # <-- fixes the ValueError
+    )
+    texts = [c.text for c in chunks]
+    vectors = model.encode(texts, batch_size=8, show_progress_bar=True, convert_to_numpy=True)
+    return vectors
+```
+
+**Why `"retrieval"` specifically, not another task**: your whole project is retrieval-based RAG — you're embedding chunks so a query can later find the most relevant one. That's exactly what the retrieval adapter is trained for. (Other tasks like "text-matching" or "classification" would tune the embeddings for different notions of similarity, not what you want here.)
+
+## Re-run order
+1. Run the torchao install cell
+2. **Restart kernel** (not just re-run cells — a real restart)
+3. Re-run everything from Cell 1 (imports/sample data) through the corrected `encode()` cell
+
+If the model download step re-triggers after restart, that's expected (fresh Python process, cache should still hit locally though, so it should be much faster than the first download). Let me know what the output looks like once it actually reaches `vectors.shape`.
+
+Me: summarize everything in this chat that will be needed to start another claude chat thread. dont miss any vital point or so, so that the new chat can have a proper head start.
+
+AI: # BYTE Retriever — A2 Handoff Doc (v2)
+*Context dump for a new chat thread. Paste/upload this first before asking for more help.
+This supersedes the earlier v1 handoff — a lot has been built since.*
+
+## Who I am
+**Sunanda**, one of 3 members on team **G21**. Teammates: **Anisa**, **Debashmita**.
+Deep Learning capstone, Agentic-RAG over scanned books, 4 milestones (A1→A4), submitted
+as GitHub tags. A1 is submitted/locked. Currently mid-way through **A2**.
+
+## Project: "BYTE Retriever"
+Citation-grounded Q&A agent over scanned **BYTE magazine** issues, for hobbyists/
+preservation researchers/tech historians.
+
+## A1 decisions (LOCKED — must match everywhere)
+- **group_id / project_id:** G21
+- **domain:** retro-computing/tech journalism
+- **data_speciality:** multi-column reading order (forces a layout/region-segmentation
+  stage before OCR)
+- **primary_nfr:** scalable → **target: P95 query latency ≤ 1.5s across full corpus**
+- **agentic feature:** evidence-gated re-search — widen `k`, retry if weak, abstain at `k_max`
+- **success metric:** Groundedness ≥ 0.85; **baseline:** naive top-1-chunk-verbatim ≈ 0.4 F1
+- **corpus:** Internet Archive `archive.org/details/byte-magazine`. Licence: no explicit
+  statement found on IA item pages → treated as **unclear**. Do not redistribute scans —
+  only a fetch script is committed.
+- **A2 subset:** ~15 BYTE issues, 1975–1993 (exact count/issue list has drifted slightly
+  across files — worth reconciling once: task.yaml/get_data.sh/provenance.md should all
+  agree on the same number and list)
+
+## Real fixed contracts (from actual `contracts.py` — verified, not guessed)
+```python
+class Page(BaseModel):
+    id: str
+    image_path: str
+    doc_id: str
+
+class Region(BaseModel):
+    page_id: str
+    bbox: tuple[int, int, int, int]
+    kind: str  # text | table | figure | heading  — ONLY these 4, no "advertisement"
+
+class Chunk(BaseModel):
+    id: str
+    doc_id: str
+    text: str
+    page_ids: list[str]
+    score: float = 0.0
+```
+**Important:** there is NO `reading_order_idx` field anywhere. Reading order is preserved
+*only* by never reordering list position, from `layout.py` all the way through
+`chunk.py`. This is a load-bearing assumption in every stage's code — don't sort by
+anything else.
+
+## `pipeline.py` (FIXED — do not edit stage order or hooks)
+Confirmed call order: `loader.load_pages → preprocess.run → enhance.run → hooks.AFTER_INGEST
+→ layout.detect → ocr.transcribe → hooks.AFTER_OCR → chunk.split → hooks.BEFORE_INDEX →
+embed.encode → store.build`. My files only need to implement the function bodies, never
+touch this file.
+
+## Code status — what's actually written
+
+### `vision/layout.py` — **Anisa/teammate rewrote this** (not my original draft)
+Uses **DocLayout-YOLO** (`juliozhao/DocLayout-YOLO-DocStructBench`), not detectron2 like
+my first draft. Key behaviors:
+- Same multi-column reading-order sort logic (`_sort_reading_order`) I originally wrote —
+  groups boxes into columns by x-position, sorts columns left-to-right, top-to-bottom
+  within each column
+- Saves regions per-doc to `data/interim/regions/<doc_id>.json` for checkpointing/resumability
+- **⚠️ Known fragility:** hardcodes an absolute HuggingFace cache snapshot path for the
+  model checkpoint — this may not exist on a different machine/session. Safer fix: always
+  call `hf_hub_download(...)` directly inside `_get_model()` instead of a hardcoded path.
+
+### `vision/ocr.py` — Debashmita's, not yet seen in full
+Confirmed from notebook: `ocr.transcribe(regions, cfg)` returns roughly **one raw `Chunk`
+per input `Region`** (small, region-sized text fragments — e.g. `"Inside the IBM PC"`,
+`"NOVEMBER 1983 Vol. 8, No. 11"`), saved to `data/interim/ocr/chunks.json`. This is NOT
+yet properly re-chunked to target size — that's `chunk.py`'s job, done next.
+
+### `index/chunk.py` — ✅ written (mine)
+Takes the small per-region `Chunk`s from OCR, groups by `doc_id` (never merges across
+docs), accumulates words up to `cfg['index']['chunk_tokens']` (default 256), flushes,
+carries the last `overlap` (default 32) words into the next chunk for continuity.
+Deduplicates `page_ids` while preserving order. Saves checkpoint to
+`data/interim/chunks/chunks.json`. Token counting is plain whitespace-split (a documented
+simplification, not a real subword tokenizer — noted as a design choice for
+`design_choices.md`).
+
+### `index/embed.py` — ✅ written (mine), with real gotchas hit + fixed
+Uses `sentence-transformers` + `jinaai/jina-embeddings-v5-text-small` (dim=1024, confirmed
+via model card). **Two real errors hit and fixed while testing on Kaggle:**
+1. `ImportError: torchao version too old` → `!pip install -q -U torchao` then **restart
+   kernel** (pip upgrade doesn't take effect without a fresh process)
+2. `ValueError: Task must be specified before encoding` → Jina v5 requires a task; fix is
+   `SentenceTransformer(model_name, trust_remote_code=True, model_kwargs={"default_task": "retrieval"})`
+   — "retrieval" is correct since that's literally what this project does.
+
+### `index/store.py` — ✅ written (mine)
+FAISS `IndexHNSWFlat(dim, M)` — this **is** the actual E5 NFR implementation, not a
+separate model. Key params: `M` (graph connectivity, default 32), `efConstruction`
+(build-time search effort, default 200), `efSearch` (query-time search effort, default
+64 — **this is the main lever for the ≤1.5s P95 target, needs real benchmarking, not left
+as a guess**). Saves `index.faiss` + a `chunks_meta.json` side-table (FAISS only stores
+vectors + integer ids, needs this side-table to map back to real `Chunk` objects for
+citations). `load()` reloads both and resets `efSearch` from cfg.
+
+### `data/validate.py` and `data/versioning.py` — ✅ written (mine)
+`validate.py`: checks page count ≥300 via `len(pages)`; word count is estimated using
+Internet Archive's *existing* embedded ABBYY text layer in the PDFs (NOT our own OCR —
+that's measured separately against `labels.jsonl`), purely as a corpus-size sanity check.
+`versioning.py`: hashes all files in a given corpus dir (sha256 per file + combined),
+saves a version record to `data/versions/<id>.json`. Not yet decided: hash `data/raw/`
+(PDFs) or `data/pages/` (extracted images) — leaning toward `data/raw/` as the more
+meaningful "source" version.
+
+## Heldout pages — status: ✅ core work done, one bug fixed
+- 15 pages extracted from PDFs as PNGs, spanning 1975–1993, varied difficulty (clean
+  2-col, messy multi-col+sidebar+ad, code listings, early scratchy scans vs later clean
+  ones) — exceeds the 5–10 Day-1 target
+- Extraction had real technical issues, now resolved:
+  - `pdftoppm` unavailable on Kaggle/Colab in some sessions (apt mirror 404) → switched to
+    **PyMuPDF (`fitz`)**, pure Python, no system dependency
+  - Some pages came out fully black or blank white → caused by broken/nonstandard CID
+    fonts in the PDF's invisible OCR text layer confusing full-page rendering → fixed by
+    extracting the embedded scan image directly (`page.get_images()` + `doc.extract_image()`
+    / `fitz.Pixmap`) instead of rendering the whole page
+  - Extracted images initially saved with wrong internal format (JPEG2000 bytes with a
+    `.png` extension) → fixed by forcing through PIL (`Image.open(io.BytesIO(...)).save(...,
+    format="PNG")`) to guarantee genuine PNG bytes
+  - Resolution is ~792×1085 (~93 DPI-equivalent) — lower than ideal 300 DPI, but confirmed
+    to be the actual resolution embedded in IA's PDF derivative (not a bug); accepted as-is
+    since it's consistent with what the real OCR pipeline will also process
+- Transcription workflow established: `show_page(page_id)` displays the image inline,
+  type into a triple-quoted string preserving correct multi-column reading order (finish
+  column 1 top-to-bottom, then column 2 — NOT line-by-line copying print wrap), one blank
+  line between paragraphs, then `add_label(page_id, text.strip())` safely JSON-escapes and
+  appends to `labels.jsonl` (checks for existing image, checks for duplicate page_id)
+- **Bug hit and fixed:** an earlier version of `labels.jsonl` (15 real entries) was badly
+  broken — someone pasted raw transcribed text directly into the file instead of running
+  it through `add_label()`, so literal newlines and an unescaped internal quote broke
+  JSON parsing on almost every line (`json.loads` errors cascading through the whole
+  file). Repaired via a regex-based reconstruction (splitting on `{"page_id":` boundaries,
+  re-parsing each block, re-emitting via `json.dumps`). **Lesson for going forward: NEVER
+  hand-edit or paste directly into labels.jsonl — always go through `add_label()`.**
+- Ground truth transcription rules locked in: exact spelling/punctuation as printed (no
+  cleanup), paragraphs as continuous flowing text (rejoin any print line-wraps), section
+  headers as their own short paragraph, consistent handling of page-bottom cutoffs
+  (pick one rule, apply everywhere)
+
+## Testing approach established
+For testing `chunk.py`/`embed.py`/`store.py` without needing the full repo cloned: paste a
+small (10-12) real slice of actual `chunks.json` output directly as a Python literal in a
+standalone Kaggle cell, copy the actual function logic in directly (not imported from
+repo), run with an artificially small `chunk_tokens` (e.g. 15 instead of 256) so the tiny
+test sample actually exercises the merge/split logic, then round-trip through FAISS
+(build → save → reload → self-query) with assertions at each stage. This avoids
+repo-cloning overhead for quick isolated verification.
+
+## Known open risks — still unresolved, carry forward
+1. **🔴 OCR fine-tuning exemption still unconfirmed.** A2 spec's baseline expectation is
+   fine-tuning a pretrained OCR model; team's plan uses zero-shot Qwen2-VL/olmOCR. Needs
+   written confirmation from instructor — this is the single biggest open risk and hasn't
+   been resolved across this whole conversation.
+2. **`ef_search` (store.py) and `weak_threshold` (retrieval config) are both guessed
+   values, not tuned.** Need a real benchmark: run sample queries, measure P95 latency
+   and retrieval quality, adjust accordingly. This is exactly what A2 Section 5 evidence
+   needs anyway.
+3. **Issue-count/list inconsistency** across task.yaml / get_data.sh / provenance.md
+   (14 vs 15 vs other counts, 176 vs 224 total corpus) — never fully reconciled.
+4. **layout.py's hardcoded HF cache path** may break on a different machine/session.
+5. **Days 2–3 of the original 4-day plan were flagged as a serial relay, not parallel**
+   (each person blocked on the previous same-day) — unclear if this was ever mitigated in
+   practice; worth checking current actual pacing.
+6. **reranker model name needs the full HF path** — `Qwen/Qwen3-Reranker-0.6B`, not just
+   `"Qwen3-Reranker"` (family name, not loadable id). 0.6B recommended over 4B/8B to
+   protect the latency NFR since reranking can run multiple times per query
+   (evidence-gated re-search).
+
+## What's next for me (Sunanda)
+- `chunk.py`, `embed.py`, `store.py` are written and passed standalone sanity tests on a
+  small real sample — next: run them on the **full** `chunks.json` from the actual
+  pipeline (not just the 10-12 sample), inside the real repo structure, and confirm
+  end-to-end
+- Real benchmarking of `efSearch` against the P95 ≤ 1.5s target once the full index is
+  built
+- `notebooks/kb_demo.ipynb` (Day 4 task) — not started yet
+- Confirm with Anisa/teammate exactly where `loader.load_pages()` expects page images to
+  live on disk (`data/pages/<doc_id>/<id>.png` was the assumed convention, not yet
+  verified against her actual code)
+
+## Useful cross-project context
+Compared this pipeline to a prior capstone (NCTB textbooks + Gemini API + Qdrant) for
+intuition: same conceptual pipeline (chunk → embed → store → search), but here everything
+is self-hosted/local (no API calls) specifically because the scalability NFR requires
+controlling latency end-to-end, and FAISS (a library/index file) is used instead of Qdrant
+(a hosted database) since this project doesn't need multi-user/concurrent DB features —
+just a fast local approximate-search structure.
+
+Me: ```
+---------------------------------------------------------------------------
+
+```
+
+
+```
+NameError                                 Traceback (most recent call last)
+
+```
+
+
+```
+/tmp/ipykernel_2392/2708827042.py in <cell line: 0>()
+      8     return index
+      9 
+---> 10 test_index = build_index(vectors)
+     11 test_index.hnsw.efSearch = 32
+     12 
+
+
+```
+
+
+```
+NameError: name 'vectors' is not defined
+```
+
+whats wrong here? (in the last cell)
+
+AI: The error is straightforward: you defined the `encode()` function in the cell before, but you never actually called it to produce a `vectors` variable.
+
+Look at your cells in order:
+
+1. Cell 2 creates `final_chunks`
+2. Cell 3 installs `torchao`
+3. Cell 4 defines `def encode(chunks, cfg) -> np.ndarray:` — this only *defines* the function, it doesn't run it
+4. Cell 5 tries to use `vectors` in `build_index(vectors)` — but `vectors` was never created anywhere
+
+You're missing the actual call to `encode()`. Add this before your `build_index` cell (or at the top of it):
+
+```python
+vectors = encode(final_chunks, {})
+```
+
+Since your `encode` function defaults to `"jinaai/jina-embeddings-v5-text-small"` when no config is passed, calling it with an empty dict `{}` will just use that default model on `final_chunks`. If you want a different model, pass a config like `{"embed": {"model": "your-model-name"}}` instead.
+
+So the full fix for the last cell would be:
+
+```python
+import faiss
+
+vectors = encode(final_chunks, {})  # <-- this line was missing
+
+def build_index(vectors, m=32, ef_construction=200):
+    dim = vectors.shape[1]
+    index = faiss.IndexHNSWFlat(dim, m)
+    index.hnsw.efConstruction = ef_construction
+    index.add(np.ascontiguousarray(vectors.astype("float32")))
+    return index
+
+test_index = build_index(vectors)
+...
+```
+
+One thing to double check: since `chunk_tokens=15` produced very short chunks (like `"monitor, perhaps you can get a friend to read this for you."`), make sure the embedding model handles short texts fine — it should, but worth a sanity glance at the output shape (`vectors.shape`) before moving on.
+
+Me:  Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+WARNING:huggingface_hub.utils._http:Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+modules.json: 100% 168/168 [00:00<00:00, 17.9kB/s]config_sentence_transformers.json: 100% 282/282 [00:00<00:00, 31.0kB/s]README.md: 100% 14.2k/14.2k [00:00<00:00, 1.76MB/s]custom_st.py: 100% 4.26k/4.26k [00:00<00:00, 486kB/s][transformers] A new version of the following files was downloaded from https://huggingface.co/jinaai/jina-embeddings-v5-text-small:
+- custom_st.py
+. Make sure to double-check they do not contain any added malicious code. To avoid downloading new versions of the code file, you can pin a revision.
+config.json: 100% 991/991 [00:00<00:00, 103kB/s]configuration_jina_embeddings_v5.py: 100% 120/120 [00:00<00:00, 14.4kB/s][transformers] A new version of the following files was downloaded from https://huggingface.co/jinaai/jina-embeddings-v5-text-small:
+- configuration_jina_embeddings_v5.py
+. Make sure to double-check they do not contain any added malicious code. To avoid downloading new versions of the code file, you can pin a revision.
+modeling_jina_embeddings_v5.py: 100% 4.13k/4.13k [00:00<00:00, 386kB/s][transformers] A new version of the following files was downloaded from https://huggingface.co/jinaai/jina-embeddings-v5-text-small:
+- modeling_jina_embeddings_v5.py
+. Make sure to double-check they do not contain any added malicious code. To avoid downloading new versions of the code file, you can pin a revision.
+model.safetensors: reconstructing file: 100% 1.19GB / 1.19GB, 85.9MB/s  model.safetensors: downloading bytes:  1.04GB, 81.5MB/s  Loading weights: 100% 310/310 [00:00<00:00, 4771.80it/s]Download complete: :   141MB, 3.38MB/s  Reconstruction complete: 100%  162MB /  162MB, 3.90MB/s  Fetching 8 files: 100% 8/8 [00:01<00:00,  1.16it/s]---------------------------------------------------------------------------
+ImportError                               Traceback (most recent call last)
+/tmp/ipykernel_2392/2155740189.py in <cell line: 0>()
+      1 import faiss
+----> 2 vectors = encode(final_chunks, {})
+      3 
+      4 def build_index(vectors, m=32, ef_construction=200):
+      5     dim = vectors.shape[1]
+
+18 frames/tmp/ipykernel_2392/1958599085.py in encode(chunks, cfg)
+      3 def encode(chunks: list[Chunk], cfg: dict) -> np.ndarray:
+      4     model_name = cfg.get("embed", {}).get("model", "jinaai/jina-embeddings-v5-text-small")
+----> 5     model = SentenceTransformer(
+      6         model_name,
+      7         trust_remote_code=True,
+
+/usr/local/lib/python3.12/dist-packages/sentence_transformers/util/decorators.py in wrapper(*args, **kwargs)
+     39                     else:
+     40                         kwargs.pop(old_name)
+---> 41             return func(*args, **kwargs)
+     42 
+     43         return wrapper
+
+/usr/local/lib/python3.12/dist-packages/sentence_transformers/sentence_transformer/model.py in __init__(self, model_name_or_path, modules, device, prompts, default_prompt_name, cache_folder, trust_remote_code, revision, local_files_only, token, use_auth_token, model_kwargs, processor_kwargs, config_kwargs, model_card_data, backend, similarity_fn_name, truncate_dim)
+    186             token = use_auth_token
+    187 
+--> 188         super().__init__(
+    189             model_name_or_path=model_name_or_path,
+    190             modules=modules,
+
+/usr/local/lib/python3.12/dist-packages/sentence_transformers/base/model.py in __init__(self, model_name_or_path, modules, device, prompts, default_prompt_name, cache_folder, trust_remote_code, revision, local_files_only, token, model_kwargs, processor_kwargs, config_kwargs, model_card_data, backend)
+    214 
+    215         if model_name_or_path:
+--> 216             modules, self.module_kwargs = self._load_modules(
+    217                 model_name_or_path,
+    218                 token=token,
+
+/usr/local/lib/python3.12/dist-packages/sentence_transformers/base/model.py in _load_modules(self, model_name_or_path, token, cache_folder, revision, trust_remote_code, local_files_only, model_kwargs, processor_kwargs, config_kwargs)
+   1000         if model_type_being_loaded == self.model_type:
+   1001             logger.info(f"Loading {self.model_type} model from {model_name_or_path}.")
+-> 1002             return self._load_config_modules(model_name_or_path, **load_kwargs)
+   1003 
+   1004         logger.info(f"Converting {model_type_being_loaded} model {model_name_or_path} to {self.model_type}.")
+
+/usr/local/lib/python3.12/dist-packages/sentence_transformers/base/model.py in _load_config_modules(self, model_name_or_path, token, cache_folder, revision, trust_remote_code, local_files_only, model_kwargs, processor_kwargs, config_kwargs)
+   1187                             init_kwargs.pop(new_name)
+   1188 
+-> 1189                     module = module_class(model_name_or_path, **init_kwargs)
+   1190 
+   1191                 else:
+
+~/.cache/huggingface/modules/transformers_modules/jinaai/jina_hyphen_embeddings_hyphen_v5_hyphen_text_hyphen_small/dd76d535f5447ca3897a9c893fb1e612ead98192/custom_st.py in __init__(self, model_name_or_path, max_seq_length, config_args, model_args, tokenizer_args, cache_dir, backend, **kwargs)
+     45             )
+     46 
+---> 47         self.model = AutoModel.from_pretrained(
+     48             model_name_or_path, config=self.config, **model_kwargs
+     49         )
+
+/usr/local/lib/python3.12/dist-packages/transformers/models/auto/auto_factory.py in from_pretrained(cls, pretrained_model_name_or_path, *model_args, **kwargs)
+    383             model_class.register_for_auto_class(auto_class=cls)
+    384             model_class = add_generation_mixin_to_remote_model(model_class)
+--> 385             return model_class.from_pretrained(
+    386                 pretrained_model_name_or_path, *model_args, config=config, **hub_kwargs, **kwargs
+    387             )
+
+~/.cache/huggingface/modules/transformers_modules/jinaai/jina_hyphen_embeddings_hyphen_v5_hyphen_text_hyphen_small/dd76d535f5447ca3897a9c893fb1e612ead98192/modeling_jina_embeddings_v5.py in from_pretrained(cls, pretrained_model_name_or_path, *args, **kwargs)
+     46 
+     47         peft_config = PeftConfig.from_pretrained(adapter_paths["retrieval"], **kwargs)
+---> 48         model = cls(base_model, peft_config, adapter_name="retrieval")
+     49         model._pretrained_path = pretrained_model_name_or_path
+     50         for adapter_name in base_config.task_names:
+
+/usr/local/lib/python3.12/dist-packages/peft/mixed_model.py in __init__(self, model, peft_config, adapter_name)
+    101         _prepare_model_for_gradient_checkpointing(model)
+    102         self.modules_to_save = None
+--> 103         self.base_model = MixedModel(model, {adapter_name: peft_config}, adapter_name)
+    104         self.set_modules_to_save(peft_config, adapter_name)
+    105 
+
+/usr/local/lib/python3.12/dist-packages/peft/tuners/mixed/model.py in __init__(self, model, config, adapter_name)
+     72 
+     73     def __init__(self, model: nn.Module, config: Configs, adapter_name: str) -> None:
+---> 74         super().__init__(model, config, adapter_name)
+     75 
+     76     def _check_new_adapter_config(self, config: Configs) -> None:
+
+/usr/local/lib/python3.12/dist-packages/peft/tuners/tuners_utils.py in __init__(self, model, peft_config, adapter_name, low_cpu_mem_usage, state_dict)
+    313         self._pre_injection_hook(self.model, self.peft_config[adapter_name], adapter_name)
+    314         if peft_config != PeftType.XLORA or peft_config[adapter_name] != PeftType.XLORA:
+--> 315             self.inject_adapter(self.model, adapter_name, low_cpu_mem_usage=low_cpu_mem_usage, state_dict=state_dict)
+    316 
+    317         self._post_injection_hook(self.model, self.peft_config[adapter_name], adapter_name)
+
+/usr/local/lib/python3.12/dist-packages/peft/tuners/tuners_utils.py in inject_adapter(self, model, adapter_name, autocast_adapter_dtype, low_cpu_mem_usage, state_dict)
+    911                     ctx = init_empty_weights if low_cpu_mem_usage else nullcontext
+    912                     with ctx():
+--> 913                         self._create_and_replace(
+    914                             peft_config, adapter_name, target, target_name, parent, current_key=key
+    915                         )
+
+/usr/local/lib/python3.12/dist-packages/peft/tuners/mixed/model.py in _create_and_replace(self, config, *args, **kwargs)
+     97             adalora.AdaLoraModel._create_and_replace(self, config, *args, **kwargs)
+     98         elif isinstance(config, lora.LoraConfig):
+---> 99             lora.LoraModel._create_and_replace(self, config, *args, **kwargs)
+    100         elif isinstance(config, loha.LoHaConfig):
+    101             loha.LoHaModel._create_and_replace(self, config, *args, **kwargs)
+
+/usr/local/lib/python3.12/dist-packages/peft/tuners/lora/model.py in _create_and_replace(self, lora_config, adapter_name, target, target_name, parent, current_key, parameter_name)
+    267                 )
+    268             device_map = get_device_map(self.model)
+--> 269             new_module = self._create_new_module(lora_config, adapter_name, target, device_map=device_map, **kwargs)
+    270             if adapter_name not in self.active_adapters:
+    271                 # adding an additional adapter: it is not automatically trainable
+
+/usr/local/lib/python3.12/dist-packages/peft/tuners/mixed/model.py in _create_new_module(config, adapter_name, target, **kwargs)
+    188             new_module = adalora.AdaLoraModel._create_new_module(config, adapter_name, target, **kwargs)
+    189         elif isinstance(config, lora.LoraConfig):
+--> 190             new_module = lora.LoraModel._create_new_module(config, adapter_name, target, **kwargs)
+    191         elif isinstance(config, loha.LoHaConfig):
+    192             new_module = loha.LoHaModel._create_new_module(config, adapter_name, target, **kwargs)
+
+/usr/local/lib/python3.12/dist-packages/peft/tuners/lora/model.py in _create_new_module(lora_config, adapter_name, target, **kwargs)
+    416         new_module = None
+    417         for dispatcher in dispatchers:
+--> 418             new_module = dispatcher(target, adapter_name, config=lora_config, **kwargs)
+    419             if new_module is not None:  # first match wins
+    420                 break
+
+/usr/local/lib/python3.12/dist-packages/peft/tuners/lora/torchao.py in dispatch_torchao(target, adapter_name, config, **kwargs)
+    140         return new_module
+    141 
+--> 142     if not is_torchao_available():
+    143         return new_module
+    144 
+
+/usr/local/lib/python3.12/dist-packages/peft/import_utils.py in is_torchao_available()
+    141 
+    142     if torchao_version < TORCHAO_MINIMUM_VERSION:
+--> 143         raise ImportError(
+    144             f"Found an incompatible version of torchao. Found version {torchao_version}, "
+    145             f"but only versions above {TORCHAO_MINIMUM_VERSION} are supported"
+
+ImportError: Found an incompatible version of torchao. Found version 0.10.0, but only versions above 0.16.0 are supported
+
+---------------------------------------------------------------------------
+NOTE: If your import is failing due to a missing package, you can
+manually install dependencies using either !pip or !apt.
+
+To view examples of installing some common dependencies, click the
+"Open Examples" button below.
+---------------------------------------------------------------------------
+Open Examples
+
+AI: The traceback shows the real issue clearly at the bottom:
+
+```
+ImportError: Found an incompatible version of torchao. Found version 0.10.0, 
+but only versions above 0.16.0 are supported
+```
+
+So `peft` (pulled in by the Jina model's custom loading code, which uses LoRA adapters) requires `torchao >= 0.16.0`, but you actually have `0.10.0` installed — even though your cell 3 ran `!pip install -q -U torchao`.
+
+**Why the upgrade didn't take:** this is almost certainly a stale-import problem, not a failed install. Look back at cell 4's output — it already showed:
+
+```
+WARNING:torchao:Failed to load .../torchao/_C_cutlass_90a.abi3.so
+WARNING:torchao:Failed to load .../torchao/_C_mxfp8.cpython-310-x86_64-linux-gnu.so
+```
+
+Those warnings are a sign `torchao` was already loaded/cached by some other import before your upgrade fully took effect in this same Python process (Colab often pre-imports torch-related packages at kernel start, or a dependency triggered an import before pip finished). Once a module is imported into a running kernel, reinstalling a new version on disk doesn't change what's already loaded in memory — you need a kernel restart to actually load the new version.
+
+**Fix:**
+
+1. Check what's actually on disk right now:
+```python
+!pip show torchao
+```
+2. Explicitly pin a version that satisfies peft's requirement (≥0.16.0), rather than relying on `-U`:
+```python
+!pip install -q torchao>=0.16.0
+```
+3. **Restart the runtime/kernel** (Runtime → Restart session in Colab, or the equivalent in Kaggle) — this is the step that's easy to miss and is almost certainly why it's still failing.
+4. Re-run all cells from the top in order after restarting, so nothing stale gets imported before the upgraded `torchao` loads.
+
+If you want to sidestep this dependency headache entirely, you could also try loading the model without the LoRA/PEFT adapter path if that's optional for retrieval-only use, but given Jina v5's custom loader hard-codes a PEFT `MixedModel` wrapper, the version pin + restart is the more reliable fix.
+
+Me: ```
+Name: torchao
+Version: 0.10.0
+Summary: Package for applying ao techniques to GPU models
+Home-page: https://github.com/pytorch/ao
+Author: 
+Author-email: 
+License: 
+Location: /usr/local/lib/python3.12/dist-packages
+Requires: 
+Required-by: 
+
+```
+
+AI: That confirms it: pip never actually upgraded it, it's still sitting at `0.10.0` despite cell 3 running. That means the `!pip install -q -U torchao` command silently failed to upgrade — the `-q` (quiet) flag likely hid the reason.
+
+Let's find out why. Run this to see the actual pip resolution output without hiding errors:
+
+```python
+!pip install -U torchao
+```
+
+Common causes for a silent no-op upgrade like this in Colab:
+
+1. **Torch version conflict** — newer `torchao` releases pin a minimum `torch` version, and Colab's preinstalled `torch` may be older than what torchao 0.16+ requires. Pip will refuse to upgrade `torchao` in that case rather than break your `torch` install, and with `-q` you just don't see why.
+2. **CUDA/build mismatch** — torchao ships CUDA-specific wheels; if there's no compatible wheel for Colab's Python/CUDA combo, pip falls back to older wheels silently.
+
+**Steps to actually diagnose and fix:**
+
+```python
+# Check what torch version you have
+import torch
+print(torch.__version__)
+
+# See what torchao versions are even available for this environment
+!pip index versions torchao
+```
+
+Then try an explicit version pin with full (non-quiet) output so you can see any resolver conflicts:
+
+```python
+!pip install torchao==0.16.0 --no-cache-dir
+```
+
+If that throws a dependency conflict error mentioning `torch`, you'll likely also need to upgrade `torch` itself first, e.g.:
+
+```python
+!pip install -U torch torchao
+```
+
+then **restart the runtime** and re-run all cells from the top — a stale kernel can also mask a real upgrade even once it lands correctly on disk.
+
+If none of that resolves it (Colab's preinstalled CUDA/torch stack can be finicky about torchao's newer builds), the more robust workaround is to avoid the PEFT/LoRA code path entirely rather than chase version pins — for example, try loading the base Jina model without `trust_remote_code`'s adapter wrapper, or fall back to a plain sentence-transformers model (e.g. `BAAI/bge-small-en-v1.5` or `sentence-transformers/all-MiniLM-L6-v2`) for this test pipeline, since your `encode()` function already reads the model name from config and nothing else in your notebook depends on Jina specifically. Want me to swap in a lighter-weight embedding model so you're not fighting this dependency chain at all?
+
+Me: explain o/p: Loading weights: 100%
+ 310/310 [00:00<00:00, 4320.68it/s]
+Download complete: : 
+  0.00B            
+Reconstruction complete: 
+  0.00B /  0.00B            
+Fetching 8 files: 100%
+ 8/8 [00:00<00:00, 292.33it/s]
+
+```
+WARNING:torchao:Failed to load /usr/local/lib/python3.12/dist-packages/torchao/_C_cutlass_90a.abi3.so: Could not load this library: /usr/local/lib/python3.12/dist-packages/torchao/_C_cutlass_90a.abi3.so
+WARNING:torchao:Failed to load /usr/local/lib/python3.12/dist-packages/torchao/_C_mxfp8.cpython-310-x86_64-linux-gnu.so: Could not load this library: /usr/local/lib/python3.12/dist-packages/torchao/_C_mxfp8.cpython-310-x86_64-linux-gnu.so
+
+```
+
+tokenizer_config.json: 100%
+ 9.73k/9.73k [00:00<00:00, 664kB/s]
+vocab.json: 100%
+ 2.78M/2.78M [00:00<00:00, 48.8MB/s]
+merges.txt: 100%
+ 1.67M/1.67M [00:00<00:00, 45.5MB/s]
+tokenizer.json: reconstructing file: 100%
+ 11.4MB / 11.4MB, 1.12MB/s  
+tokenizer.json: downloading bytes: 
+ 3.40MB,  333kB/s  
+
+```
+WARNING:sentence_transformers.base.model:Default prompt name is set to 'document'. This prompt will be applied to all inference calls, except if a `prompt` or `prompt_name` parameter is provided.
+
+```
+
+Batches: 100%
+ 1/1 [00:00<00:00,  1.04it/s]
+
+```
+Index built: 5 vectors, dim=1024
+
+Top-3 nearest to chunk 0's own vector: [0 1 2] (should include 0 itself, distance ~0)
+✅ store.py sanity checks passed — full pipeline round-trip OK
+
+```
+
+AI: This is a clean success run — different from the earlier crash. Here's what each part means:
+
+**Model weight loading**
+```
+Loading weights: 100% 310/310 [00:00<00:00, 4320.68it/s]
+Download complete / Reconstruction complete: 0.00B
+Fetching 8 files: 100% 8/8 [00:00<00:00, 292.33it/s]
+```
+The Jina model files were already cached from your previous run (that's why it's `0.00B` downloaded — nothing new to fetch, it just reused the local cache and reconstructed/loaded the 310 weight tensors from disk almost instantly).
+
+**The torchao warnings — now harmless**
+```
+WARNING:torchao:Failed to load .../torchao/_C_cutlass_90a.abi3.so
+WARNING:torchao:Failed to load .../torchao/_C_mxfp8.cpython-310-x86_64-linux-gnu.so
+```
+These are just torchao failing to load some optional compiled CUDA kernels (Cutlass and MXFP8 extensions — used for specific low-precision quantized ops on newer GPUs). They're non-fatal — torchao falls back to other implementations. This time the import didn't crash the way it did before, meaning your torchao upgrade/restart actually took effect and satisfied peft's version check; these two `.so` files just aren't relevant to a T4 GPU anyway.
+
+**Tokenizer download**
+```
+tokenizer_config.json / vocab.json / merges.txt / tokenizer.json
+```
+Standard tokenizer files pulled from the Hub — vocabulary, merge rules (this is a BPE-style tokenizer, common for these models), and the fast-tokenizer binary.
+
+**Prompt default notice**
+```
+Default prompt name is set to 'document'. This prompt will be applied to all inference calls...
+```
+Jina's embedding models support task-specific prompts (e.g. `"query"` vs `"document"` prefixes get prepended to text before embedding, which improves retrieval quality). Since you didn't pass a `prompt_name`, it's defaulting to `"document"` mode for every text you encode — meaning your `final_chunks` were embedded as if they were all documents/passages, not search queries. That's the correct choice for indexing chunks, but worth remembering: if you later embed a search *query* to look things up in this index, you should pass `prompt_name="query"` (or whatever Jina calls it) so query and document embeddings live in a comparable space.
+
+**Batching**
+```
+Batches: 100% 1/1 [00:00<00:00, 1.04it/s]
+```
+With `batch_size=8` and only 5 chunks, everything fit in a single batch.
+
+**Final results**
+```
+Index built: 5 vectors, dim=1024
+Top-3 nearest to chunk 0's own vector: [0 1 2]
+✅ store.py sanity checks passed
+```
+- Your FAISS HNSW index has 5 vectors (matches your 5 `final_chunks`), each 1024-dimensional (that's Jina v5 small's embedding size).
+- Searching for chunk 0's own vector correctly returns chunk 0 as the top match (index `0` first), confirming save/reload/search round-trips work.
+- All your assertions passed — the embed → index → search pipeline is functioning end to end.
+
+So: the torchao/peft version conflict from before is resolved, and your whole standalone test (chunk → embed → store) now runs clean. One thing worth double-checking given the prompt-name note above: if `store.py`'s real usage involves querying with separate query text later, make sure that code path passes the right prompt type.
+
+Me: i dont actually get what happened. what o/p are to be expected and where to look for them?
+
+AI: Fair — let me break this down plainly, section by section, so you know what's normal vs what needs attention.
+
+## What actually happened
+
+Your standalone pipeline test has **3 stages**, each producing its own chunk of output. You ran them all successfully this time. Here's what to expect from each, and where to look:
+
+### Stage 1: Model download/loading (the noisy part)
+```
+Loading weights: 100% 310/310
+Download complete: 0.00B
+Fetching 8 files: 100% 8/8
+tokenizer_config.json / vocab.json / merges.txt / tokenizer.json
+```
+**What this is:** SentenceTransformer downloading and loading the Jina embedding model + its tokenizer from Hugging Face.
+
+**What to check:** Just that it reaches 100% on each line and doesn't throw a red traceback. `0.00B` downloaded just means it used a cache from before — that's fine, not an error.
+
+### Stage 2: Two warnings (ignore these)
+```
+WARNING:torchao:Failed to load .../_C_cutlass_90a.abi3.so
+WARNING:torchao:Failed to load .../_C_mxfp8...so
+WARNING:sentence_transformers...Default prompt name is set to 'document'
+```
+**What this is:** Yellow/informational noise, not failures. torchao skipping two optional GPU kernels your T4 doesn't need, and sentence-transformers telling you what default behavior it's using.
+
+**What to check:** Nothing — these are not errors. The real signal is whether an actual `Traceback`/`Error` block appears below them. In your output, none did.
+
+### Stage 3: The actual test results (this is what you care about)
+```
+Batches: 100% 1/1
+Index built: 5 vectors, dim=1024
+Top-3 nearest to chunk 0's own vector: [0 1 2]
+✅ store.py sanity checks passed — full pipeline round-trip OK
+```
+**This is the part to actually read.** It tells you:
+- `Index built: 5 vectors, dim=1024` → your 5 chunks got turned into 5 embedding vectors, each 1024 numbers long. This confirms `encode()` worked.
+- `Top-3 nearest to chunk 0's own vector: [0 1 2]` → you asked the index "what's most similar to chunk 0?" and it correctly answered "chunk 0 itself" (index `0` is first in the list). This is the actual test — if this had come back e.g. `[3 1 4]` (chunk 0 not first), that would mean something is broken in the embed/index/search chain.
+- `✅ ... passed` → the `assert` statements in your code didn't fail.
+
+## The one-line summary of "what happened"
+
+Nothing new happened between your last two messages — you pasted the same successful output twice. To answer your real question: **"is this good?" → yes.** The thing to look for going forward, every time you rerun this notebook, is just:
+
+1. No red `Traceback` / `Error` blocks anywhere
+2. The final `✅ ... passed` line appears at the bottom
+3. `Index built: N vectors` matches the number of chunks you expect
+
+Everything above that (downloads, warnings) is just noise you can skim past unless step 1 fails.
+
+
