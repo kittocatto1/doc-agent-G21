@@ -6,8 +6,8 @@
 - Licence / usage rights: Permitted for Educational purposes
   No explicit license/rights statement is published on the Internet Archive item pages for this collection (checked directly — no CC tag, no public-domain notice). Treated as all-rights-reserved. We do not redistributescans in this repo — only a fetch script pointing to archive.org is committed; anyone reproducing this project re-downloads directly from IA. 
 
-- Pages: [RUN: `find data/raw -name '*.pdf' | xargs -I{} pdfinfo {} | grep Pages | awk '{s+=$2} END {print s}'`]
-  Words: [RUN: after OCR/text extraction — word count is only knowable once text is extracted; log an estimate here for now and update post-OCR]
+- Pages: 6603
+  Words: 4282808
   Size on disk: [RUN: `du -sh data/raw/`]
 
 - Scan/script difficulty notes:
