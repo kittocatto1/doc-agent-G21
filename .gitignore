@@ -3,5 +3,5 @@ data/interim/
 *.ckpt
 wandb/
 __pycache__/
-.venv/
+venv/
 data/raw
