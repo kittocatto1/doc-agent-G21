@@ -5794,4 +5794,2075 @@ no changes added to commit (use "git add" and/or "git commit -a")
 debashmita@debashmita-HP:~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$ 
 
 
+AI: A couple of things to flag before you commit anything:
+
+**1. You're directly on `main`, not a feature branch.** Earlier in the project the plan was to work on a branch (e.g. `debashmita/get-data-provenance`) and not commit straight to `main`, specifically because your commit history *is* your graded submission and multiple people pushing directly to `main` risks stepping on each other. Worth checking with Anisa/Sunanda — either your team has since agreed to work directly on `main` for this stage (some teams do relax this once early setup is done), or this got missed. Not something to fix retroactively right now, but flag it in your team chat so you're all on the same page going forward.
+
+**2. The untracked files are a mix of different things — don't blanket `git add -A`:**
+- `grading_kit/heldout_pages/preview/` — the Cell 3 scratch PNGs from the notebook, fine to include.
+- `grading_kit/heldout_pages/byte-magazine-1989-04_p180.png`, `-1992-03_p170.png`, `-1993-06_p140.png` — these look like your **actual held-out sample pages** (different naming pattern, not the `preview/` scratch folder), which is genuinely required content per How-To-Submit ("commit only the few held-out sample pages under `grading_kit/heldout_pages/`"). Good that these exist, but they should go with a proper commit message about held-out set work, not silently bundled into the notebook commit.
+- `transcripts/2105098.txt` — this is your AI-chat transcript, also a required deliverable, currently untracked. This one especially shouldn't get lost in an unrelated commit message.
+
+**Recommended: three separate, clearly-labeled commits**, not one giant one — better commit hygiene and clearer history:
+
+```bash
+git add notebooks/eda.ipynb grading_kit/heldout_pages/preview/
+git commit -m "Add corpus exploration notebook: inventory, word counts, multi-column evidence, dimension spread, text-layer coverage"
+
+git add grading_kit/heldout_pages/byte-magazine-1989-04_p180.png grading_kit/heldout_pages/byte-magazine-1992-03_p170.png grading_kit/heldout_pages/byte-magazine-1993-06_p140.png
+git commit -m "Add held-out sample pages for grading_kit"
+
+git add transcripts/2105098.txt
+git commit -m "Add AI-chat transcript"
+
+git push origin main
+```
+
+Before you run this — quick check on that third one: is `transcripts/2105098.txt` actually complete/current, or is this mid-conversation and you'll want to append more later? If it's not final, still fine to commit now and commit again later with more content (transcripts naturally grow over the project), just flagging so you don't think this is a one-shot "final" push.
+
+Confirm you're good with the 3-commit plan, or let me know if you'd rather do it differently, and then go ahead and push.
+
+Me: To https://github.com/kittocatto1/doc-agent-G21.git
+ ! [rejected]        main -> main (fetch first)
+error: failed to push some refs to 'https://github.com/kittocatto1/doc-agent-G21.git'
+hint: Updates were rejected because the remote contains work that you do not
+hint: have locally. This is usually caused by another repository pushing to
+hint: the same ref. If you want to integrate the remote changes, use
+hint: 'git pull' before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+
+AI: Someone (Anisa or Sunanda) pushed to `main` between your last `git status` check and just now — a normal race condition when multiple people work on the same branch. Nothing's broken yet, you just need to pull their work in first.
+
+```bash
+git pull origin main
+```
+
+**What to expect:**
+- If it merges cleanly (likely, since your teammates probably touched different files than `notebooks/eda.ipynb`, `grading_kit/heldout_pages/`, and `transcripts/`) — you'll get an auto-merge commit, and you can then push.
+- If it opens a merge conflict — Git will tell you exactly which file(s) conflict. Paste me the output if that happens; don't try to resolve it blindly, especially if it touches a shared file like `manifest.yaml` or `task.yaml`.
+
+After a clean pull:
+```bash
+git push origin main
+```
+
+Run the pull and paste the output — whether it's a clean auto-merge or a conflict, I'll walk you through the next step either way.
+
+Me: git pull origin main
+remote: Enumerating objects: 55, done.
+remote: Counting objects: 100% (55/55), done.
+remote: Compressing objects: 100% (18/18), done.
+remote: Total 42 (delta 21), reused 39 (delta 18), pack-reused 0 (from 0)
+Unpacking objects: 100% (42/42), 17.91 KiB | 495.00 KiB/s, done.
+From https://github.com/kittocatto1/doc-agent-G21
+ * branch            main       -> FETCH_HEAD
+   6218731..4828b77  main       -> origin/main
+hint: You have divergent branches and need to specify how to reconcile them.
+hint: You can do so by running one of the following commands sometime before
+hint: your next pull:
+hint: 
+hint:   git config pull.rebase false  # merge
+hint:   git config pull.rebase true   # rebase
+hint:   git config pull.ff only       # fast-forward only
+hint: 
+hint: You can replace "git config" with "git config --global" to set a default
+hint: preference for all repositories. You can also pass --rebase, --no-rebase,
+hint: or --ff-only on the command line to override the configured default per
+hint: invocation.
+fatal: Need to specify how to reconcile divergent branches.
+
+AI: Git wants to know how to combine your 3 local commits with your teammate's pushed work — this happens because you both branched off the same point and now history has split into two paths. Use **merge** (not rebase) — it's simpler, safer for team work, and won't rewrite any commit history (rebase would rewrite your commits, which gets messy if anything's already shared):
+
+```bash
+git pull --no-rebase origin main
+```
+
+**What to expect:**
+- Git will try to auto-merge. If your teammate's changes and your changes touched different files (likely — you touched `notebooks/`, `grading_kit/heldout_pages/`, `transcripts/`), it'll succeed automatically and open your default editor with a pre-filled merge commit message.
+- If it opens an editor: just save and close it as-is (in most default setups, that's `:wq` if it's Vim, or `Ctrl+X` then `Y` then `Enter` if it's Nano) — you don't need to edit the message.
+- If instead Git reports a **conflict** (tells you specific file(s) with `CONFLICT` in the output), stop and paste me the output rather than trying to resolve it blindly.
+
+Run it and paste whatever it prints.
+
+Me: it pull --no-rebase origin main
+From https://github.com/kittocatto1/doc-agent-G21
+ * branch            main       -> FETCH_HEAD
+Merge made by the 'ort' strategy.
+ configs/config.yaml                |    6 +-
+ src/doc_agent/ingest/loader.py     |   84 +-
+ src/doc_agent/ingest/preprocess.py |   65 +-
+ src/doc_agent/vision/layout.py     |  208 +-
+ src/doc_agent/vision/ocr.py        |  255 ++-
+ transcripts/2105036.txt            | 1670 ++++++++++++++++-
+ 6 files changed, 2224 insertions(+), 64 deletions(-)
+debashmita@debashmita-HP:~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$
+
+AI: Clean auto-merge, no conflicts — good. Your teammate (student 2105036, likely Anisa or Sunanda) has been busy: real progress on `loader.py`, `preprocess.py`, `layout.py`, and `ocr.py`, plus their own transcript update. Nothing overlapped with your files, so the merge went through automatically.
+
+You're clear to push now:
+
+```bash
+git push origin main
+```
+
+Once that's through, worth doing two quick things given what just landed:
+
+1. **Pull up what changed in `vision/ocr.py` and `vision/layout.py`** — since that's your area too (you own `vision/ocr.py`), you'll want to see exactly what your teammate added before you keep working on it yourself, to avoid duplicating or conflicting with their work next time you touch it:
+```bash
+git log --oneline -5 -- src/doc_agent/vision/ocr.py
+git log --oneline -5 -- src/doc_agent/vision/layout.py
+```
+2. **Check in with them** (quick team-chat message) on what's done vs. still open in those files, since 255 lines changed in `ocr.py` is substantial — better to know now than to find out mid-edit later.
+
+Push first, then let me know if you want to dig into what changed in `ocr.py`/`layout.py`, or if you'd rather switch over to checking on your own held-out labels/OCR benchmarking work next.
+
+Me: I want to push directly in main from now on
+
+AI: That's a reasonable call at this stage — early setup (structure-sensitive stub files) is done, and you've already had one live example of how `main`-only can work fine (this merge went through with zero conflicts since you and your teammate touched different files). For a 3-person team past the initial scaffolding phase, working directly on `main` is a common and defensible choice, not a red flag by itself.
+
+A few things worth doing to make it work smoothly, given How-To-Submit's rule that your **commit history is your graded submission**:
+
+1. **Pull before every session, not just before pushing.** You just saw what happens when you fall behind — a divergent-branches prompt. Starting each work session with `git pull origin main` avoids surprises and keeps merges small/clean rather than big and risky.
+2. **Commit and push often, in small chunks** (per How-To-Submit: "a history that grows steadily over weeks looks like real work"). Direct-to-`main` makes this even more important, since there's no branch buffering half-finished work.
+3. **Flag this decision to Anisa and Sunanda explicitly** (if you haven't already) so all three of you are actually doing the same thing — one person still branching while the other two push to `main` directly would reintroduce exactly the conflict risk branching was meant to avoid.
+4. **If you're mid-edit on a file and about to pull**, quickly check `git status` first — an uncommitted change colliding with an incoming pull on the *same* file is the one scenario that gets messy. Committing your own work before pulling (even a small WIP commit) sidesteps that.
+
+Go ahead and push what you have now:
+```bash
+git push origin main
+```
+
+Once that's through, let me know if you want to look at what your teammate changed in `vision/ocr.py`/`layout.py` (since that overlaps your area), or move on to your own held-out labels/OCR benchmarking work.
+----3rd claude
+
+Me: git log --oneline -5 -- src/doc_agent/vision/ocr.py
+cat src/doc_agent/vision/ocr.py
+4828b77 Enhance OCR transcribing with checkpointing to resume from previous runs and avoid data loss
+1774b2c Refactor OCR module to integrate Qwen2-VL-2B-Instruct model and enhance image processing
+b64b3c5 initial commit
+"""Stage 3 — OCR using Qwen2-VL-2B-Instruct."""
+from __future__ import annotations
+from pathlib import Path
+import torch
+import json 
+from PIL import Image
+from ..contracts import Chunk, Region
+
+OCR_DIR = Path("data/interim/ocr")
+
+_model = None
+_processor = None
+
+def _get_model(cfg: dict):
+    """Load the configured VLM once and reuse it."""
+
+    global _model, _processor
+
+    if _model is not None and _processor is not None:
+        return _model, _processor
+
+    from transformers import (
+        AutoProcessor,
+        Qwen2VLForConditionalGeneration,
+    )
+
+    model_name = cfg["ocr"]["model"]
+
+    print(f"Loading OCR model: {model_name}")
+
+    _processor = AutoProcessor.from_pretrained(model_name)
+
+    _model = Qwen2VLForConditionalGeneration.from_pretrained(
+        model_name,
+        torch_dtype="auto",
+        device_map="auto",
+    )
+
+    _model.eval()
+
+    return _model, _processor
+
+
+def _find_page_image(page_id: str) -> Path:
+    """Find the preprocessed page image belonging to a Region."""
+
+    if "_p" not in page_id:
+        raise ValueError(
+            f"Unexpected page_id format: {page_id}"
+        )
+
+    doc_id, page_number = page_id.rsplit("_p", 1)
+
+    filename = f"page_{page_number}.png"
+
+    search_dirs = [
+        Path("data/interim/preprocessed"),
+        Path("data/interim/pages")
+    ]
+
+    for directory in search_dirs:
+        candidate = directory / doc_id / filename
+
+        if candidate.exists():
+            return candidate
+
+    # Fallback for slightly different directory structures.
+    for directory in search_dirs:
+        if directory.exists():
+            matches = list(directory.rglob(filename))
+
+            for path in matches:
+                if doc_id in str(path):
+                    return path
+
+    raise FileNotFoundError(
+        f"Could not find image for page_id={page_id}"
+    )
+
+
+def _crop_region(region: Region) -> Image.Image:
+    """Load a page and crop the detected region."""
+
+    image_path = _find_page_image(region.page_id)
+
+    with Image.open(image_path) as image:
+        image = image.convert("RGB")
+
+        x0, y0, x1, y1 = region.bbox
+
+        # Keep bbox inside image boundaries.
+        x0 = max(0, min(x0, image.width))
+        y0 = max(0, min(y0, image.height))
+        x1 = max(0, min(x1, image.width))
+        y1 = max(0, min(y1, image.height))
+
+        if x1 <= x0 or y1 <= y0:
+            raise ValueError(
+                f"Invalid region bbox: {region.bbox}"
+            )
+
+        return image.crop((x0, y0, x1, y1))
+
+
+def _prompt_for_region(kind: str) -> str:
+    """Return an OCR instruction appropriate for the region type."""
+
+    if kind == "heading":
+        return (
+            "Transcribe the heading exactly as shown. "
+            "Return only the text. Do not explain or summarize."
+        )
+
+    if kind == "table":
+        return (
+            "Transcribe all readable text in this table. "
+            "Preserve rows and columns as clearly as possible. "
+            "Return only the transcription."
+        )
+
+    if kind == "figure":
+        return (
+            "Transcribe any readable text appearing in this figure, "
+            "diagram, or caption. Return only the text. "
+            "Do not describe the image."
+        )
+
+    return (
+        "Transcribe all visible text exactly as shown. "
+        "Preserve words, numbers, punctuation, and line breaks "
+        "where possible. Do not summarize or explain."
+    )
+
+
+class Reader:
+    """VLM-based OCR reader."""
+
+    def __init__(self, cfg: dict) -> None:
+        self.cfg = cfg["ocr"]
+        self.model, self.processor = _get_model(cfg)
+
+    def transcribe_region(self, region: Region) -> str:
+        """OCR a single detected layout region."""
+
+        crop = _crop_region(region)
+        prompt = _prompt_for_region(region.kind)
+
+        messages = [
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image",
+                        "image": crop,
+                    },
+                    {
+                        "type": "text",
+                        "text": prompt,
+                    },
+                ],
+            }
+        ]
+
+        inputs = self.processor.apply_chat_template(
+            messages,
+            add_generation_prompt=True,
+            tokenize=True,
+            return_dict=True,
+            return_tensors="pt",
+        )
+
+        # Move tensor inputs to the same device as the model.
+        inputs = {
+            key: value.to(self.model.device)
+            if hasattr(value, "to")
+            else value
+            for key, value in inputs.items()
+        }
+
+        with torch.inference_mode():
+            generated_ids = self.model.generate(
+                **inputs,
+                max_new_tokens=self.cfg.get(
+                    "max_new_tokens",
+                    512,
+                ),
+                do_sample=False,
+            )
+
+        input_length = inputs["input_ids"].shape[1]
+
+        generated_ids = generated_ids[
+            :, input_length:
+        ]
+
+        text = self.processor.batch_decode(
+            generated_ids,
+            skip_special_tokens=True,
+            clean_up_tokenization_spaces=False,
+        )[0]
+
+        return text.strip()
+
+
+def transcribe(
+    regions: list[Region],
+    cfg: dict,
+) -> list[Chunk]:
+    """Convert layout regions into OCR text chunks.
+    Checkpoints incrementally to OCR_DIR/chunks.json and resumes from it
+    on restart (skips regions whose chunk_id was already OCR'd) -- Kaggle
+    sessions can die mid-run, this avoids losing completed work."""
+
+    OCR_DIR.mkdir(parents=True, exist_ok=True)
+    output_path = OCR_DIR / "chunks.json"
+    checkpoint_every = cfg["ocr"].get("checkpoint_every", 25)
+
+    # Resume: load any chunks already OCR'd from a previous run.
+    chunks: list[Chunk] = []
+    already_done_ids: set[str] = set()
+    if output_path.exists():
+        with output_path.open("r", encoding="utf-8") as f:
+            existing = json.load(f)
+        chunks = [Chunk(**item) for item in existing]
+        already_done_ids = {c.id for c in chunks}
+        print(f"Resuming: {len(chunks)} chunks already OCR'd, skipping those.")
+
+    reader = Reader(cfg)
+
+    for index, region in enumerate(regions):
+        doc_id = region.page_id.rsplit("_p", 1)[0]
+        chunk_id = f"{region.page_id}_region_{index:04d}"
+
+        if chunk_id in already_done_ids:
+            continue  # already OCR'd in a previous (interrupted) run
+
+        try:
+            text = reader.transcribe_region(region)
+        except Exception as exc:
+            print(f"WARNING: OCR failed for region {index}/{len(regions)} ({chunk_id}): {exc}")
+            continue
+
+        if not text:
+            continue
+
+        chunks.append(Chunk(
+            id=chunk_id, doc_id=doc_id, text=text,
+            page_ids=[region.page_id], score=0.0,
+        ))
+
+        if (index + 1) % checkpoint_every == 0 or (index + 1) == len(regions):
+            with output_path.open("w", encoding="utf-8") as f:
+                json.dump([c.model_dump() for c in chunks], f, ensure_ascii=False, indent=2)
+            print(f"[{index + 1}/{len(regions)}] checkpoint saved -- {len(chunks)} chunks total")
+
+    return chunksdebashmita@debashmita-HP:~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$ 
+    the ocr code is running in kaggle by 3 of our teammates, we divided the issues among us
+
+AI: Good — that's genuinely solid code: real Qwen2-VL-2B integration, proper region cropping with boundary clamping, kind-specific prompts (heading/table/figure/text), and smart checkpointing to survive Kaggle session death. This confirms `vision/ocr.py` itself is largely done — Anisa built the actual OCR mechanism.
+
+## What this means for your role now
+
+Since OCR generation is being split across all 3 of you on Kaggle by issue, the actual model-calling code isn't something you need to duplicate. Your remaining responsibility shifts to what happens **around** this OCR output — specifically two things from your original task list that are still open:
+
+## Next step: `eval/metrics.py → ocr_f1()`
+
+This is explicitly still yours per the 4-Day Plan (*"Debashmita | ...eval/metrics.py → ocr_f1() against held-out labels"*), and it's now genuinely unblocked — you have real `Chunk` objects with OCR'd text coming out of `transcribe()`, and you have (mostly) real ground truth in `labels.jsonl`. This function's job: compare OCR output against your hand-transcribed ground truth and produce a real quality number (F1, CER, or WER) for Section 5 of your A2 form.
+
+**Before writing this, let's check the current stub:**
+```bash
+cat src/doc_agent/eval/metrics.py
+```
+
+## But first — a blocker worth resolving
+
+`ocr_f1()` needs **valid, parseable ground truth** to compare against. Two problems stand in the way right now:
+
+1. **`labels.jsonl`'s malformed JSON** (raw newlines inside string values) — you flagged this to Sunanda already; worth checking if she's fixed it yet, since `ocr_f1()` literally cannot run until this file parses correctly.
+2. **Your own 3 pages** (`1989-04_p180`, `1992-03_p170`, `1993-06_p140`) still have **no transcribed ground truth at all** — they exist as images in `heldout_pages/`, but nothing was ever added to `labels.jsonl` for them.
+
+**Practical next step, in order:**
+
+```bash
+git pull origin main
+```
+(check if anyone's touched `labels.jsonl` or `metrics.py` since your last pull)
+
+Then:
+```bash
+python3 -c "
+import json
+with open('grading_kit/labels.jsonl') as f:
+    for i, line in enumerate(f, 1):
+        try:
+            json.loads(line)
+        except Exception as e:
+            print(f'Line {i} broken: {e}')
+"
+```
+
+This tells us plainly whether the malformed-JSON problem is still there. If it's fixed, we move straight to `ocr_f1()`. If not, this is now a real blocker for your assigned task — worth escalating in your team chat as urgent, not just a heads-up, since it's now sitting directly in your critical path.
+
+Run both and paste the output — let's confirm what's actually blocking you before writing more code.
+
+Me: git pull origin main pull origin main
+
+remote: Enumerating objects: 34, done.
+
+remote: Counting objects: 100% (34/34), done.
+
+remote: Compressing objects: 100% (10/10), done.
+
+remote: Total 30 (delta 20), reused 30 (delta 20), pack-reused 0 (from 0)
+
+Unpacking objects: 100% (30/30), 7.26 MiB | 4.46 MiB/s, done.
+
+From https://github.com/kittocatto1/doc-agent-G21
+
+ * branch            main       -> FETCH_HEAD
+
+   054e6cc..d1e82a1  main       -> origin/main
+
+Updating 054e6cc..d1e82a1
+
+Fast-forward
+
+ .../byte-magazine-1983-12_p019.png        | Bin 0 -> 2601238 bytes
+
+ .../byte-magazine-1984-01_p023.png        | Bin 0 -> 919549 bytes
+
+ .../byte-magazine-1985-06_p018.png        | Bin 0 -> 1381721 bytes
+
+ .../byte-magazine-1986-08_p032.png        | Bin 0 -> 1451404 bytes
+
+ .../byte-magazine-1987-09_p330.png        | Bin 0 -> 1275506 bytes
+
+ grading_kit/labels.jsonl                  | 219 +++++++++++++++
+
+ 6 files changed, 219 insertions(+)
+
+ create mode 100644 grading_kit/heldout_pages/byte-magazine-1983-12_p019.png
+
+ create mode 100644 grading_kit/heldout_pages/byte-magazine-1984-01_p023.png
+
+ create mode 100644 grading_kit/heldout_pages/byte-magazine-1985-06_p018.png
+
+ create mode 100644 grading_kit/heldout_pages/byte-magazine-1986-08_p032.png
+
+ create mode 100644 grading_kit/heldout_pages/byte-magazine-1987-09_p330.png
+
+debashmita@debashmita-HP:~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$ 
+
+
+AI: Good — more heldout pages landed (5 new ones), and `labels.jsonl` grew again (219 lines added). Let's check if the JSON validity problem is actually fixed now, since that's the real gate before you can write `ocr_f1()`.Run this:
+
+```bash
+python3 -c "
+import json
+good = 0
+bad = 0
+with open('grading_kit/labels.jsonl') as f:
+    for i, line in enumerate(f, 1):
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            json.loads(line)
+            good += 1
+        except Exception as e:
+            bad += 1
+            print(f'Line {i} broken: {e}')
+print(f'\\n{good} valid lines, {bad} broken lines')
+"
+```
+
+**Why this specific check, and why now matters:** this tells us definitively whether the earlier raw-newline problem is still present, partially fixed, or fully resolved — and gives an exact count so we know the scale of any remaining issue before writing `ocr_f1()` against this file. If it's still broken, `ocr_f1()` will crash immediately trying to load ground truth, so this is the real gate.
+
+Paste the output — based on that, we'll either move straight to building `metrics.py`, or you'll have concrete evidence (exact broken line numbers) to bring back to Sunanda so it's not just "it's broken" but "here's exactly what's broken and where."
+
+Me:  python3 -c "
+import json
+good = 0
+bad = 0
+with open('grading_kit/labels.jsonl') as f:
+    for i, line in enumerate(f, 1):
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            json.loads(line)
+            good += 1
+        except Exception as e:
+            bad += 1
+            print(f'Line {i} broken: {e}')
+print(f'\\n{good} valid lines, {bad} broken lines')
+"
+Line 1 broken: Unterminated string starting at: line 1 column 51 (char 50)
+Line 4 broken: Expecting value: line 1 column 1 (char 0)
+Line 7 broken: Expecting value: line 1 column 1 (char 0)
+Line 8 broken: Expecting value: line 1 column 1 (char 0)
+Line 11 broken: Expecting value: line 1 column 1 (char 0)
+Line 14 broken: Expecting value: line 1 column 1 (char 0)
+Line 17 broken: Expecting value: line 1 column 1 (char 0)
+Line 19 broken: Expecting value: line 1 column 1 (char 0)
+Line 22 broken: Expecting value: line 1 column 1 (char 0)
+Line 25 broken: Expecting value: line 1 column 1 (char 0)
+Line 28 broken: Expecting value: line 1 column 1 (char 0)
+Line 31 broken: Expecting value: line 1 column 1 (char 0)
+Line 34 broken: Expecting value: line 1 column 1 (char 0)
+Line 37 broken: Expecting value: line 1 column 1 (char 0)
+Line 40 broken: Expecting value: line 1 column 1 (char 0)
+Line 43 broken: Expecting value: line 1 column 1 (char 0)
+Line 46 broken: Unterminated string starting at: line 1 column 51 (char 50)
+Line 48 broken: Expecting value: line 1 column 1 (char 0)
+Line 50 broken: Expecting value: line 1 column 1 (char 0)
+Line 51 broken: Expecting value: line 1 column 1 (char 0)
+Line 52 broken: Extra data: line 1 column 6 (char 5)
+Line 53 broken: Expecting value: line 1 column 1 (char 0)
+Line 56 broken: Expecting value: line 1 column 1 (char 0)
+Line 58 broken: Expecting value: line 1 column 1 (char 0)
+Line 60 broken: Expecting value: line 1 column 1 (char 0)
+Line 61 broken: Expecting value: line 1 column 1 (char 0)
+Line 62 broken: Expecting value: line 1 column 1 (char 0)
+Line 63 broken: Expecting value: line 1 column 1 (char 0)
+Line 65 broken: Expecting value: line 1 column 1 (char 0)
+Line 67 broken: Expecting value: line 1 column 1 (char 0)
+Line 69 broken: Expecting value: line 1 column 1 (char 0)
+Line 72 broken: Unterminated string starting at: line 1 column 51 (char 50)
+Line 74 broken: Expecting value: line 1 column 1 (char 0)
+Line 76 broken: Expecting value: line 1 column 1 (char 0)
+Line 78 broken: Expecting value: line 1 column 1 (char 0)
+Line 80 broken: Expecting value: line 1 column 1 (char 0)
+Line 82 broken: Expecting value: line 1 column 1 (char 0)
+Line 84 broken: Expecting value: line 1 column 1 (char 0)
+Line 85 broken: Expecting value: line 1 column 1 (char 0)
+Line 86 broken: Expecting value: line 1 column 1 (char 0)
+Line 88 broken: Expecting value: line 1 column 1 (char 0)
+Line 90 broken: Expecting value: line 1 column 1 (char 0)
+Line 92 broken: Expecting value: line 1 column 1 (char 0)
+Line 94 broken: Expecting value: line 1 column 1 (char 0)
+Line 96 broken: Expecting value: line 1 column 1 (char 0)
+Line 98 broken: Expecting value: line 1 column 1 (char 0)
+Line 100 broken: Expecting value: line 1 column 1 (char 0)
+Line 101 broken: Expecting value: line 1 column 1 (char 0)
+Line 102 broken: Expecting value: line 1 column 1 (char 0)
+Line 104 broken: Expecting value: line 1 column 1 (char 0)
+Line 105 broken: Expecting value: line 1 column 1 (char 0)
+Line 107 broken: Expecting value: line 1 column 1 (char 0)
+Line 108 broken: Extra data: line 1 column 2 (char 1)
+Line 110 broken: Expecting value: line 1 column 1 (char 0)
+Line 111 broken: Expecting value: line 1 column 1 (char 0)
+Line 112 broken: Expecting value: line 1 column 1 (char 0)
+Line 114 broken: Extra data: line 1 column 3 (char 2)
+Line 115 broken: Expecting value: line 1 column 1 (char 0)
+Line 116 broken: Expecting value: line 1 column 1 (char 0)
+Line 117 broken: Expecting value: line 1 column 1 (char 0)
+Line 119 broken: Expecting value: line 1 column 1 (char 0)
+Line 121 broken: Expecting value: line 1 column 1 (char 0)
+Line 124 broken: Unterminated string starting at: line 1 column 51 (char 50)
+Line 126 broken: Expecting value: line 1 column 1 (char 0)
+Line 127 broken: Expecting value: line 1 column 1 (char 0)
+Line 129 broken: Expecting value: line 1 column 1 (char 0)
+Line 131 broken: Expecting value: line 1 column 1 (char 0)
+Line 133 broken: Expecting value: line 1 column 1 (char 0)
+Line 135 broken: Expecting value: line 1 column 1 (char 0)
+Line 137 broken: Expecting value: line 1 column 1 (char 0)
+Line 139 broken: Expecting value: line 1 column 1 (char 0)
+Line 141 broken: Expecting value: line 1 column 1 (char 0)
+Line 143 broken: Expecting value: line 1 column 1 (char 0)
+Line 145 broken: Expecting value: line 1 column 1 (char 0)
+Line 147 broken: Expecting value: line 1 column 1 (char 0)
+Line 149 broken: Expecting value: line 1 column 1 (char 0)
+Line 151 broken: Expecting value: line 1 column 1 (char 0)
+Line 153 broken: Extra data: line 1 column 5 (char 4)
+Line 156 broken: Unterminated string starting at: line 1 column 51 (char 50)
+Line 158 broken: Expecting value: line 1 column 1 (char 0)
+Line 160 broken: Expecting value: line 1 column 1 (char 0)
+Line 162 broken: Expecting value: line 1 column 1 (char 0)
+Line 164 broken: Expecting value: line 1 column 1 (char 0)
+Line 166 broken: Expecting value: line 1 column 1 (char 0)
+Line 168 broken: Expecting value: line 1 column 1 (char 0)
+Line 170 broken: Expecting value: line 1 column 1 (char 0)
+Line 172 broken: Expecting value: line 1 column 1 (char 0)
+Line 174 broken: Expecting value: line 1 column 1 (char 0)
+Line 176 broken: Expecting value: line 1 column 1 (char 0)
+Line 178 broken: Expecting value: line 1 column 1 (char 0)
+Line 180 broken: Expecting value: line 1 column 1 (char 0)
+Line 182 broken: Expecting value: line 1 column 1 (char 0)
+Line 184 broken: Expecting value: line 1 column 1 (char 0)
+Line 186 broken: Expecting value: line 1 column 1 (char 0)
+Line 188 broken: Extra data: line 1 column 4 (char 3)
+Line 191 broken: Unterminated string starting at: line 1 column 51 (char 50)
+Line 193 broken: Expecting value: line 1 column 1 (char 0)
+Line 195 broken: Expecting value: line 1 column 1 (char 0)
+Line 197 broken: Expecting value: line 1 column 1 (char 0)
+Line 199 broken: Expecting value: line 1 column 1 (char 0)
+Line 201 broken: Expecting value: line 1 column 1 (char 0)
+Line 203 broken: Expecting value: line 1 column 1 (char 0)
+Line 205 broken: Expecting value: line 1 column 1 (char 0)
+Line 207 broken: Expecting value: line 1 column 1 (char 0)
+Line 208 broken: Expecting value: line 1 column 1 (char 0)
+Line 209 broken: Expecting value: line 1 column 1 (char 0)
+Line 211 broken: Expecting value: line 1 column 1 (char 0)
+Line 213 broken: Expecting value: line 1 column 1 (char 0)
+Line 214 broken: Expecting value: line 1 column 1 (char 0)
+Line 216 broken: Expecting value: line 1 column 1 (char 0)
+Line 218 broken: Expecting value: line 1 column 1 (char 0)
+Line 219 broken: Expecting value: line 1 column 1 (char 0)
+Line 220 broken: Expecting value: line 1 column 1 (char 0)
+Line 221 broken: Expecting value: line 1 column 1 (char 0)
+Line 222 broken: Expecting value: line 1 column 1 (char 0)
+Line 223 broken: Expecting value: line 1 column 1 (char 0)
+Line 224 broken: Expecting value: line 1 column 1 (char 0)
+Line 225 broken: Expecting value: line 1 column 1 (char 0)
+Line 226 broken: Expecting value: line 1 column 1 (char 0)
+Line 227 broken: Expecting value: line 1 column 1 (char 0)
+Line 228 broken: Expecting value: line 1 column 1 (char 0)
+Line 229 broken: Expecting value: line 1 column 1 (char 0)
+Line 230 broken: Expecting value: line 1 column 1 (char 0)
+Line 231 broken: Expecting value: line 1 column 1 (char 0)
+Line 232 broken: Expecting value: line 1 column 1 (char 0)
+Line 233 broken: Expecting value: line 1 column 1 (char 0)
+Line 234 broken: Expecting value: line 1 column 1 (char 0)
+Line 235 broken: Expecting value: line 1 column 1 (char 0)
+Line 236 broken: Expecting value: line 1 column 1 (char 0)
+Line 237 broken: Expecting value: line 1 column 1 (char 0)
+Line 238 broken: Expecting value: line 1 column 1 (char 0)
+Line 239 broken: Expecting value: line 1 column 1 (char 0)
+Line 240 broken: Expecting value: line 1 column 1 (char 0)
+Line 241 broken: Expecting value: line 1 column 1 (char 0)
+Line 242 broken: Expecting value: line 1 column 1 (char 0)
+Line 243 broken: Expecting value: line 1 column 1 (char 0)
+Line 244 broken: Expecting value: line 1 column 1 (char 0)
+Line 245 broken: Expecting value: line 1 column 1 (char 0)
+Line 246 broken: Expecting value: line 1 column 1 (char 0)
+Line 247 broken: Expecting value: line 1 column 1 (char 0)
+Line 248 broken: Expecting value: line 1 column 1 (char 0)
+Line 250 broken: Expecting value: line 1 column 1 (char 0)
+Line 252 broken: Expecting value: line 1 column 1 (char 0)
+Line 254 broken: Expecting value: line 1 column 1 (char 0)
+Line 256 broken: Expecting value: line 1 column 1 (char 0)
+Line 258 broken: Expecting value: line 1 column 1 (char 0)
+Line 260 broken: Expecting value: line 1 column 1 (char 0)
+Line 262 broken: Expecting value: line 1 column 1 (char 0)
+Line 264 broken: Expecting value: line 1 column 1 (char 0)
+Line 266 broken: Expecting value: line 1 column 1 (char 0)
+Line 268 broken: Expecting value: line 1 column 1 (char 0)
+Line 271 broken: Unterminated string starting at: line 1 column 51 (char 50)
+Line 273 broken: Expecting value: line 1 column 1 (char 0)
+Line 275 broken: Expecting value: line 1 column 1 (char 0)
+Line 277 broken: Expecting value: line 1 column 1 (char 0)
+Line 278 broken: Expecting value: line 1 column 1 (char 0)
+Line 279 broken: Expecting value: line 1 column 1 (char 0)
+Line 280 broken: Expecting value: line 1 column 1 (char 0)
+Line 281 broken: Expecting value: line 1 column 1 (char 0)
+Line 283 broken: Expecting value: line 1 column 1 (char 0)
+Line 285 broken: Expecting value: line 1 column 1 (char 0)
+Line 287 broken: Expecting value: line 1 column 1 (char 0)
+Line 289 broken: Expecting value: line 1 column 1 (char 0)
+Line 291 broken: Expecting value: line 1 column 1 (char 0)
+Line 292 broken: Expecting value: line 1 column 1 (char 0)
+Line 293 broken: Extra data: line 1 column 5 (char 4)
+Line 294 broken: Expecting value: line 1 column 1 (char 0)
+Line 296 broken: Expecting value: line 1 column 1 (char 0)
+Line 298 broken: Expecting value: line 1 column 1 (char 0)
+Line 300 broken: Expecting value: line 1 column 1 (char 0)
+Line 302 broken: Expecting value: line 1 column 1 (char 0)
+Line 303 broken: Expecting value: line 1 column 1 (char 0)
+Line 304 broken: Extra data: line 1 column 3 (char 2)
+Line 305 broken: Expecting value: line 1 column 1 (char 0)
+Line 307 broken: Expecting value: line 1 column 1 (char 0)
+Line 309 broken: Expecting value: line 1 column 1 (char 0)
+Line 311 broken: Extra data: line 1 column 4 (char 3)
+Line 313 broken: Expecting value: line 1 column 1 (char 0)
+Line 316 broken: Unterminated string starting at: line 1 column 51 (char 50)
+Line 318 broken: Expecting value: line 1 column 1 (char 0)
+Line 320 broken: Extra data: line 1 column 3 (char 2)
+Line 322 broken: Expecting value: line 1 column 1 (char 0)
+Line 324 broken: Expecting value: line 1 column 1 (char 0)
+Line 326 broken: Expecting value: line 1 column 1 (char 0)
+Line 328 broken: Expecting value: line 1 column 1 (char 0)
+Line 330 broken: Expecting value: line 1 column 1 (char 0)
+Line 332 broken: Extra data: line 1 column 4 (char 3)
+Line 334 broken: Expecting value: line 1 column 1 (char 0)
+Line 337 broken: Unterminated string starting at: line 1 column 51 (char 50)
+Line 339 broken: Expecting value: line 1 column 1 (char 0)
+Line 341 broken: Expecting value: line 1 column 1 (char 0)
+Line 343 broken: Expecting value: line 1 column 1 (char 0)
+Line 345 broken: Expecting value: line 1 column 1 (char 0)
+Line 347 broken: Expecting value: line 1 column 1 (char 0)
+Line 349 broken: Expecting value: line 1 column 1 (char 0)
+Line 351 broken: Expecting value: line 1 column 1 (char 0)
+Line 353 broken: Expecting value: line 1 column 1 (char 0)
+Line 355 broken: Expecting value: line 1 column 1 (char 0)
+Line 357 broken: Expecting value: line 1 column 1 (char 0)
+Line 359 broken: Expecting value: line 1 column 1 (char 0)
+Line 361 broken: Expecting value: line 1 column 1 (char 0)
+Line 363 broken: Expecting value: line 1 column 1 (char 0)
+Line 365 broken: Expecting value: line 1 column 1 (char 0)
+Line 367 broken: Expecting value: line 1 column 1 (char 0)
+Line 369 broken: Expecting value: line 1 column 1 (char 0)
+Line 371 broken: Expecting value: line 1 column 1 (char 0)
+Line 372 broken: Extra data: line 1 column 6 (char 5)
+Line 374 broken: Expecting value: line 1 column 1 (char 0)
+Line 375 broken: Extra data: line 1 column 4 (char 3)
+Line 377 broken: Expecting value: line 1 column 1 (char 0)
+Line 379 broken: Expecting value: line 1 column 1 (char 0)
+Line 382 broken: Unterminated string starting at: line 1 column 51 (char 50)
+Line 384 broken: Expecting value: line 1 column 1 (char 0)
+Line 386 broken: Expecting value: line 1 column 1 (char 0)
+Line 388 broken: Expecting value: line 1 column 1 (char 0)
+Line 390 broken: Expecting value: line 1 column 1 (char 0)
+Line 392 broken: Expecting value: line 1 column 1 (char 0)
+Line 394 broken: Expecting value: line 1 column 1 (char 0)
+Line 396 broken: Expecting value: line 1 column 1 (char 0)
+Line 398 broken: Expecting value: line 1 column 1 (char 0)
+Line 400 broken: Expecting value: line 1 column 1 (char 0)
+Line 402 broken: Expecting value: line 1 column 1 (char 0)
+Line 404 broken: Expecting value: line 1 column 1 (char 0)
+Line 406 broken: Expecting value: line 1 column 1 (char 0)
+Line 408 broken: Expecting value: line 1 column 1 (char 0)
+Line 410 broken: Expecting value: line 1 column 1 (char 0)
+Line 412 broken: Expecting value: line 1 column 1 (char 0)
+Line 414 broken: Expecting value: line 1 column 2 (char 1)
+Line 416 broken: Expecting value: line 1 column 1 (char 0)
+Line 419 broken: Unterminated string starting at: line 1 column 51 (char 50)
+Line 421 broken: Expecting value: line 1 column 1 (char 0)
+Line 423 broken: Expecting value: line 1 column 1 (char 0)
+Line 425 broken: Expecting value: line 1 column 1 (char 0)
+Line 427 broken: Expecting value: line 1 column 1 (char 0)
+Line 429 broken: Expecting value: line 1 column 1 (char 0)
+Line 431 broken: Expecting value: line 1 column 1 (char 0)
+Line 433 broken: Expecting value: line 1 column 1 (char 0)
+Line 435 broken: Expecting value: line 1 column 1 (char 0)
+Line 437 broken: Expecting value: line 1 column 1 (char 0)
+Line 439 broken: Expecting value: line 1 column 1 (char 0)
+Line 440 broken: Expecting value: line 1 column 1 (char 0)
+Line 441 broken: Expecting value: line 1 column 1 (char 0)
+Line 443 broken: Expecting value: line 1 column 1 (char 0)
+Line 445 broken: Expecting value: line 1 column 1 (char 0)
+Line 447 broken: Expecting value: line 1 column 1 (char 0)
+Line 449 broken: Expecting value: line 1 column 1 (char 0)
+Line 451 broken: Expecting value: line 1 column 1 (char 0)
+Line 453 broken: Expecting value: line 1 column 1 (char 0)
+Line 454 broken: Expecting value: line 1 column 1 (char 0)
+Line 456 broken: Expecting value: line 1 column 1 (char 0)
+Line 458 broken: Expecting value: line 1 column 1 (char 0)
+Line 460 broken: Expecting value: line 1 column 1 (char 0)
+Line 462 broken: Expecting value: line 1 column 1 (char 0)
+Line 464 broken: Expecting value: line 1 column 1 (char 0)
+Line 466 broken: Expecting value: line 1 column 1 (char 0)
+Line 468 broken: Expecting value: line 1 column 1 (char 0)
+Line 469 broken: Expecting value: line 1 column 1 (char 0)
+Line 470 broken: Expecting value: line 1 column 1 (char 0)
+Line 472 broken: Expecting value: line 1 column 1 (char 0)
+Line 474 broken: Expecting value: line 1 column 1 (char 0)
+Line 476 broken: Expecting value: line 1 column 1 (char 0)
+Line 478 broken: Expecting value: line 1 column 1 (char 0)
+Line 480 broken: Expecting value: line 1 column 1 (char 0)
+Line 481 broken: Expecting value: line 1 column 1 (char 0)
+Line 482 broken: Expecting value: line 1 column 1 (char 0)
+Line 484 broken: Expecting value: line 1 column 1 (char 0)
+
+0 valid lines, 266 broken lines
+debashmita@debashmita-HP:~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$ 
+
+AI: This is worse than before — **0 valid lines out of 266**. The entire file is broken, not just a few entries. This confirms the same root cause we diagnosed earlier (raw newlines inside JSON string values, un-escaped) — it's just gotten bigger as more people added entries the same broken way. This is now a genuine, hard blocker: **`ocr_f1()` cannot be written or tested against this file in its current state.**
+
+## Why "don't touch her file" no longer fully applies
+
+Your instinct earlier — not editing Sunanda's file without her involvement — was right at the time, when it was a smaller, isolated issue you could flag and move past. But now:
+1. The file is **100% broken**, not partially
+2. It's now blocking **your** assigned deliverable (`ocr_f1()`), not just a hypothetical future problem
+3. Multiple people (going by the growing line count) have been appending to it the same broken way, meaning the problem will keep compounding if untouched
+
+This has crossed from "her file, her call" into "shared blocker affecting the whole team's A2 submission." That changes what's reasonable to do.
+
+## Recommended next step: escalate clearly, offer a concrete fix
+
+**Message to your team (Sunanda + Anisa), direct and specific:**
+
+> `grading_kit/labels.jsonl` is currently 100% invalid JSON (0/266 lines parse) — every entry has raw line breaks inside the text field instead of `\n` escapes. This blocks `ocr_f1()` (my task) since I can't load any ground truth to score against. I can write a repair script that reconstructs all entries into valid JSONL without losing any transcribed text — want me to run it, or would you rather fix the entry format going forward yourselves?
+
+This is honest, non-blaming (states the technical fact, not "you broke it"), and offers to solve it rather than just complain.
+
+## While waiting for a reply — prepare the repair script now, don't run it yet
+
+We can write and test a repair script safely (on a **copy** of the file, not overwriting the real one) so that the moment you get a green light, you can apply it instantly rather than losing more time:
+
+```bash
+cp grading_kit/labels.jsonl /tmp/labels_backup.jsonl
+```
+
+Want me to write that repair script now so it's ready, while you send the team message? It would reconstruct each `{"page_id": ...}` block (using the same pattern-matching approach I described earlier) and properly escape embedded newlines — recovering all the real transcription work already done, not discarding it.
+
+Me: Sent her message, she said changed it. Let's check
+
+AI: Good — let's verify directly rather than assume. Same validation script as before, run fresh:**First, pull her latest change:**
+
+```bash
+git pull origin main
+```
+
+**Then re-run the same validation check:**
+
+```bash
+python3 -c "
+import json
+good = 0
+bad = 0
+with open('grading_kit/labels.jsonl') as f:
+    for i, line in enumerate(f, 1):
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            json.loads(line)
+            good += 1
+        except Exception as e:
+            bad += 1
+            print(f'Line {i} broken: {e}')
+print(f'\\n{good} valid lines, {bad} broken lines')
+"
+```
+
+**Why re-run the identical check rather than just trust her word:** this is exactly the kind of thing worth confirming with evidence, same principle as when we double-checked your own transcript push earlier tonight — not because anyone's untrustworthy, but because "I fixed it" and "it actually parses cleanly now" are two different claims, and this file directly blocks your graded deliverable, so it's worth being certain before building on top of it.
+
+Run both and paste the output — if it comes back `0 broken lines`, you're clear to move straight to `ocr_f1()`. If there's still a nonzero count, we'll have exact line numbers to send back.
+
+Me: python3 -c "
+import json
+good = 0
+bad = 0
+with open('grading_kit/labels.jsonl') as f:
+    for i, line in enumerate(f, 1):
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            json.loads(line)
+            good += 1
+        except Exception as e:
+            bad += 1
+            print(f'Line {i} broken: {e}')
+print(f'\\n{good} valid lines, {bad} broken lines')
+"
+15 valid lines, 0 broken lines
+
+AI: Confirmed clean — **15 valid lines, 0 broken lines**. Sunanda genuinely fixed it (likely rewrote it properly as 15 real one-line JSON entries rather than the sprawling 266-line broken version). Good, this is a real, verified fix — you're unblocked.
+
+## Next: look at what's actually in there before writing `ocr_f1()`
+
+```bash
+python3 -c "
+import json
+with open('grading_kit/labels.jsonl') as f:
+    for line in f:
+        d = json.loads(line)
+        print(d['page_id'], '-', len(d['text'].split()), 'words')
+"
+```
+
+**Why check this first:** we need to know exactly which `page_id`s have ground truth before writing the scoring function — specifically, whether your 3 pages (`1989-04_p180`, `1992-03_p170`, `1993-06_p140`) that we extracted earlier ever got transcribed and added, or whether they're still missing. If only 15 entries exist total across your whole team's heldout set (which now has many more image files than 15, based on all the PNGs we've seen land from different teammates), some pages likely still lack ground truth.
+
+Paste the output — this tells us exactly what `ocr_f1()` will have to work with, and whether there's still transcription work needed before you can properly test/demonstrate the scoring function end-to-end.
+
+Me: python3 -c "
+import json
+with open('grading_kit/labels.jsonl') as f:
+    for line in f:
+        d = json.loads(line)
+        print(d['page_id'], '-', len(d['text'].split()), 'words') 
+"
+byte-magazine-1975-09_p020 - 857 words
+byte-magazine-1978-07_p013 - 354 words
+byte-magazine-1980-07_p197 - 241 words
+byte-magazine-1981-05_p132 - 769 words
+byte-magazine-1982-04_p044 - 823 words
+byte-magazine-1983-11_p441 - 386 words
+byte-magazine-1983-12_p019 - 429 words
+byte-magazine-1984-01_p023 - 588 words
+byte-magazine-1985-06_p018 - 349 words
+byte-magazine-1986-08_p032 - 555 words
+byte-magazine-1987-09_p330 - 447 words
+byte-magazine-1988-05_p110 - 1110 words
+byte-magazine-1989-04_p180 - 442 words
+byte-magazine-1992-03_p170 - 541 words
+byte-magazine-1993-06_p140 - 316 words
+debashmita@debashmita-HP:~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$
+
+AI: Excellent — genuinely good news. All 15 issues have real, substantial ground truth (241–1110 words each, no suspiciously empty entries), **and your 3 pages specifically are already there** — `1989-04_p180`, `1992-03_p170`, `1993-06_p140` all have real transcribed text. Someone on the team (likely Anisa or Sunanda) transcribed these while running their own OCR work on Kaggle — good, no duplicate work needed on your end for these 3.
+
+This is a complete, valid ground-truth set — one labeled page per issue, all 15 issues covered. Genuinely ready to build `ocr_f1()` against.
+
+## Now let's look at the actual metrics stub before writing anything
+
+```bash
+cat src/doc_agent/eval/metrics.py
+```
+
+**Why check this first, same reasoning as always:** the stub might already have partial scaffolding, specific function signatures, or hints about what return format is expected (e.g., does `ocr_f1()` take page IDs and look up both ground truth and OCR output itself, or does it take two text strings and just compare them). We want to build against what's actually there, not assume.
+
+Paste the output — once I see it, we'll design `ocr_f1()` properly: what it needs to compare (your OCR'd `Chunk` objects vs. `labels.jsonl` ground truth), what metric to compute (word-level F1 is the most standard, straightforward choice given the function's name), and how it ties into your Section 5 evidence requirement.
+
+Me: cat src/doc_agent/eval/metrics.py
+"""Stage 9 — metrics"""
+from __future__ import annotations
+from ..contracts import *  # noqa
+def ocr_f1(pred: str, gold: str) -> float: raise NotImplementedError
+def recall_at_k(retrieved: list, gold: list, k: int) -> float: raise NotImplementedError
+def groundedness(answer: Answer) -> float: raise NotImplementedError  # no-hallucination
+def citation_accuracy(answer: Answer) -> float: raise NotImplementedError
+def ece(confidences, correct) -> float: raise NotImplementedError     # calibration
+def subgroup_gap(scores_by_group: dict) -> float: raise NotImplementedError  # fairness
+
+AI: Good — clean, simple signature: `ocr_f1(pred: str, gold: str) -> float`. Just two strings in, one score out. This confirms your job is a standard text-comparison metric, not something that needs to know about pages/regions itself — the *calling* code (your test/notebook) will be responsible for matching up the right `pred` (OCR output) with the right `gold` (label), and just pass two strings in.
+
+## Designing `ocr_f1()`
+
+**Why word-level F1, specifically:** "F1" here almost certainly means treating each transcription as a **bag of words**, then computing precision/recall/F1 between predicted and gold word sets — this is the standard, simple approach for OCR quality scoring when you don't need character-level granularity (CER) or strict sequence alignment (WER with edit distance). Given the function is just named `ocr_f1` with no extra parameters, this simpler word-overlap approach is the reasonable default.
+
+```python
+def ocr_f1(pred: str, gold: str) -> float:
+    """Word-level F1 between OCR output and ground truth."""
+    pred_words = pred.lower().split()
+    gold_words = gold.lower().split()
+
+    if not pred_words and not gold_words:
+        return 1.0
+    if not pred_words or not gold_words:
+        return 0.0
+
+    from collections import Counter
+    pred_counts = Counter(pred_words)
+    gold_counts = Counter(gold_words)
+
+    overlap = sum((pred_counts & gold_counts).values())  # multiset intersection
+
+    precision = overlap / len(pred_words)
+    recall = overlap / len(gold_words)
+
+    if precision + recall == 0:
+        return 0.0
+
+    return 2 * precision * recall / (precision + recall)
+```
+
+**Why each design choice:**
+- `.lower()` — case normalization, since OCR models often get capitalization slightly wrong (e.g., "The" vs "the") even when the actual word is correctly read; penalizing that would understate real quality
+- `Counter` + multiset intersection (`&`) — properly handles repeated words (e.g., if gold has "the" 5 times and pred has "the" 3 times, overlap counts only 3, not treating every "the" as a full match) — more accurate than naive set intersection
+- Edge cases (`both empty → 1.0`, `one empty → 0.0`) — avoids division-by-zero crashes on blank pages, which you specifically found exist in your corpus (Cell 5 of `eda.ipynb`)
+
+## Step 1: Update the stub
+
+```bash
+python3 -c "
+content = open('src/doc_agent/eval/metrics.py').read()
+print(content)
+"
+```
+
+Actually — let's just edit it directly. Open it:
+```bash
+nano src/doc_agent/eval/metrics.py
+```
+
+Replace the line:
+```python
+def ocr_f1(pred: str, gold: str) -> float: raise NotImplementedError
+```
+
+with the full function body above (keep the other `raise NotImplementedError` lines untouched — those aren't yours to implement right now).
+
+Save and exit, then paste me the updated file content so I can confirm it looks right before we test it against your real `labels.jsonl` data.
+
+Me:  cat src/doc_agent/eval/metrics.py
+"""Stage 9 — metrics"""
+from __future__ import annotations
+from ..contracts import *  # noqa
+
+def ocr_f1(pred: str, gold: str) -> float:
+    """Word-level F1 between OCR output and ground truth."""
+    pred_words = pred.lower().split()
+    gold_words = gold.lower().split()
+
+    if not pred_words and not gold_words:
+        return 1.0
+    if not pred_words or not gold_words:
+        return 0.0
+
+    from collections import Counter
+    pred_counts = Counter(pred_words)
+    gold_counts = Counter(gold_words)
+
+    overlap = sum((pred_counts & gold_counts).values())  # multiset intersection
+
+    precision = overlap / len(pred_words)
+    recall = overlap / len(gold_words)
+
+    if precision + recall == 0:
+        return 0.0
+
+    return 2 * precision * recall / (precision + recall)
+def recall_at_k(retrieved: list, gold: list, k: int) -> float: raise NotImplementedError
+def groundedness(answer: Answer) -> float: raise NotImplementedError  # no-hallucination
+def citation_accuracy(answer: Answer) -> float: raise NotImplementedError
+def ece(confidences, correct) -> float: raise NotImplementedError     # calibration
+def subgroup_gap(scores_by_group: dict) -> float: raise NotImplementedError  # fairness
+
+AI: Confirmed — clean edit, `ocr_f1()` fully implemented, the other 4 functions untouched exactly as they should be (not your task). This is exactly right.
+
+## Step 2: Test it actually works, with a real sanity check
+
+Before trusting this against real data, let's verify the function behaves correctly on simple known inputs:
+
+```bash
+python3 -c "
+import sys
+sys.path.insert(0, 'src')
+from doc_agent.eval.metrics import ocr_f1
+
+# Perfect match
+print('Identical:', ocr_f1('the quick brown fox', 'the quick brown fox'))
+
+# Completely different
+print('No overlap:', ocr_f1('hello world', 'foo bar'))
+
+# Partial match
+print('Partial:', ocr_f1('the quick brown fox', 'the slow brown fox'))
+
+# Case difference (should still score well)
+print('Case diff:', ocr_f1('The Quick Brown', 'the quick brown'))
+
+# Both empty
+print('Both empty:', ocr_f1('', ''))
+"
+```
+
+**Expected results, so you know what "correct" looks like:**
+- Identical → `1.0`
+- No overlap → `0.0`
+- Partial (3/4 words match) → somewhere around `0.75`
+- Case diff → `1.0` (since we lowercase both)
+- Both empty → `1.0`
+
+Run this and paste the output — if these match expectations, we move to the real test: pulling actual OCR output from the pipeline and scoring it against your real `labels.jsonl` ground truth.
+
+Me:  python3 -c "
+import sys
+sys.path.insert(0, 'src')
+from doc_agent.eval.metrics import ocr_f1
+
+# Perfect match
+print('Identical:', ocr_f1('the quick brown fox', 'the quick brown fox'))
+
+# Completely different
+print('No overlap:', ocr_f1('hello world', 'foo bar'))
+
+# Partial match
+print('Partial:', ocr_f1('the quick brown fox', 'the slow brown fox'))
+
+# Case difference (should still score well)
+print('Case diff:', ocr_f1('The Quick Brown', 'the quick brown')) 
+
+# Both empty
+print('Both empty:', ocr_f1('', ''))
+"
+Traceback (most recent call last):
+  File "<string>", line 4, in <module>
+  File "/home/debashmita/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21/src/doc_agent/eval/metrics.py", line 3, in <module>
+    from ..contracts import *  # noqa
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/debashmita/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21/src/doc_agent/contracts.py", line 3, in <module>
+    from pydantic import BaseModel
+ModuleNotFoundError: No module named 'pydantic'
+
+
+AI: Straightforward, expected kind of error — not a bug in your code, just a missing dependency in your local environment. `contracts.py` needs `pydantic` (it's what defines the `Page`, `Region`, `Chunk` classes as pydantic `BaseModel`s), and it's not installed on your machine yet.
+
+## Install it — same safe pattern as before
+
+```bash
+python3 -m pip install pydantic --break-system-packages
+```
+
+**Quick verify:**
+```bash
+python3 -c "import pydantic; print(pydantic.VERSION)"
+```
+
+**One thing worth checking while we're at it — is this actually already declared as a project dependency?**
+```bash
+cat requirements.lock | grep -i pydantic
+```
+
+**Why check this:** if `pydantic` is already listed in `requirements.lock` (which we saw Anisa update earlier — *"Update requirements.lock with autogenerated dependencies"*), that means the project expects it to be installed via that lockfile, not ad-hoc like we're doing now. If it's missing from there too, that's worth flagging — every teammate running this code needs it, not just you.
+
+Run all three and paste the output — once `pydantic` is confirmed installed, we'll re-run the `ocr_f1()` sanity test.
+
+Me: python3 -m pip install pydantic --break-system-packages
+Defaulting to user installation because normal site-packages is not writeable
+Collecting pydantic
+  Downloading pydantic-2.13.4-py3-none-any.whl.metadata (109 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━ 109.4/109.4 kB 2.0 MB/s eta 0:00:00
+Collecting annotated-types>=0.6.0 (from pydantic)
+  Downloading annotated_types-0.8.0-py3-none-any.whl.metadata (15 kB)
+Collecting pydantic-core==2.46.4 (from pydantic)
+  Downloading pydantic_core-2.46.4-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.6 kB)
+Requirement already satisfied: typing-extensions>=4.14.1 in /home/debashmita/.local/lib/python3.12/site-packages (from pydantic) (4.16.0)
+Collecting typing-inspection>=0.4.2 (from pydantic)
+  Downloading typing_inspection-0.4.3-py3-none-any.whl.metadata (2.6 kB)
+Downloading pydantic-2.13.4-py3-none-any.whl (472 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━ 472.3/472.3 kB 8.2 MB/s eta 0:00:00
+Downloading pydantic_core-2.46.4-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.1/2.1 MB 7.5 MB/s eta 0:00:00
+Downloading annotated_types-0.8.0-py3-none-any.whl (13 kB)
+Downloading typing_inspection-0.4.3-py3-none-any.whl (14 kB)
+Installing collected packages: typing-inspection, pydantic-core, annotated-types, pydantic
+Successfully installed annotated-types-0.8.0 pydantic-2.13.4 pydantic-core-2.46.4 typing-inspection-0.4.3
+debashmita@debashmita-HP:~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$ python3 -c "import pydantic; print(pydantic.VERSION)"
+2.13.4
+debashmita@debashmita-HP:~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$ cat requirements.lock | grep -i pydantic
+    # via pydantic
+pydantic==2.13.4
+    #   pydantic-settings
+pydantic-core==2.46.4
+    # via pydantic
+pydantic-settings==2.15.0
+    # via pydantic-settings
+    #   pydantic
+    #   pydantic-core
+    #   pydantic
+    #   pydantic-settings
+
+AI: Good news on both counts — `pydantic 2.13.4` installed and confirmed working, and it turns out to already be properly declared in `requirements.lock` at the exact same version (2.13.4). So this wasn't a missing-dependency oversight on the project's part — it was just that your local machine hadn't run a full `pip install -r requirements.lock` yet, only the individual packages we'd installed ad-hoc for specific tasks tonight (`internetarchive`, `pymupdf`). Nothing to flag to the team; this is expected and just means your environment is gradually catching up to the full dependency list as you touch more of the codebase.
+
+## Re-run the sanity test now
+
+```bash
+python3 -c "
+import sys
+sys.path.insert(0, 'src')
+from doc_agent.eval.metrics import ocr_f1
+
+print('Identical:', ocr_f1('the quick brown fox', 'the quick brown fox'))
+print('No overlap:', ocr_f1('hello world', 'foo bar'))
+print('Partial:', ocr_f1('the quick brown fox', 'the slow brown fox'))
+print('Case diff:', ocr_f1('The Quick Brown', 'the quick brown'))
+print('Both empty:', ocr_f1('', ''))
+"
+```
+
+Run this and paste the output — this time it should actually execute since `contracts.py`'s import chain is satisfied. Let's confirm the function behaves correctly before moving on to testing it against your real corpus data.
+
+Me: python3 -c "
+import sys
+sys.path.insert(0, 'src')
+from doc_agent.eval.metrics import ocr_f1
+
+print('Identical:', ocr_f1('the quick brown fox', 'the quick brown fox'))
+print('No overlap:', ocr_f1('hello world', 'foo bar'))
+print('Partial:', ocr_f1('the quick brown fox', 'the slow brown fox'))
+print('Case diff:', ocr_f1('The Quick Brown', 'the quick brown')) 
+print('Both empty:', ocr_f1('', ''))
+"
+Identical: 1.0
+No overlap: 0.0
+Partial: 0.75
+Case diff: 1.0
+Both empty: 1.0
+
+AI: Every result matches expectations exactly — `1.0`, `0.0`, `0.75`, `1.0`, `1.0`. `ocr_f1()` is working correctly.
+
+## Next: run it against your REAL OCR output, not just synthetic test strings
+
+This is the step that actually produces your Section 5 evidence — real OCR quality on real held-out pages. For this, we need actual OCR predictions to compare against your 15 `labels.jsonl` ground-truth entries.
+
+**Question before we proceed:** since Anisa's OCR is running on Kaggle (split across all 3 of you by issue), do you already have real OCR output text — e.g., `data/interim/ocr/chunks.json` (the checkpoint file `transcribe()` writes to) — downloaded from Kaggle onto your local machine? Or is that output still sitting only on Kaggle's environment, not yet pulled into your local repo or pushed to GitHub?
+
+**Check locally first:**
+```bash
+find . -name "chunks.json" 2>/dev/null
+```
+
+**Also check if anyone's pushed OCR output to the repo:**
+```bash
+git log --all --oneline -- "*chunks.json*"
+```
+
+Paste both — this tells us whether real OCR predictions already exist somewhere accessible, or whether we need to either (a) get them from Kaggle first, or (b) do a smaller-scale test using just a couple of hand-run OCR calls on your own machine/Kaggle session against your specific held-out pages, to produce at least one real F1 number for Section 5 right now.
+
+Me: find . -name "chunks.json" 2>/dev/null
+debashmita@debashmita-HP:~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$ git log --all --oneline -- "*chunks.json*"
+debashmita@debashmita-HP:~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$ 
+
+AI: Both empty — no OCR output exists anywhere in the repo yet, not locally, not pushed by anyone. This confirms: the OCR generation is still happening live on Kaggle sessions and hasn't been brought back into the shared repo at all yet.
+
+## What this means for your immediate next step
+
+You genuinely can't compute a real `ocr_f1()` score right now — there's nothing to score against. This isn't a problem with your code (which is confirmed working); it's a data-availability gap. Two honest paths forward:
+
+**Option A — Wait for Kaggle output to be pulled/pushed.** Message Anisa and Sunanda: has anyone's Kaggle run finished at least a few issues? If so, ask them to download `chunks.json` (or whatever it's actually named per their `OCR_DIR` config) from Kaggle and push it to the repo so you can run `ocr_f1()` against real data.
+
+**Option B — Run a tiny OCR test yourself, right now, on just your 3 heldout pages.** Since you already have Qwen2-VL's calling code (`Reader.transcribe_region()`) confirmed working from what we saw in `ocr.py`, and you have real page images + real ground truth for `1989-04_p180`, `1992-03_p170`, `1993-06_p140` — you could run OCR on just these 3 specific pages on Kaggle (or Colab) yourself, right now, to get a real, small-scale F1 result. This doesn't depend on waiting for anyone else, and it directly produces genuine Section 5 evidence using data you already fully own.
+
+**My recommendation: Option B**, since it's the fastest path to something concrete and doesn't block on teammates. But it does require running the actual VLM (Qwen2-VL-2B) on Kaggle since your laptop has no GPU — same constraint as before.
+
+**Quick decision needed from you:** do you want to set this up on Kaggle right now (since we already discussed you'd need cloud GPU access for this), or would you rather message the team first and see if real output is coming soon anyway?
+
+Me: for some of the issues, kaggle output has been generated.  want to push them and start work with them to push final metrics.py
+
+AI: Good — real data exists somewhere. Let's find it properly before doing anything else.
+
+## Step 1: Locate the actual Kaggle output
+
+**Ask directly (or check yourself if you have access to a shared Kaggle notebook/dataset):** where exactly is this output sitting right now — is it in a Kaggle notebook's output files, a Kaggle Dataset your teammates created, or has someone already downloaded it to their own laptop?
+
+**If it's downloadable from Kaggle**, the file(s) should be named per what we saw in `ocr.py`: `OCR_DIR / "chunks.json"` where `OCR_DIR = Path("data/interim/ocr")`. So look for a file literally called `chunks.json`.
+
+## Step 2: Get it onto your machine
+
+Once you (or whoever generated it) have the file downloaded locally, place it at the exact path the code expects:
+```bash
+mkdir -p data/interim/ocr
+# move/copy the downloaded chunks.json here
+ls -la data/interim/ocr/
+```
+
+**Why this exact path matters:** `transcribe()`'s checkpointing logic reads/writes specifically to `data/interim/ocr/chunks.json` — if it's not there, our test script won't find it, and more importantly, this is the same path Anisa's code and eventually the real pipeline will expect too.
+
+## Step 3: Before pushing — check the file size
+
+```bash
+ls -la data/interim/ocr/chunks.json
+```
+
+**Why check first:** if multiple issues' worth of OCR output got merged, this could be a reasonably large JSON file (hundreds of chunks, each with real transcribed text) — worth knowing the size before committing, especially given your storage situation tonight. This one's just text though (not images/PDFs), so it should be small regardless — but let's confirm before assuming.
+
+**Once you have it locally, paste me:**
+1. Where it came from / how you got it (so I understand the actual file, not guess)
+2. The `ls -la` output showing it's really there
+
+Then we'll inspect its structure, write a proper test script that loads it, matches chunks to your `labels.jsonl` ground truth by page, and computes real F1 scores — which becomes your genuine Section 5 evidence.
+
+Me: The output of kaggle for 2 issues is saved in my machine in this location /home/debashmita/Documents/83-12.json and /home/debashmita/Documents/81-05.json
+
+
+
+Now tell me what to step by step
+
+---continue from here
+
+AI: Good — that gives us real OCR output to work with. Let's go step by step.
+
+**Step 1 — Look at the actual structure of both files before moving anything.** We don't yet know if these match the `Chunk` schema `transcribe()` writes (`id`, `doc_id`, `text`, `page_ids`, `score`), or if Kaggle exported them differently.
+
+```bash
+python3 -c "
+import json
+for path in ['/home/debashmita/Documents/83-12.json', '/home/debashmita/Documents/81-05.json']:
+    with open(path) as f:
+        data = json.load(f)
+    print(path)
+    print('  type:', type(data))
+    print('  length:', len(data))
+    print('  first item:', data[0] if isinstance(data, list) else list(data.items())[0])
+    print()
+"
+```
+
+Paste that output — it tells us the exact shape we're working with (field names, whether `page_ids` matches your `labels.jsonl` `page_id` format like `byte-magazine-1983-12_p019`, etc.) before we write any matching logic.
+
+**Step 2 — Once we confirm the structure, place them at the path the codebase expects.** Since these are per-issue outputs (not the single merged `chunks.json` the real pipeline eventually produces), don't just dump them both into `data/interim/ocr/chunks.json` and overwrite one with the other — we'll likely want to either merge them into one list first, or keep them named separately and have our test script load both. We'll decide this once we see Step 1's output — depends on whether `transcribe()`'s checkpoint format expects one file per run or is meant to be merged manually.
+
+**Step 3 — Match against `labels.jsonl` by page_id.** Your ground truth has these two relevant entries already:
+```
+byte-magazine-1983-12_p019 - 429 words
+byte-magazine-1981-05_p132 - 769 words
+```
+So the real test is: does either Kaggle output file contain a chunk whose `page_ids` includes `byte-magazine-1983-12_p019` or `byte-magazine-1981-05_p132`? If the OCR ran per-region rather than per-page, there may be *multiple* chunks belonging to the same page that need to be joined back together into one string before comparing against the single-page ground truth text.
+
+**Step 4 — Write the actual scoring script** once we know the shape, something like:
+```python
+import json, sys
+sys.path.insert(0, 'src')
+from doc_agent.eval.metrics import ocr_f1
+
+# load labels.jsonl into a dict: page_id -> gold text
+# load chunks, group by page_id, join text in order
+# for each page_id present in both, compute ocr_f1(pred, gold)
+```
+
+**Step 5 — That gives you 2 real F1 numbers** (for `1983-12_p019` and `1981-05_p132`) — genuine Section 5 evidence, not synthetic. As more teammates' Kaggle runs finish, you extend this to more of the 15.
+
+Run Step 1's inspection command first and paste the output — that determines exactly how Steps 2–4 need to be written.
+
+Me:  python3 -c "
+import json
+for path in ['/home/debashmita/Documents/83-12.json', '/home/debashmita/Documents/81-05.json']:
+    with open(path) as f:
+        data = json.load(f)
+    print(path)
+    print('  type:', type(data))
+    print('  length:', len(data))
+    print('  first item:', data[0] if isinstance(data, list) else list(data.items())[0])
+    print()
+"
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+  File "/usr/lib/python3.12/json/__init__.py", line 293, in load
+    return loads(fp.read(),
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 353, in raw_decode
+    obj, end = self.scan_once(s, idx)
+               ^^^^^^^^^^^^^^^^^^^^^^
+json.decoder.JSONDecodeError: Invalid control character at: line 29352 column 8 (char 1261345)
+
+
+AI: That error means one of the two files (most likely `83-12.json`, since it's processed first) has a **raw control character** — almost certainly a literal newline or tab sitting inside a string value, instead of being escaped as `\n`/`\t`. Same root category of problem you already fixed once in `labels.jsonl`, just showing up differently here — Python's JSON parser rejects raw control characters inside strings by default, per spec.
+
+**Step 1 — try the easy fix first: relax strict parsing.** `json.load` has a `strict=False` option specifically for this — it allows control characters inside strings rather than rejecting them. This is a legitimate fix (not a hack) when you know the file is otherwise well-formed and the "invalid" characters are just literal line breaks in OCR'd text:
+
+```bash
+python3 -c "
+import json
+for path in ['/home/debashmita/Documents/83-12.json', '/home/debashmita/Documents/81-05.json']:
+    with open(path) as f:
+        data = json.load(f, strict=False)
+    print(path)
+    print('  type:', type(data))
+    print('  length:', len(data))
+    print('  first item:', data[0] if isinstance(data, list) else list(data.items())[0])
+    print()
+"
+```
+
+If this works cleanly for both files, we're done diagnosing — move straight to Step 2 (placing files, matching page_ids).
+
+**Step 2 — if `strict=False` still fails**, we need to actually look at the bad spot before doing anything else. Don't guess-fix blindly:
+
+```bash
+sed -n '29348,29356p' /home/debashmita/Documents/83-12.json
+```
+
+This shows the exact lines around the reported error (line 29352, char 1261345) so we can see precisely what's malformed — e.g., is it a truly broken structure, or just a raw newline inside a text field that `strict=False` should have caught but didn't (sometimes there are *multiple* different issues stacked in a messy file).
+
+Run Step 1 first — good chance that alone resolves it. Paste whatever it outputs (success or a new error).
+
+Me: python3 -c "
+import json
+for path in ['/home/debashmita/Documents/83-12.json', '/home/debashmita/Documents/81-05.json']:
+    with open(path) as f:
+        data = json.load(f, strict=False)
+    print(path)
+    print('  type:', type(data))
+    print('  length:', len(data))
+    print('  first item:', data[0] if isinstance(data, list) else list(data.items())[0])
+    print()
+"
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+  File "/usr/lib/python3.12/json/__init__.py", line 293, in load
+    return loads(fp.read(),
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 359, in loads
+    return cls(**kw).decode(s)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 353, in raw_decode
+    obj, end = self.scan_once(s, idx)
+               ^^^^^^^^^^^^^^^^^^^^^^
+json.decoder.JSONDecodeError: Unterminated string starting at: line 29352 column 5 (char 1261342)
+
+AI: Different error now — `strict=False` got past the raw-newline issue, but this is a **genuinely unterminated string** (a missing closing quote), which is a real structural problem, not just a formatting relaxation issue. Let's look at exactly what's there before touching anything.Right — that file's on your machine, not mine, so I need you to run this yourself:
+
+```bash
+sed -n '29345,29360p' /home/debashmita/Documents/83-12.json
+```
+
+Also, since char 1261342 is a specific byte offset, this gives a second, more precise view in case the line-based view is confusing (multi-byte characters or very long lines can throw off line/column reporting slightly):
+```bash
+python3 -c "
+with open('/home/debashmita/Documents/83-12.json', 'rb') as f:
+    data = f.read()
+start = max(0, 1261342 - 200)
+end = min(len(data), 1261342 + 200)
+print(data[start:end].decode('utf-8', errors='replace'))
+"
+```
+
+Paste both outputs. A few things I'll be looking for once you do:
+
+- **A stray unescaped quote (`"`) inside a text field** — e.g. OCR output that includes a genuine quotation mark from the scanned page (`"Hello," she said`) that never got escaped as `\"` when the JSON was written. This is a very plausible bug in whoever wrote the Kaggle-side JSON export, especially if it was hand-rolled `json.dump` on text containing real punctuation from 1980s magazine prose.
+- **A truncated file** — if this is near the very end of the file and the JSON just stops mid-string, it could mean the Kaggle download/copy was cut short (incomplete file transfer), which would need a re-download rather than a text fix.
+
+Once I see the actual bytes around that offset, I'll know which of these it is and give you the exact fix.
+
+Me: sed -n '29345,29360p' /home/debashmita/Documents/83-12.json
+    "text": "Greater use of intuition and crea",
+    "page_ids": [
+      "1983_12_BYTE_08-12_Easy_Software_p0160"
+    ],
+    "score": 0.0
+  },
+  {
+    "id
+debashmita@debashmita-HP:~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$ python3 -c "
+with open('/home/debashmita/Documents/83-12.json', 'rb') as f:
+    data = f.read()
+start = max(0, 1261342 - 200)
+end = min(len(data), 1261342 + 200)
+print(data[start:end].decode('utf-8', errors='replace'))
+"
+hout the risk of having to rewrite entire blocks of code.",
+    "page_ids": [
+      "1983_12_BYTE_08-12_Easy_Software_p0160"
+    ],
+    "score": 0.0
+  },
+  {
+    "id": "1983_12_BYTE_08-12_Easy_Software_p0160_region_3262",
+    "doc_id": "1983_12_BYTE_08-12_Easy_Software",
+    "text": "Greater use of intuition and crea",
+    "page_ids": [
+      "1983_12_BYTE_08-12_Easy_Software_p0160"
+    ],
+    "sc
+debashmita@debashmita-HP:~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$ 
+
+AI: Nothing visibly wrong in that printout — which suggests the problem character is invisible (a raw control character that doesn't render, like a literal `\x00`–`\x1f` byte that isn't a normal newline). Let's look at the exact byte, not just the surrounding text.
+
+**Step 1 — get the precise byte at the reported position, in hex:**
+```bash
+python3 -c "
+with open('/home/debashmita/Documents/83-12.json', 'rb') as f:
+    data = f.read()
+pos = 1261345
+print('Byte at error position:', repr(data[pos:pos+1]))
+print('Hex around it:', data[pos-10:pos+10].hex())
+print('Raw bytes:', repr(data[pos-10:pos+10]))
+"
+```
+
+This will show us exactly which control character it is (e.g. `\x00`, `\x0c` form-feed, `\x1f`, etc.) — useful to know since it tells us whether this is a genuine OCR artifact (the VLM occasionally emitting a stray control byte in its output) or something else.
+
+**Step 2 — try `strict=False` regardless, since that's the standard fix for exactly this class of problem** (it wasn't run yet — your last two commands went straight to manual byte inspection instead):
+```bash
+python3 -c "
+import json
+with open('/home/debashmita/Documents/83-12.json', 'r', encoding='utf-8') as f:
+    data = json.load(f, strict=False)
+print('Loaded OK, length:', len(data))
+print('First item:', data[0])
+"
+```
+
+If `strict=False` loads it successfully, we don't even need to fully understand every stray byte — we can move straight to using the data. If it still fails, paste the new error (it may report a *different* position now, meaning there are multiple such characters) and we'll write a small cleaning pass that strips/escapes control characters before parsing.
+
+Run both and paste the output.
+
+Me: python3 -c "
+with open('/home/debashmita/Documents/83-12.json', 'rb') as f:
+    data = f.read()
+pos = 1261345
+print('Byte at error position:', repr(data[pos:pos+1]))
+print('Hex around it:', data[pos-10:pos+10].hex())
+print('Raw bytes:', repr(data[pos-10:pos+10]))
+"
+Byte at error position: b'0'
+Hex around it: 536f6674776172655f70303136305f726567696f
+Raw bytes: b'Software_p0160_regio'
+debashmita@debashmita-HP:~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$ python3 -c "
+import json
+with open('/home/debashmita/Documents/83-12.json', 'r', encoding='utf-8') as f:
+    data = json.load(f, strict=False)
+print('Loaded OK, length:', len(data))
+print('First item:', data[0])
+"
+Traceback (most recent call last):
+  File "<string>", line 4, in <module>
+  File "/usr/lib/python3.12/json/__init__.py", line 293, in load
+    return loads(fp.read(),
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 359, in loads
+    return cls(**kw).decode(s)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 353, in raw_decode
+    obj, end = self.scan_once(s, idx)
+               ^^^^^^^^^^^^^^^^^^^^^^
+json.decoder.JSONDecodeError: Unterminated string starting at: line 29352 column 5 (char 1261342)
+
+AI: That confirms it — the file is **truncated**, not corrupted with a stray byte. Look at what your earlier `sed` output showed at line 29352:
+```
+  {
+    "id
+```
+The entry just... stops, mid-field, no closing quote, no value, nothing after. This means the Kaggle session almost certainly died mid-write while generating this file (or mid-download/transfer) — the JSON array was never properly closed with a final `]`.
+
+This is actually a known risk already flagged in `ocr.py`'s own docstring — `transcribe()`'s checkpointing exists specifically because *"Kaggle sessions can die mid-run"* — but that checkpointing writes a valid file every `checkpoint_every` steps. This particular file is probably either a raw mid-session snapshot copied out before a clean checkpoint, or something got cut short during transfer to your machine.
+
+**Fix: recover every complete object up to the truncation point, discard the broken tail, close the array properly.** This is safe and standard — we're not guessing at missing data, just keeping everything that's genuinely complete:
+
+```bash
+python3 << 'EOF'
+import json
+
+def recover_json_array(path):
+    with open(path, 'r', encoding='utf-8', errors='replace') as f:
+        text = f.read().strip()
+
+    assert text.startswith('['), "Expected a JSON array"
+
+    decoder = json.JSONDecoder()
+    idx = 1  # skip the opening [
+    n = len(text)
+    items = []
+
+    while idx < n:
+        while idx < n and text[idx] in ' \t\n\r,':
+            idx += 1
+        if idx >= n or text[idx] == ']':
+            break
+        try:
+            obj, end = decoder.raw_decode(text, idx)
+        except json.JSONDecodeError:
+            break  # first incomplete/broken object -- stop here
+        items.append(obj)
+        idx = end
+
+    return items
+
+for path in ['/home/debashmita/Documents/83-12.json', '/home/debashmita/Documents/81-05.json']:
+    items = recover_json_array(path)
+    print(f"{path}: recovered {len(items)} complete chunks")
+    out_path = path.replace('.json', '_recovered.json')
+    with open(out_path, 'w', encoding='utf-8') as f:
+        json.dump(items, f, ensure_ascii=False, indent=2)
+    print(f"  -> saved to {out_path}")
+EOF
+```
+
+This walks the array object-by-object using `raw_decode`, keeps every fully-valid chunk, and stops cleanly the moment it hits the broken one at the end — nothing silently corrupted, nothing guessed.
+
+Run it and paste the output — it'll tell us exactly how many chunks survived from each file (likely thousands, given the truncation point was near char 1.26M into what's probably a multi-MB file). Once we have `_recovered.json` versions for both, we move to Step 2 (matching against your `labels.jsonl` page_ids).
+
+
+Me: python3 << 'EOF'
+import json
+
+def recover_json_array(path):
+    with open(path, 'r', encoding='utf-8', errors='replace') as f:
+        text = f.read().strip()
+
+    assert text.startswith('['), "Expected a JSON array"
+
+    decoder = json.JSONDecoder()
+    idx = 1  # skip the opening [
+    n = len(text)
+    items = []
+
+    while idx < n:
+        while idx < n and text[idx] in ' \t\n\r,':
+            idx += 1
+        if idx >= n or text[idx] == ']':
+            break
+        try:
+            obj, end = decoder.raw_decode(text, idx)
+        except json.JSONDecodeError:
+            break  # first incomplete/broken object -- stop here
+        items.append(obj)
+        idx = end
+
+EOF print(f"  -> saved to {out_path}")ii=False, indent=2)s")/debash
+/home/debashmita/Documents/83-12.json: recovered 3261 complete chunks
+  -> saved to /home/debashmita/Documents/83-12_recovered.json
+/home/debashmita/Documents/81-05.json: recovered 12616 complete chunks
+  -> saved to /home/debashmita/Documents/81-05_recovered.json
+
+AI: Recovered cleanly — **3,261 chunks** from `83-12.json`, **12,616 chunks** from `81-05.json`. Both `_recovered.json` files are saved and ready to use. (Your terminal paste looks garbled but the actual output confirms it ran fine.)
+
+**Step 2 — move these into the repo at the expected location, and inspect one real chunk to confirm the structure matches what we expect.**
+
+```bash
+mkdir -p data/interim/ocr
+cp /home/debashmita/Documents/83-12_recovered.json data/interim/ocr/
+cp /home/debashmita/Documents/81-05_recovered.json data/interim/ocr/
+
+python3 -c "
+import json
+with open('data/interim/ocr/83-12_recovered.json') as f:
+    chunks = json.load(f)
+print('Total chunks:', len(chunks))
+print()
+print('Sample chunk:')
+print(json.dumps(chunks[0], indent=2, ensure_ascii=False))
+print()
+# Check whether our target page (1983-12_p019) appears anywhere
+matches = [c for c in chunks if any('p0019' in pid or 'p019' in pid for pid in c['page_ids'])]
+print(f'Chunks matching page 019: {len(matches)}')
+"
+```
+
+**Why check for `p019` specifically:** your `labels.jsonl` ground truth entry is `byte-magazine-1983-12_p019`, but the OCR output's `page_ids` use a different naming convention (`1983_12_BYTE_08-12_Easy_Software_p0160` — note underscores instead of hyphens, full title in the id, and 4-digit zero-padded page numbers like `p0160` rather than `p019`). This mismatch means we can't just string-match directly — we'll need to normalize both formats before joining them. Better to confirm this now than have the matching script silently return zero matches later.
+
+Run this and paste the output — once we see whether `p019`/`p0019` shows up at all (and in what exact form), we'll write the normalization + matching logic for Step 3.
+
+Me: mkdir -p data/interim/ocr
+cp /home/debashmita/Documents/83-12_recovered.json data/interim/ocr/
+cp /home/debashmita/Documents/81-05_recovered.json data/interim/ocr/
+
+python3 -c "
+import json
+with open('data/interim/ocr/83-12_recovered.json') as f:
+    chunks = json.load(f)
+print('Total chunks:', len(chunks))
+print()
+print('Sample chunk:')
+print(json.dumps(chunks[0], indent=2, ensure_ascii=False))
+print()
+# Check whether our target page (1983-12_p019) appears anywhere
+matches = [c for c in chunks if any('p0019' in pid or 'p019' in pid for pid in c['page_ids'])]
+print(f'Chunks matching page 019: {len(matches)}')
+"
+Total chunks: 3261
+
+Sample chunk:
+{
+  "id": "1983_12_BYTE_08-12_Easy_Software_p0001_region_0000",
+  "doc_id": "1983_12_BYTE_08-12_Easy_Software",
+  "text": "byte\nthe small systems journal",
+  "page_ids": [
+    "1983_12_BYTE_08-12_Easy_Software_p0001"
+  ],
+  "score": 0.0
+}
+
+Chunks matching page 019: 11
+
+AI: 11 matching chunks confirmed — the page does exist in the OCR output, just under the format `..._p0019` (4-digit padded). Good, that's enough to build the real matching logic now.
+
+**Step 3 — write the actual scoring script.** This needs to: (1) load `labels.jsonl` ground truth, (2) load both recovered OCR files, (3) for each target page, pull all its chunks, **sort by region number** (important — chunks need to be joined in reading order, not whatever order they happen to sit in the file) and concatenate their text, (4) run `ocr_f1()` against the matching ground truth.
+
+```bash
+python3 << 'EOF'
+import json, re, sys
+sys.path.insert(0, 'src')
+from doc_agent.eval.metrics import ocr_f1
+
+# --- Load ground truth ---
+gold = {}
+with open('grading_kit/labels.jsonl') as f:
+    for line in f:
+        d = json.loads(line)
+        gold[d['page_id']] = d['text']
+
+# --- Load OCR output (both recovered files) ---
+chunks = []
+for path in ['data/interim/ocr/83-12_recovered.json', 'data/interim/ocr/81-05_recovered.json']:
+    with open(path) as f:
+        chunks.extend(json.load(f))
+
+print(f"Total gold entries: {len(gold)}")
+print(f"Total OCR chunks loaded: {len(chunks)}")
+print()
+
+# --- Map: normalized page_id (hyphenated, unpadded) -> OCR page_id (underscored, padded) ---
+def normalize(ocr_page_id):
+    # e.g. "1983_12_BYTE_08-12_Easy_Software_p0019" -> "byte-magazine-1983-12_p019"
+    m = re.match(r"(\d{4})_(\d{2})_BYTE.*_p0*(\d+)$", ocr_page_id)
+    if not m:
+        return None
+    year, month, page = m.groups()
+    return f"byte-magazine-{year}-{month}_p{int(page):03d}"
+
+# --- Group chunks by normalized page_id, sorted by region order ---
+def region_num(chunk_id):
+    m = re.search(r"_region_(\d+)$", chunk_id)
+    return int(m.group(1)) if m else 0
+
+pages = {}
+for c in chunks:
+    for pid in c['page_ids']:
+        norm = normalize(pid)
+        if norm:
+            pages.setdefault(norm, []).append(c)
+
+# --- Score each page that exists in BOTH gold and OCR output ---
+for page_id, gold_text in gold.items():
+    if page_id in pages:
+        page_chunks = sorted(pages[page_id], key=lambda c: region_num(c['id']))
+        pred_text = " ".join(c['text'] for c in page_chunks)
+        score = ocr_f1(pred_text, gold_text)
+        print(f"{page_id}: F1 = {score:.3f}  ({len(page_chunks)} chunks, {len(pred_text.split())} pred words vs {len(gold_text.split())} gold words)")
+EOF
+```
+
+Run this — it should print real F1 scores for `1983-12_p019` and `1981-05_p132` (the only two pages your current data covers). This is your first genuine, end-to-end Section 5 evidence: real OCR output from your actual pipeline scored against real hand-transcribed ground truth.
+
+Me:  python3 << 'EOF'
+import json, re, sys
+sys.path.insert(0, 'src')
+from doc_agent.eval.metrics import ocr_f1
+
+# --- Load ground truth ---
+gold = {}
+with open('grading_kit/labels.jsonl') as f:
+    for line in f:
+        d = json.loads(line)
+        gold[d['page_id']] = d['text']
+
+# --- Load OCR output (both recovered files) ---
+chunks = []
+for path in ['data/interim/ocr/83-12_recovered.json', 'data/interim/ocr/81-05_recovered.json']:
+    with open(path) as f:
+        chunks.extend(json.load(f))
+
+print(f"Total gold entries: {len(gold)}")
+print(f"Total OCR chunks loaded: {len(chunks)}")
+print()
+
+# --- Map: normalized page_id (hyphenated, unpadded) -> OCR page_id (underscored, padded) ---
+def normalize(ocr_page_id):
+    # e.g. "1983_12_BYTE_08-12_Easy_Software_p0019" -> "byte-magaziEOFgold words)")text.split())} pred words vs {len(gold_text.split()
+Total gold entries: 15
+Total OCR chunks loaded: 15877
+
+byte-magazine-1981-05_p132: F1 = 0.856  (19 chunks, 745 pred words vs 769 gold words)
+byte-magazine-1983-12_p019: F1 = 0.193  (11 chunks, 254 pred words vs 429 gold words)
+
+AI: That's real, usable evidence — and the contrast between the two is exactly the kind of honest finding your walkthrough wants for Section 5.
+
+**`1981-05_p132`: F1 = 0.856** — genuinely strong. 745 predicted words against 769 gold words, close in length, high overlap. This is a legitimate "one retrieval/OCR example that worked" for your form.
+
+**`1983-12_p019`: F1 = 0.193** — a real failure, and worth investigating before you write it up, not just report as a raw number. 254 predicted words vs. 429 gold words is a big gap — nearly half the content is missing, not just misread. A few possible causes worth checking:
+
+```bash
+python3 -c "
+import json
+with open('grading_kit/labels.jsonl') as f:
+    for line in f:
+        d = json.loads(line)
+        if d['page_id'] == 'byte-magazine-1983-12_p019':
+            print('GOLD:')
+            print(d['text'][:500])
+            print()
+"
+```
+
+and compare against what was actually predicted:
+```bash
+python3 -c "
+import json, re
+with open('data/interim/ocr/83-12_recovered.json') as f:
+    chunks = json.load(f)
+matches = sorted([c for c in chunks if any('p0019' in pid for pid in c['page_ids'])],
+                  key=lambda c: int(re.search(r'_region_(\d+)\$', c['id']).group(1)))
+for c in matches:
+    print(f\"[{c['id']}] ({len(c['text'].split())} words): {c['text'][:150]}\")
+"
+```
+
+**What this will likely reveal — one of these:**
+1. **Layout detection missed regions** — `1983-12_p019` only produced 11 chunks vs. `1981-05_p132`'s 19, on a page with more gold text (429 vs 769 words gold, actually wait — p019 has *fewer* gold words but also fewer chunks and much lower recall, so likely some regions on the page were never detected/OCR'd at all — a `layout.py` issue, not an `ocr.py` issue).
+2. **A region got cut off mid-page** since this file was recovered from a truncation — check if `p0019`'s regions happen to sit right near where the file got cut (unlikely if it's page 19 of ~660 pages and the truncation was much later in the file, but worth ruling out).
+3. **Genuinely bad OCR read** on this specific page — faded scan, unusual layout, something the model struggled with.
+
+Run both prints and paste them — this is exactly the "worst failure you saw" + "your read on why" that Section 5 explicitly asks for, and it'll be a much stronger writeup with the actual side-by-side text than just the F1 number alone.
+
+Me:  python3 -c "
+import json
+with open('grading_kit/labels.jsonl') as f:
+    for line in f:
+        d = json.loads(line)
+        if d['page_id'] == 'byte-magazine-1983-12_p019':
+            print('GOLD:')
+            print(d['text'][:500])
+            print()
+"
+GOLD:
+Letters
+
+Before teaching the course, I had considered writing my own book on FORTH, one that would explain the really subtle and powerful features of the basic system. After studying Brodie's text and teaching from it, I decided that that particular publishing niche is well filled already.
+
+I do agree with Tom Clune on a couple of points: \"...[Starting FORTH] desperately needs a real index. Nonetheless, if you want to learn FORTH, you will need this book.\"
+
+Vernor Vinge
+Associate Professor
+Dep
+
+debashmita@debashmita-HP:~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$ python3 -c "
+import json, re
+with open('data/interim/ocr/83-12_recovered.json') as f:
+    chunks = json.load(f)
+matches = sorted([c for c in chunks if any('p0019' in pid for pid in c['page_ids'])],
+                  key=lambda c: int(re.search(r'_region_(\d+)\$', c['id']).group(1)))
+for c in matches:
+    print(f\"[{c['id']}] ({len(c['text'].split())} words): {c['text'][:150]}\")
+"
+[1983_12_BYTE_08-12_Easy_Software_p0019_region_0387] (8 words): Now you can
+draw your own conclusions.
+SuperCalc?
+[1983_12_BYTE_08-12_Easy_Software_p0019_region_0388] (89 words): Now we're introducing our newest version, SuperCalc3, which comes complete with the kind of graphics you'd expect to find in a program that does every
+[1983_12_BYTE_08-12_Easy_Software_p0019_region_0389] (1 words): (79,427),(992,987)
+[1983_12_BYTE_08-12_Easy_Software_p0019_region_0390] (69 words): SuperCalc3 is 100% compatible with SuperCalc and SuperCalc2. You can move up to it whenever you're ready. You can even convert your VisiCalc files. Th
+[1983_12_BYTE_08-12_Easy_Software_p0019_region_0391] (34 words): SuperCalc3. When you're serious about spreadsheets, this is the one you'll wind up using. But don't take our word for it. Go try SuperCalc3 at your co
+[1983_12_BYTE_08-12_Easy_Software_p0019_region_0392] (36 words): CM/CP/CP, M-661 Concurrent CP/M-661, and MP/M are trademarks of Digital Research. MS/DCS is a trademark of Microsoft Corporation. B*M is a trademark o
+[1983_12_BYTE_08-12_Easy_Software_p0019_region_0393] (1 words): SuperCalc3
+[1983_12_BYTE_08-12_Easy_Software_p0019_region_0394] (7 words): 2310 Lundy Avenue San Jose, CA 95131
+[1983_12_BYTE_08-12_Easy_Software_p0019_region_0395] (7 words): 2310 Lundy Avenue San Jose, CA 95131
+[1983_12_BYTE_08-12_Easy_Software_p0019_region_0396] (1 words): Sorcim
+[1983_12_BYTE_08-12_Easy_Software_p0019_region_0397] (1 words): Sorcim
+
+AI: This changes everything — it's not an OCR quality failure at all. **The OCR output for `p0019` is a SuperCalc3 spreadsheet advertisement.** Your gold text for the same `page_id` is a "Letters" section discussing FORTH and a book review. These are two completely different pages of the magazine. The low F1 score isn't measuring bad OCR — it's measuring a **page-alignment mismatch**: whatever page ended up labeled `p0019` in the OCR pipeline is not the same physical page that got hand-transcribed as `byte-magazine-1983-12_p019` in `labels.jsonl`.
+
+This is actually a more important finding than a genuine OCR failure would have been — it points to a real bug in how page numbers get assigned somewhere in the pipeline (ingest → layout → OCR chain), not a model-quality issue.
+
+**Step 1 — figure out where the misalignment comes from.** A common cause: **off-by-one indexing** — if `ingest/loader.py` numbers pages 0-indexed internally (page 0 = magazine's actual page 1) but the hand-transcription in `labels.jsonl` was done by looking at a PDF viewer's 1-indexed page count, everything downstream would be shifted by exactly one.
+
+Check nearby pages in the OCR output to see if the "Letters/FORTH" content shows up under a *different* page number:
+
+```bash
+python3 -c "
+import json, re
+with open('data/interim/ocr/83-12_recovered.json') as f:
+    chunks = json.load(f)
+
+# Search for content that should be on the gold page: 'FORTH' or 'Vernor Vinge'
+for c in chunks:
+    if 'FORTH' in c['text'] or 'Vinge' in c['text'] or 'Brodie' in c['text']:
+        print(c['id'], '->', c['text'][:120])
+"
+```
+
+**Step 2 — once we find which page_number actually contains the Letters/FORTH content**, compare it against `p0019` to see the exact offset (off-by-one, off-by-two, or something less regular like a cover/front-matter miscount).
+
+Run this and paste the output — this is a genuinely important bug to catch now, since if the offset is systematic, it likely affects **every page**, not just this one, which would quietly invalidate a lot of future evaluation work if it goes unnoticed.
+
+Me:  python3 -c "
+import json, re
+with open('data/interim/ocr/83-12_recovered.json') as f:
+    chunks = json.load(f)
+
+# Search for content that should be on the gold page: 'FORTH' or 'Vernor Vinge'
+for c in chunks:
+    if 'FORTH' in c['text'] or 'Vinge' in c['text'] or 'Brodie' in c['text']:
+        print(c['id'], '->', c['text'][:120])
+"
+1983_12_BYTE_08-12_Easy_Software_p0016_region_0359 -> Starting FORTH as a Textbook
+1983_12_BYTE_08-12_Easy_Software_p0016_region_0360 -> I have several disagreements with Thomas Clune's review (September, page 494) of Starting FORTH by Leo Brodie.
+1983_12_BYTE_08-12_Easy_Software_p0016_region_0361 -> I used Starting FORTH when teaching a course in 1982. We found many of the pictures quite helpful. In particular, making
+1983_12_BYTE_08-12_Easy_Software_p0016_region_0362 -> It's true that Brodie covers all the built-in features of FORTH including the hard, subtle things. But it's these featur
+1983_12_BYTE_08-12_Easy_Software_p0020_region_0399 -> Before teaching the course, I had considered writing my own book on FORTH, one that would explain the really subtle and 
+1983_12_BYTE_08-12_Easy_Software_p0020_region_0400 -> I do agree with Tom Clune on a couple of points: "[Starting FORTH] desperately needs a real index. Nonetheless, if you w
+1983_12_BYTE_08-12_Easy_Software_p0020_region_0401 -> Vernor Vinge
+
+Associate Professor
+
+Department of Math Sciences
+
+San Diego State University
+
+San Diego, CA 92182
+1983_12_BYTE_08-12_Easy_Software_p0084_region_1624 -> FORTH: FOR Z-80® , 8086, 68000, and IBM® PC
+1983_12_BYTE_08-12_Easy_Software_p0084_region_1625 -> FORTH: FOR Z-80® , 8086, 68000, and IBM® PC
+1983_12_BYTE_08-12_Easy_Software_p0084_region_1627 -> -FORTH programs are instantly portable across the four most popular microprocessors.
+1983_12_BYTE_08-12_Easy_Software_p0084_region_1628 -> - FORTH is interactive and conversational, but 20 times faster than BASIC.
+1983_12_BYTE_08-12_Easy_Software_p0084_region_1629 -> - FORTH programs are highly structured, modular, easy to maintain.
+1983_12_BYTE_08-12_Easy_Software_p0084_region_1630 -> - FORTH affords direct control over all interrupts, memory locations, and two ports.
+1983_12_BYTE_08-12_Easy_Software_p0084_region_1631 -> FORTH allows full access to DOS files and functions.
+1983_12_BYTE_08-12_Easy_Software_p0084_region_1632 -> FORTH application programs can be compiled into turnkey COM files and distributed with no license fee.
+1983_12_BYTE_08-12_Easy_Software_p0084_region_1633 -> -FORTH Cross Compilers are available for ROM ed or disk based applications on most microprocessors. Trademarks IBM Inter
+1983_12_BYTE_08-12_Easy_Software_p0084_region_1641 -> FORTH Application Development Systems include interpreter/complier with virtual memory management and multitasking, asse
+1983_12_BYTE_08-12_Easy_Software_p0084_region_1642 -> Z.80 FORTH for CP/M 2.2 or CP/M II $500.00
+
+80 FORTH for CP/M 2.2 or CP/M II $500.00
+
+8086 FORTH for CP/M 86 or MSDOS $1
+1983_12_BYTE_08-12_Easy_Software_p0084_region_1643 -> FORTH + Systems are 32 bit implementations that allow creation of programs as large as 1 megabyte. The entire memory add
+1983_12_BYTE_08-12_Easy_Software_p0084_region_1644 -> PC FORTH + $250.00 8086 FORTH + for CP/M-86 or MS/DOS $250.00 68000 FORTH + for CP/M 68K $250.00
+1983_12_BYTE_08-12_Easy_Software_p0095_region_1986 -> MVP-FORTH
+1983_12_BYTE_08-12_Easy_Software_p0095_region_1987 -> Stable - Transportable - Public Domain - Tools
+
+You need two primary features in a software development package: a stabl
+1983_12_BYTE_08-12_Easy_Software_p0095_region_1988 -> You need two primary features in a software development package: a stable operating system and the ability to move progr
+1983_12_BYTE_08-12_Easy_Software_p0095_region_1990 -> Volume 1, As about FORTH by Haydon. MVP-FORTH glossary with cross references to fig-FORTH. Starting MVP-FORTH and FORTH-
+1983_12_BYTE_08-12_Easy_Software_p0095_region_1991 -> MVP-FORTH Software - A Transportable FORTH
+1983_12_BYTE_08-12_Easy_Software_p0095_region_1992 -> MVP-FORTH Programmer's Kit including disk, documentation, Volumes 1 & 2 of MVP-FORTH Series (All About FORTH, 2nd Ed. & 
+1983_12_BYTE_08-12_Easy_Software_p0095_region_1994 -> FORTH with editor assembler, and manual
+1983_12_BYTE_08-12_Easy_Software_p0095_region_1996 -> Enhanced FORTH with F-Floating Point G Graphics T-Tutorial S-Stand Alone M-Math Chip Support MT-Multi-Tasking X-Other Ex
+1983_12_BYTE_08-12_Easy_Software_p0095_region_1997 -> CROSS COMPILERS Allow extending, modifying and compiling for speed and memory savings. can also produce ROMable code. *R
+1983_12_BYTE_08-12_Easy_Software_p0095_region_2006 -> THE FORTH SOURCE
+1983_12_BYTE_08-12_Easy_Software_p0095_region_2009 -> MVP-FORTH Cross Compiler for CP/M Programmer's Kit Can also generate headerless code for ROM or target CPU $300 MVP-FORT
+1983_12_BYTE_08-12_Easy_Software_p0095_region_2010 -> MVP-FORTH Fast Floating Point Point Includes 951 math chip on board with disks, documentation and enhanced virtual MVP-F
+1983_12_BYTE_08-12_Easy_Software_p0095_region_2011 -> MVP-FORTH Professional Application Development System (PADS) for IBM-PC, or APPLE A three level integrated system with c
+1983_12_BYTE_08-12_Easy_Software_p0095_region_2012 -> MVP-FORTH Expert System for development of knowledge-based programs for Apple, IBM, or CP/M
+1983_12_BYTE_08-12_Easy_Software_p0095_region_2013 -> MVP-FORTH Fire Management System (FMS) with inter-union security for IBM, Victor 9000, or CRAM
+1983_12_BYTE_08-12_Easy_Software_p0124_region_2548 -> 68KFORTH Systems Language
+CP/M-68K O/S with C, 68K-BASIC,
+68KFORTH, FORTRAN 77, Z80
+Emulator, Whitemaths' C
+IDRIS O/S wi
+1983_12_BYTE_08-12_Easy_Software_p0151_region_3104 -> System 816 family supports Pascal, C, FORTH, BASIC, COBOL, PL/1, FORTRAN 77™ and more.
+debashmita@debashmita-HP:~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$ 
+
+
+AI: Confirmed — this is a clean **off-by-one page shift**, and it's specific to the *content*, not a random OCR mixup. Look at what actually matches:
+
+- Gold `p019` starts: *"Before teaching the course, I had considered writing my own book on FORTH..."* → this exact sentence appears verbatim in OCR's **`p0020`**, not `p0019`.
+- Gold's closing signature *"Vernor Vinge / Associate Professor / Dep..."* → matches OCR **`p0020`**'s `region_0401` exactly (*"Vernor Vinge\n\nAssociate Professor\n\nDepartment of Math Sciences\n\nSan Diego State University"*).
+
+So: **whatever the hand-transcriber (probably Sunanda or Anisa) counted as "page 19" of this PDF is actually being labeled "page 20" by the OCR pipeline** — a consistent 1-page shift, at least for this document.
+
+**Why this matters more than the F1 score itself:** if this offset is systematic (applies to every page in `1983-12`, not just this one), then **every page_id in `labels.jsonl` for this issue is silently pointing at the wrong OCR output**, which would badly understate your real OCR quality — you'd be comparing correct OCR text against the *wrong* gold answer, not measuring actual transcription errors.
+
+**Step 1 — check if `1981-05` (the page that scored well, 0.856) has the same kind of offset, or is genuinely aligned correctly.** If it's aligned correctly while `1983-12` is shifted, the bug is likely **document-specific** (e.g., one extra front-matter/cover page in that particular PDF that others don't have), not a global pipeline bug:
+
+```bash
+python3 -c "
+import json
+with open('grading_kit/labels.jsonl') as f:
+    for line in f:
+        d = json.loads(line)
+        if d['page_id'] == 'byte-magazine-1981-05_p132':
+            print(d['text'][:200])
+"
+```
+```bash
+python3 -c "
+import json, re
+with open('data/interim/ocr/81-05_recovered.json') as f:
+    chunks = json.load(f)
+matches = sorted([c for c in chunks if any('p0132' in pid for pid in c['page_ids'])],
+                  key=lambda c: int(re.search(r'_region_(\d+)\$', c['id']).group(1)))
+for c in matches[:3]:
+    print(c['id'], '->', c['text'][:150])
+"
+```
+
+If the gold text and `p0132`'s OCR text genuinely match here (no shift), that confirms the bug is isolated to `1983-12` — likely something specific about how that PDF was ingested (e.g. an extra blank/cover page `loader.py` counted differently than whoever transcribed the gold page counted).
+
+Run both and paste the output — this tells us whether to fix one issue's alignment or escalate a pipeline-wide bug in `ingest/loader.py`'s page numbering.
+
+Me: python3 -c "
+import json
+with open('grading_kit/labels.jsonl') as f:
+    for line in f:
+        d = json.loads(line)
+        if d['page_id'] == 'byte-magazine-1981-05_p132':
+            print(d['text'][:200])
+"
+Supreme Court Takes a Softer Look at Software
+\"A claim drawn to subject matter otherwise statutory does not become nonstatutory simply because it uses a mathematical formula, computer program, or di
+debashmita@debashmita-HP:~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$ python3 -c "
+import json, re
+with open('data/interim/ocr/81-05_recovered.json') as f:
+    chunks = json.load(f)
+matches = sorted([c for c in chunks if any('p0132' in pid for pid in c['page_ids'])],
+                  key=lambda c: int(re.search(r'_region_(\d+)\$', c['id']).group(1)))
+for c in matches[:3]:
+    print(c['id'], '->', c['text'][:150])
+"
+1981_05_BYTE_06-05_Software_Piracy_p0132_region_2558 -> With this somewhat cryptic remark, the Supreme Court has, in the words of software and patent expert Morton C Jacobs, "removed the shackles from the s
+1981_05_BYTE_06-05_Software_Piracy_p0132_region_2559 -> The key word in the above quote is "statutory." According to patent law, an invention is statutory if it is a "process," "machine," "article of manufa
+1981_05_BYTE_06-05_Software_Piracy_p0132_region_2560 -> the ruling was affirmed by the US Court of Appeals for the Seventh Circuit, and it precipitated considerable concern within the data-processing indust
+
+AI: Good — this confirms the alignment theory. Gold `p132` opens with *"Supreme Court Takes a Softer Look at Software... 'A claim drawn to subject matter otherwise statutory...'"* (a legal quote), and OCR `p0132` opens with *"With this somewhat cryptic remark, the Supreme Court has... removed the shackles..."* — that's the article's very next sentence, picking up directly after the quote ends. **These genuinely match; `1981-05` has no offset.**
+
+So the bug is confirmed **isolated to `1983-12`**, not a pipeline-wide issue — exactly what we needed to know. That's good news: you don't need to distrust every page across all 15 issues, just this one document.
+
+**What this means concretely:**
+- Your `1981-05_p132` F1 = 0.856 is a **real, trustworthy result** — solid Section 5 evidence, no caveat needed.
+- Your `1983-12_p019` F1 = 0.193 is **not a real OCR quality measurement** — it's an artifact of a page-count mismatch specific to that one PDF (likely an extra front-matter/cover page that got counted differently between however `ingest/loader.py` numbers pages and however the hand-transcriber counted while looking at the PDF).
+- **This is worth flagging to whoever transcribed `1983-12_p019`** (check `labels.jsonl` history / your team chat) — either the transcription itself needs to be re-labeled as `p020`, or `loader.py`'s page indexing for that specific file needs checking. Don't silently fix it yourself without telling them, same reasoning as the earlier `labels.jsonl` situation — but this one's cheap to flag since you now have exact proof (the verbatim matching sentences) ready to paste into your message.
+
+Me: OKay now I want to push the json files
+
+AI: Before pushing, let's check what we're dealing with — size and current git state, since these are OCR output (not raw PDFs), but still worth confirming they're reasonable to commit rather than something that should go through `.gitignore` like your raw corpus does.
+
+```bash
+ls -la data/interim/ocr/
+git status
+```
+
+A few things to check once you see that output:
+
+1. **Size** — text JSON, so probably fine (a few MB at most for ~15K chunks), but worth confirming before committing, same instinct as checking PDF sizes earlier.
+2. **Is `data/interim/` already gitignored?** Worth checking, since interim pipeline outputs are sometimes excluded by convention (only `data/raw/` explicitly needs the exclusion per How-To-Submit, but `.gitignore` might have been written more broadly):
+```bash
+cat .gitignore | grep -i interim
+```
+If it's ignored, `git status` won't show these files as untracked at all — in that case we'd need `git add -f` or adjust `.gitignore`, and worth pausing to ask why interim data is excluded before overriding that.
+
+3. **Naming** — you have the two `_recovered.json` files (cleaned/truncation-fixed versions). Worth deciding: keep the `_recovered` suffix as-is (honest about what happened), or rename to something cleaner like `1983-12_chunks.json` before committing? I'd lean toward keeping `_recovered` in the name or at least mentioning the truncation-recovery in the commit message — it's useful provenance information if anyone (including a marker) looks at how this data was produced.
+
+Run the two checks above and paste the output — then I'll give you the exact `git add`/`commit`/`push` commands.
+
+Me: ls -la data/interim/ocr/
+git status
+total 5812
+drwxrwxr-x 2 debashmita debashmita    4096 Aug 12 23:44 .
+drwxrwxr-x 3 debashmita debashmita    4096 Aug 12 23:44 ..
+-rw-rw-r-- 1 debashmita debashmita 4669918 Aug 12 23:44 81-05_recovered.json
+-rw-rw-r-- 1 debashmita debashmita 1261557 Aug 12 23:44 83-12_recovered.json
+On branch main
+Your branch is up to date with 'origin/main'.
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   src/doc_agent/eval/metrics.py
+	modified:   transcripts/2105098.txt
+no changes added to commit (use "git add" and/or "git commit -a")
+debashmita@debashmita-HP:~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$ cat .gitignore | grep -i interim
+data/interim/
+
 AI: 
