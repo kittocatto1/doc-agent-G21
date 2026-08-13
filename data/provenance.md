@@ -8,7 +8,7 @@
 
 - Pages: 6603
   Words: 4282808
-  Size on disk: [RUN: `du -sh data/raw/`]
+  Size on disk: 3.7 GB
 
 - Scan/script difficulty notes:
   BYTE magazine pages use a dense 2-3 column layout throughout, with sidebars, boxed code listings, and full-page ads that interrupt normal reading order. Naive left-to-right/top-to-bottom OCR would scramble text across columns. Print quality varies significantly across the ~1975-1993 span in our subset — early issues (1975-1980) show more visible print/scan artifacts (halftone dot patterns in images, lower contrast body text) than later issues. This is why a layout/region-detection stage runs before OCR (see vision/layout.py) rather than OCR-ing raw pages directly.
