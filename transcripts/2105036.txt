@@ -14298,3 +14298,1033 @@ And honestly, **don't rush to fill that section now**. Your assignment explicitl
 
 The nice thing is that you've already built the hard prerequisite: **you have an actual FAISS index with 8,692+ vectors**, so once `retriever.py` is implemented, you can immediately start generating these two pieces of evidence.
 
+Me: anisa@anisa-VivoBook-ASUSLaptop-X513EPN-K513EP:~/Downloads/doc-agent-template/doc-agent-starter$ make ingest index
+python scripts/run_ingest.py
+make: python: No such file or directory
+make: *** [Makefile:4: ingest] Error 127
+anisa@anisa-VivoBook-ASUSLaptop-X513EPN-K5
+
+
+why am i getting this error? should i give the whole directory structure ?
+
+AI: Nope, you don't need to give me the whole directory structure yet. This error is much simpler:
+
+```text
+make: python: No such file or directory
+```
+
+Your `Makefile` says:
+
+```make
+ingest: ; python scripts/run_ingest.py
+index:  ; python scripts/run_index.py
+```
+
+but on your Ubuntu machine, the Python executable is probably called **`python3`**, not `python`.
+
+### First check
+
+Run:
+
+```bash
+which python
+which python3
+python3 --version
+```
+
+Since you've been using a virtual environment, also check:
+
+```bash
+which python
+```
+
+If your venv is active, it should look something like:
+
+```text
+/home/anisa/.../venv/bin/python
+```
+
+If it says nothing, activate your venv:
+
+```bash
+source venv/bin/activate
+```
+
+Then:
+
+```bash
+which python
+python --version
+```
+
+### If `python` still doesn't exist
+
+Your Makefile can simply use `python3`:
+
+```make
+ingest: ; python3 scripts/run_ingest.py
+index:  ; python3 scripts/run_index.py
+```
+
+**But wait before changing it.** Since you're using a `venv`, I'd first make sure the venv is actually active.
+
+Run these and send me the output:
+
+```bash
+which python
+which python3
+python3 --version
+echo $VIRTUAL_ENV
+```
+
+Then we can tell whether this is just an inactive venv or whether the Makefile needs changing.
+
+Me: er$ make ingest index
+python scripts/run_ingest.py
+Traceback (most recent call last):
+  File "/home/anisa/Downloads/doc-agent-template/doc-agent-starter/scripts/run_ingest.py", line 1, in <module>
+    from doc_agent import config, pipeline
+ModuleNotFoundError: No module named 'doc_agent'
+make: *** [Makefile:4: ingest] Error 1
+
+AI: Yep — now you've moved past the `python` problem. 😭
+
+This error:
+
+```text
+ModuleNotFoundError: No module named 'doc_agent'
+```
+
+means Python cannot find your package under `src/doc_agent`.
+
+Your project is using a **src layout**, so running:
+
+```bash
+python scripts/run_ingest.py
+```
+
+doesn't automatically put `src/` on Python's import path.
+
+### Quick test
+
+From the project root, run:
+
+```bash
+PYTHONPATH=src python scripts/run_ingest.py
+```
+
+If that works, you've confirmed the issue.
+
+### Better fix for the Makefile
+
+Since your project consistently uses:
+
+```text
+src/
+└── doc_agent/
+```
+
+change the Makefile to:
+
+```make
+ingest: ; PYTHONPATH=src python scripts/run_ingest.py
+index:  ; PYTHONPATH=src python scripts/run_index.py
+```
+
+Then:
+
+```bash
+make ingest index
+```
+
+### One important catch
+
+Your `run_index.py` currently does:
+
+```python
+pipeline.build_knowledge_base(config.load())
+```
+
+and `run_ingest.py` **also** does:
+
+```python
+pipeline.build_knowledge_base(config.load())
+```
+
+So:
+
+```bash
+make ingest index
+```
+
+will currently run the **entire pipeline twice** — not "ingest first, then index."
+
+That's something I'd fix before you test this seriously, especially since your corpus is huge.
+
+For your current A2 setup, I'd **not run `make ingest index` locally yet** given your storage limitations. First fix the staged-script design, then run the full build on Kaggle.
+
+Me: (venv) anisa@anisa-VivoBook-ASUSLaptop-X513EPN-K513EP:~/Downloads/doc-agent-template$ make ingest index
+make: *** No rule to make target 'ingest'.  Stop.
+
+AI: Yep — this one is simply because you're **one directory too high**.
+
+Earlier you were here:
+
+```text
+~/Downloads/doc-agent-template/doc-agent-starter
+```
+
+and that directory contains the `Makefile`.
+
+Now you're here:
+
+```text
+~/Downloads/doc-agent-template
+```
+
+So `make` can't find the project's Makefile/targets.
+
+Run:
+
+```bash
+cd ~/Downloads/doc-agent-template/doc-agent-starter
+```
+
+Then verify:
+
+```bash
+ls Makefile
+```
+
+You should see:
+
+```text
+Makefile
+```
+
+Then:
+
+```bash
+make ingest index
+```
+
+### One more thing
+
+Since your venv is already active (`(venv)`), that's good.
+
+If you then get:
+
+```text
+ModuleNotFoundError: No module named 'doc_agent'
+```
+
+we'll deal with the `src/` import-path issue next. Don't change anything else yet.
+
+Me: (venv) anisa@anisa-VivoBook-ASUSLaptop-X513EPN-K513EP:~/Downloads/doc-agent-template$ cd -
+/home/anisa/Downloads/doc-agent-template/doc-agent-starter
+(venv) anisa@anisa-VivoBook-ASUSLaptop-X513EPN-K513EP:~/Downloads/doc-agent-template/doc-agent-starter$ ls Makefile 
+Makefile
+(venv) anisa
+
+AI: Perfect — you're back in the **correct project directory**, and `Makefile` is present. 👍
+
+Now run:
+
+```bash
+make ingest index
+```
+
+If you get:
+
+```text
+ModuleNotFoundError: No module named 'doc_agent'
+```
+
+then the next issue is the `src/` layout. In that case, **don't edit the Makefile yet**. First test:
+
+```bash
+PYTHONPATH=src python scripts/run_ingest.py
+```
+
+If that works, we'll know exactly what needs changing in the Makefile.
+
+Also, because your laptop has limited storage, **stop if it starts actually processing the full corpus/OCR**. We're only trying to verify the build wiring here.
+
+Me: .PHONY: setup seed ingest index eval serve test lint
+setup: ; uv sync --frozen
+seed:  ; python scripts/set_seed.py
+ingest:; python src/scripts/run_ingest.py
+index: ; python src/scripts/run_index.py
+eval:  ; python scripts/run_eval.py
+serve: ; uvicorn doc_agent.serve.api:app --host 0.0.0.0 --port 8000
+lint:  ; ruff check . && black --check . && mypy src
+test:  ; pytest
+
+
+
+
+why aint this working
+
+AI: Because there are **two separate problems** in those paths.
+
+Your project structure is roughly:
+
+```text
+doc-agent-starter/
+├── Makefile
+├── scripts/
+│   ├── run_ingest.py
+│   └── run_index.py
+└── src/
+    └── doc_agent/
+        ├── pipeline.py
+        ├── config.py
+        └── ...
+```
+
+So this:
+
+```make
+ingest:; python src/scripts/run_ingest.py
+index: ; python src/scripts/run_index.py
+```
+
+is wrong because **`scripts/` is not inside `src/`**.
+
+It should be:
+
+```make
+ingest: ; PYTHONPATH=src python scripts/run_ingest.py
+index:  ; PYTHONPATH=src python scripts/run_index.py
+```
+
+### Why `PYTHONPATH=src`?
+
+Because your actual package is:
+
+```text
+src/doc_agent/
+```
+
+and `run_ingest.py` contains:
+
+```python
+from doc_agent import config, pipeline
+```
+
+Python needs `src/` on its module search path to find `doc_agent`.
+
+---
+
+### So your Makefile should have
+
+```make
+.PHONY: setup seed ingest index eval serve test lint
+
+setup: ; uv sync --frozen
+seed:  ; PYTHONPATH=src python scripts/set_seed.py
+ingest: ; PYTHONPATH=src python scripts/run_ingest.py
+index:  ; PYTHONPATH=src python scripts/run_index.py
+eval:   ; PYTHONPATH=src python scripts/run_eval.py
+serve:  ; PYTHONPATH=src uvicorn doc_agent.serve.api:app --host 0.0.0.0 --port 8000
+lint:   ; ruff check . && black --check . && mypy src
+test:   ; PYTHONPATH=src pytest
+```
+
+The **critical fixes** are:
+
+```diff
+- ingest:; python src/scripts/run_ingest.py
++ ingest: ; PYTHONPATH=src python scripts/run_ingest.py
+
+- index: ; python src/scripts/run_index.py
++ index:  ; PYTHONPATH=src python scripts/run_index.py
+```
+
+Then test just the import/wiring with:
+
+```bash
+make ingest
+```
+
+⚠️ **Don't let it run the full corpus on your laptop.** Since your laptop has storage/compute limitations, we're only trying to verify the command wiring. Your full OCR → chunk → embed → HNSW build should stay on Kaggle.
+
+Me: # Knowledge-base pipeline diagram (A2 — fill this)
+
+Embed your diagram image here (or describe the stages): pages → clean → (enhance) → layout → OCR → chunk → embed → store.
+
+
+
+pls complete this based on the contexts you know - `[author]` **reports/pipeline\_diagram.md** — diagram the knowledge-base pipeline.
+
+AI: Absolutely. Based on the final implementation you have now, I’d make `reports/pipeline_diagram.md` describe the **actual A2 pipeline**, not the original template defaults.
+
+You can put this directly into `reports/pipeline_diagram.md`:
+
+````markdown
+# Knowledge-Base Pipeline Diagram
+
+## BYTE Retriever — Knowledge-Base Construction Pipeline
+
+```text
+                    ┌──────────────────────────┐
+                    │   BYTE Magazine Pages    │
+                    │  (scanned page images)   │
+                    └────────────┬─────────────┘
+                                 │
+                                 ▼
+                    ┌──────────────────────────┐
+                    │         Ingest           │
+                    │  Load ordered page data  │
+                    └────────────┬─────────────┘
+                                 │
+                                 ▼
+                    ┌──────────────────────────┐
+                    │       Preprocess          │
+                    │  Basic image preparation  │
+                    └────────────┬─────────────┘
+                                 │
+                                 ▼
+                    ┌──────────────────────────┐
+                    │        Enhancement       │
+                    │       DISABLED            │
+                    │  Corpus pages are not     │
+                    │  sufficiently faded to    │
+                    │  justify enhancement      │
+                    └────────────┬─────────────┘
+                                 │
+                                 ▼
+                    ┌──────────────────────────┐
+                    │      Layout Detection    │
+                    │ DocLayout-YOLO /          │
+                    │     DocStructBench        │
+                    │                          │
+                    │ score_thr = 0.25          │
+                    └────────────┬─────────────┘
+                                 │
+                                 │ detected regions
+                                 │ + reading order
+                                 ▼
+                    ┌──────────────────────────┐
+                    │           OCR            │
+                    │ Qwen2-VL-2B-Instruct     │
+                    │                          │
+                    │ Pretrained / zero-shot   │
+                    │ No fine-tuning            │
+                    └────────────┬─────────────┘
+                                 │
+                                 │ region-level
+                                 │ Chunk objects
+                                 ▼
+                    ┌──────────────────────────┐
+                    │          Chunk           │
+                    │ Rule-based re-chunking   │
+                    │                          │
+                    │ 256 words/chunk           │
+                    │ 32-word overlap           │
+                    │                          │
+                    │ Grouped by doc_id         │
+                    │ Reading order preserved  │
+                    └────────────┬─────────────┘
+                                 │
+                                 ▼
+                    ┌──────────────────────────┐
+                    │          Embed           │
+                    │ BAAI/bge-small-en-v1.5   │
+                    │                          │
+                    │ 384-dimensional vectors  │
+                    │ Pretrained / zero-shot   │
+                    └────────────┬─────────────┘
+                                 │
+                                 ▼
+             ┌──────────────────────────────────────┐
+             │             Vector Store              │
+             │                                      │
+             │        FAISS IndexHNSWFlat           │
+             │                                      │
+             │ M = 32                                │
+             │ efConstruction = 200                  │
+             │ efSearch = 64                         │
+             │                                      │
+             │ Incremental indexing                  │
+             │ + doc_id duplicate protection         │
+             └────────────────────┬─────────────────┘
+                                  │
+                    ┌─────────────┴─────────────┐
+                    ▼                           ▼
+          ┌───────────────────┐       ┌────────────────────┐
+          │    index.faiss    │       │  chunks_meta.json  │
+          │                   │       │                    │
+          │ FAISS vectors +   │       │ Chunk text, doc_id │
+          │ HNSW graph        │       │ page_ids, etc.     │
+          └───────────────────┘       └────────────────────┘
+````
+
+## Pipeline Summary
+
+The knowledge-base construction pipeline processes scanned BYTE magazine pages from ingestion through vector indexing:
+
+**pages → ingest → preprocess → layout detection → OCR → chunk → embed → FAISS HNSW store**
+
+### Stage 1 — Ingest and preprocessing
+
+Scanned BYTE magazine pages are loaded and prepared for downstream processing. Image enhancement is currently **disabled**, since the corpus does not contain sufficiently faded pages to justify the additional computational cost.
+
+### Stage 2 — Layout detection
+
+**DocLayout-YOLO / DocStructBench** detects text and other regions on each page. The detection threshold was selected through experimentation on representative BYTE pages. The layout stage also establishes the reading order used by later stages, which is important for BYTE's multi-column articles.
+
+### Stage 3 — OCR
+
+**Qwen2-VL-2B-Instruct** performs pretrained, zero-shot OCR on the detected regions. It was selected after experiments showed substantially better OCR behaviour than the alternative OCR models tested, including **Tesseract, TrOCR-base-printed, and another TrOCR configuration**.
+
+Fine-tuning is disabled because the instructor's Q&A document explicitly exempts the project from fine-tuning requirements for the large corpus.
+
+### Stage 4 — Chunking
+
+The region-level OCR output is converted into retrieval-sized chunks:
+
+* `chunk_tokens = 256`
+* `overlap = 32`
+* chunks are grouped by `doc_id`
+* the existing layout-generated reading order is preserved
+* chunks are stored as `Chunk` objects containing their text, document ID, and page IDs
+
+The splitter is rule-based and does not require a learned model.
+
+### Stage 5 — Embedding
+
+Each final chunk is converted into a **384-dimensional embedding** using:
+
+**`BAAI/bge-small-en-v1.5`**
+
+The earlier Jina embedding choice was replaced because the BYTE corpus is English-only and therefore does not require multilingual retrieval. BGE-small provides a more practical computational/runtime trade-off for the large corpus while remaining suitable for semantic retrieval.
+
+### Stage 6 — Vector storage
+
+The embeddings are stored in a **FAISS HNSW** index.
+
+The current configuration uses:
+
+* `M = 32`
+* `efConstruction = 200`
+* `efSearch = 64`
+
+The index is designed for the project's scalability requirement and supports **incremental addition of new issues**. Before adding vectors, the implementation checks existing metadata using `doc_id` and rejects an issue if that `doc_id` is already present. This prevents accidentally indexing the same BYTE issue twice.
+
+The vector index is stored separately from its metadata:
+
+* `data/index/index.faiss` — FAISS HNSW vector index
+* `data/index/chunks_meta.json` — metadata used to map FAISS vector IDs back to the original chunks
+
+## Design Rationale
+
+The pipeline is designed around the main characteristics of the BYTE corpus:
+
+1. **Multi-column layouts** require layout-aware processing and preservation of reading order.
+2. **Large corpus size** makes computationally expensive enhancement, OCR, and embedding choices important.
+3. **English-only content** allows the use of a lightweight English retrieval model rather than requiring multilingual embeddings.
+4. **Incremental corpus growth** requires the vector store to accept new issues without rebuilding the entire index.
+5. **Duplicate protection** prevents the same issue from being accidentally added to the vector database multiple times.
+
+```
+
+### One small correction I'd make
+
+Your assignment says **“Stages 1–4”**, but your actual code comments call `chunk`, `embed`, and `store` **Stage 4**. That's because the starter template's stage numbering is a little weird.
+
+For the diagram, I'd **avoid numbering them as Stage 1, Stage 2, Stage 3, etc.** and just use the actual pipeline components. That prevents a reviewer from getting confused about the template's inconsistent stage labels.
+
+Also, for the OCR sentence, if you know the **exact two TrOCR variants** you experimented with, I'd replace “another TrOCR configuration” with their actual model names. That'll look much more concrete in the report.
+```
+Me: A2 — Knowledge-Base Demo (fill this)
+
+Show OCR quality on a sample and one working retrieval example. ✨ Generate
+
+- Code
+- Markdown
+
+# IMPLEMENT: run OCR quality + one retrieval, end to end
+
+✓ 0.0s
+
+
+
+
+
+i need to complete this 
+
+1. `[author]` **notebooks/kb\_demo.ipynb** — show OCR quality and one retrieval example.
+
+
+
+but how will i show only one OCR quality i cant even run the code on my machine :") 
+
+AI: You **don’t need to run the full OCR pipeline locally** just to complete `kb_demo.ipynb`. Since you already have OCR outputs from Kaggle, you can make the notebook demonstrate the **OCR result quality using an existing OCR output**, then demonstrate retrieval using the index you already built.
+
+For A2, I’d structure `kb_demo.ipynb` like this:
+
+### 1. Load one existing OCR output
+
+Use one of your valid OCR JSON files from Kaggle or a copied sample:
+
+```python
+import json
+from pathlib import Path
+
+OCR_FILE = Path("data/.../1982_04.json")
+
+with OCR_FILE.open("r", encoding="utf-8") as f:
+    ocr_chunks = json.load(f)
+
+print(f"Number of OCR regions: {len(ocr_chunks)}")
+```
+
+### 2. Show one OCR-quality example
+
+Pick a page/region containing recognizable text:
+
+```python
+sample = ocr_chunks[0]
+
+print("Document:", sample["doc_id"])
+print("Page:", sample["page_ids"][0])
+print("\nOCR output:")
+print(sample["text"])
+```
+
+But **this alone isn't really "OCR quality"**. Ideally, show:
+
+> **Original page image → OCR output**
+
+If you have the corresponding scanned page available in Kaggle, display it:
+
+```python
+from IPython.display import display
+from PIL import Image
+
+image = Image.open("path/to/page.png")
+display(image)
+
+print("\nOCR output:")
+print(sample["text"])
+```
+
+Then add a Markdown cell:
+
+> **OCR quality observation:** The VLM-based OCR successfully preserves the main textual content and reading order of the selected BYTE page. Minor OCR errors may remain, particularly around specialized terminology, symbols, or complex layouts.
+
+You don't need to manually calculate an OCR accuracy score unless your assignment specifically asks for one.
+
+---
+
+### 3. Then show the chunking result
+
+Since your OCR output is already available, you can demonstrate Stage 4 without rerunning OCR:
+
+```python
+from doc_agent.contracts import Chunk
+from doc_agent.index import chunk
+
+chunks = [
+    Chunk(**item)
+    for item in ocr_chunks
+]
+
+final_chunks = chunk.split(chunks, cfg)
+
+print("OCR regions:", len(chunks))
+print("Final retrieval chunks:", len(final_chunks))
+```
+
+This nicely demonstrates:
+
+**OCR → Chunk**
+
+---
+
+### 4. Show one retrieval example
+
+Since you already have your FAISS index, this is the important part.
+
+For example, choose a question about something actually contained in the corpus:
+
+```text
+"What does the 1982 BYTE issue say about human factors engineering?"
+```
+
+Then show:
+
+```text
+Query:
+What does the 1982 BYTE issue say about human factors engineering?
+
+Retrieved chunk:
+...
+
+Document:
+1982_04_BYTE_07-04_Human_Factors_Engineering
+
+Page:
+...
+
+Score:
+...
+```
+
+That gives you the **one working retrieval example** the A2 requirement asks for.
+
+---
+
+### The key point
+
+Your notebook **does not have to execute this entire thing**:
+
+```text
+PDF
+ ↓
+preprocess
+ ↓
+enhancement
+ ↓
+layout
+ ↓
+OCR
+ ↓
+chunk
+ ↓
+embed
+ ↓
+FAISS
+```
+
+You already ran the expensive parts on Kaggle.
+
+For the demo notebook, it's perfectly reasonable to use the **artifacts produced by those stages**:
+
+```text
+Existing OCR output
+       ↓
+   show OCR quality
+       ↓
+     chunk
+       ↓
+    embed
+       ↓
+  existing/build FAISS
+       ↓
+ one retrieval query
+```
+
+And because you already have the Kaggle-generated index, you can even make the notebook primarily a **demonstration/inspection notebook**, rather than a corpus-processing notebook.
+
+So no, you're not stuck because your laptop can't run the OCR. 😭 Your laptop's storage/compute limitation doesn't prevent you from completing the **demo artifact**. The expensive OCR/index construction can stay on Kaggle; the notebook just needs to demonstrate the resulting pipeline artifacts clearly.
+
+Me: ok i think the cell 1 code was enough for  the OCR quality check but now for the retrieval example what to do? 
+
+*A build milestone needs proof, not promises. Show real numbers and one real retrieval.*
+
+| **OCR quality on a sample**<br>*measure reading quality on a labelled sample (character/word error rate, or F1). State the number and the sample size.* | <br>                                                                                                                                                                                                                                                                                                           |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Index statistics**<br>*chunks indexed, embedding dimension, index type, corpus coverage (pages/words indexed vs total).*                              | Chunks indexed: *(count from* *`chunks_meta.json`* *after a full-subset run)*<br>Embedding dimension: 1024 (confirmed)<br>Index type: FAISS HNSW, `M=32`<br>Index size on disk: *(from* *`index.faiss`* *file size)*<br>Corpus coverage: *(pages/words actually indexed vs. total in the 15-issue subset)*<br> |
+| **One retrieval example**<br>*a real query, the top chunk returned, and whether it's the right page. Show one that worked.*                             | <br>                                                                                                                                                                                                                                                                                                           |
+| **The worst failure we saw**<br>*where reading or retrieval failed badly, and your read on why (honest — this shapes A3).*                              | <br><br><br><br>THESE ARE WHAT WE ARE SUPPOSED TO DO BTW                                                                                                                                                                                                                                                       |
+
+AI: Yep. For the **retrieval example**, you don't need to run the entire agent yet. A2 is basically asking you to prove:
+
+> **"Given a real user question, does my indexed KB retrieve the correct chunk/page?"**
+
+Since your `retriever.py` isn't implemented yet, you can do this as a **dense-retrieval smoke test directly against the FAISS index**. That's completely reasonable for A2.
+
+The flow for the notebook should be:
+
+```text
+Real query
+   ↓
+BGE-small embedding
+   ↓
+FAISS HNSW search
+   ↓
+Top-k vector IDs
+   ↓
+chunks_meta.json
+   ↓
+Top chunk + page + text
+   ↓
+Manually verify against the actual BYTE page
+```
+
+## Cell 1 — Load the index and metadata
+
+```python
+# Cell — Load the FAISS index and chunk metadata
+
+import json
+import faiss
+from pathlib import Path
+
+INDEX_DIR = Path("../data/index")
+
+INDEX_FILE = INDEX_DIR / "index.faiss"
+META_FILE = INDEX_DIR / "chunks_meta.json"
+
+# Load FAISS index
+index = faiss.read_index(str(INDEX_FILE))
+
+# Load metadata
+with META_FILE.open("r", encoding="utf-8") as f:
+    chunks_meta = json.load(f)
+
+print("Index loaded successfully.")
+print(f"Vectors in index : {index.ntotal}")
+print(f"Embedding dim    : {index.d}")
+print(f"Metadata entries : {len(chunks_meta)}")
+
+assert index.ntotal == len(chunks_meta), \
+    "❌ FAISS vector count and metadata count do not match."
+
+print("✅ FAISS ↔ metadata consistency check passed.")
+```
+
+---
+
+## Cell 2 — Load BGE-small
+
+This has to use **the exact same embedding model that was used to create your index**.
+
+```python
+# Cell — Load the BGE-small embedding model
+
+from sentence_transformers import SentenceTransformer
+
+MODEL_NAME = "BAAI/bge-small-en-v1.5"
+
+model = SentenceTransformer(MODEL_NAME)
+
+print(f"Loaded embedding model: {MODEL_NAME}")
+print(f"Embedding dimension: {model.get_sentence_embedding_dimension()}")
+```
+
+You should get:
+
+```text
+Embedding dimension: 384
+```
+
+That should match:
+
+```text
+Index dim: 384
+```
+
+---
+
+## Cell 3 — Choose a REAL query
+
+This is important for your A2 report.
+
+Don't use something generic like:
+
+> "What is this article about?"
+
+Use a question that a real BYTE reader might ask and where you **already know the answer/page**.
+
+For example, if your 1985-06 sample contains something about a particular computer:
+
+```python
+# Cell — Define a real user query
+
+query = "What computer was described as having this particular feature?"
+
+print("Query:")
+print(query)
+```
+
+**But don't blindly use that example.** Pick a question whose answer you can verify from your actual OCR/page.
+
+Even better, choose something like:
+
+```python
+query = "What processor was used in the computer discussed in this article?"
+```
+
+if your selected article actually discusses a processor.
+
+---
+
+## Cell 4 — Embed the query and search FAISS
+
+```python
+# Cell — Retrieve top-k chunks
+
+import numpy as np
+
+TOP_K = 5
+
+# Embed query
+query_vector = model.encode(
+    [query],
+    convert_to_numpy=True
+).astype("float32")
+
+print("Query embedding shape:", query_vector.shape)
+
+# Search FAISS
+scores, indices = index.search(query_vector, TOP_K)
+
+print(f"\nTop {TOP_K} retrieved chunks:\n")
+
+for rank, (score, idx) in enumerate(zip(scores[0], indices[0]), start=1):
+    chunk = chunks_meta[idx]
+
+    print("=" * 80)
+    print(f"Rank       : {rank}")
+    print(f"FAISS ID   : {idx}")
+    print(f"Score      : {score:.4f}")
+    print(f"Document   : {chunk['doc_id']}")
+    print(f"Page       : {chunk['page_ids']}")
+    print(f"Chunk ID   : {chunk['id']}")
+    print(f"Text       : {chunk['text'][:500]}")
+```
+
+Now you'll get something like:
+
+```text
+================================================================================
+Rank       : 1
+FAISS ID   : 1832
+Score      : 0.7821
+Document   : 1985_06_BYTE_10-06_...
+Page       : ['1985_06_BYTE_10-06_..._p0036']
+Chunk ID   : ...
+Text       : The processor used in this computer was...
+```
+
+---
+
+# Cell 5 — Make the result easier to read
+
+For your actual notebook, I'd make the **top result** much more presentable.
+
+```python
+# Cell — Display the top retrieval result
+
+best_idx = int(indices[0][0])
+best_score = float(scores[0][0])
+best_chunk = chunks_meta[best_idx]
+
+print("🔎 RETRIEVAL EXAMPLE")
+print("=" * 80)
+
+print(f"Query:\n{query}\n")
+
+print(f"Top-1 similarity score: {best_score:.4f}")
+print(f"Document: {best_chunk['doc_id']}")
+print(f"Page: {best_chunk['page_ids']}")
+
+print("\nRetrieved text:")
+print("-" * 80)
+print(best_chunk["text"])
+```
+
+---
+
+# Cell 6 — Show the actual page
+
+This is the part that makes the retrieval example **proof rather than promises**.
+
+If the retrieved chunk points to page 36:
+
+```python
+# Cell — Verify the retrieved result against the actual page
+
+from IPython.display import display
+from PIL import Image
+
+PAGE_IMAGE = Path("../data/interim/sample_page_0036.png")
+
+image = Image.open(PAGE_IMAGE)
+
+print(f"Retrieved page: {best_chunk['page_ids']}")
+print("Actual page used for verification:")
+
+display(image)
+```
+
+Then underneath the image, you can manually state:
+
+```python
+print("Verification:")
+print("✅ The retrieved chunk corresponds to the page containing the answer.")
+```
+
+**Only write that if you've actually checked it.**
+
+---
+
+# What goes into your A2 table?
+
+You can then fill:
+
+### One retrieval example
+
+Something like:
+
+> **Query:** "What processor was used in the computer discussed in the article?"
+>
+> **Top-1 retrieved chunk:** `1985_06_BYTE_...`
+>
+> **Retrieved page:** p0036
+>
+> **Similarity score:** 0.78
+>
+> **Verification:** The retrieved page contains the information required to answer the query. **Top-1 retrieval succeeded.**
+
+That's exactly the kind of evidence they're asking for.
+
+---
+
+## One important correction in your current table
+
+Your table currently says:
+
+> **Embedding dimension: 1024 (confirmed)**
+
+But you've switched from Jina to:
+
+```yaml
+embed:
+  model: "BAAI/bge-small-en-v1.5"
+  dim: 384
+```
+
+So for your **current final system**, it should be:
+
+> **Embedding dimension: 384**
+
+And your index is:
+
+> **FAISS HNSW, M=32, efConstruction=200, efSearch=64**
+
+Your index statistics can be obtained automatically with:
+
+```python
+print(f"Chunks indexed      : {len(chunks_meta)}")
+print(f"Embedding dimension  : {index.d}")
+print(f"Index type           : FAISS HNSW")
+print(f"HNSW M               : 32")
+print(f"Index size           : {INDEX_FILE.stat().st_size / (1024**2):.2f} MB")
+```
+
+### And don't fake the OCR quality number
+
+Your A2 requirement says:
+
+> character/word error rate, or F1 + sample size
+
+Your Cell 1 showing OCR regions is useful **qualitative evidence**, but it isn't technically an OCR quality metric.
+
+If you have that **15-page hand-transcribed `labels.jsonl`** you mentioned earlier, that's what we should use to calculate actual **CER/WER**. That would make the A2 section much stronger.
+
+For the retrieval example, though, the six cells above are enough: **real query → BGE embedding → FAISS → top chunk → actual page verification**.
+
