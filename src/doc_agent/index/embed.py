@@ -29,6 +29,7 @@ def encode(chunks: list[Chunk], cfg: dict) -> np.ndarray:
         batch_size=32,
         show_progress_bar=True,
         convert_to_numpy=True,
+        normalize_embeddings=True,
     )
 
     expected_dim = cfg.get("embed", {}).get("dim")
