@@ -14,7 +14,7 @@ def _get_model(cfg: dict):
     if _model is not None:
         return _model
     from sentence_transformers import SentenceTransformer
-    model_name = cfg.get("embed", {}).get("model", "jinaai/jina-embeddings-v5-text-small")
+    model_name = cfg.get("embed", {}).get("model")
     _model = SentenceTransformer(model_name, trust_remote_code=True)
     return _model
 
