@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import numpy as np
 from ..contracts import Chunk
+#this is main
 
 EMBED_DIR = Path("data/interim/embed")
 _model = None
