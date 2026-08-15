@@ -19,8 +19,8 @@ axes:
 
 corpus:
   path: data/raw/                   # where the scanned page-images live
-  pages: 0                          # total pages  (floor: >= 300)
-  words: 0                          # total words  (floor: >= 60000)
+  pages: 6603                         # total pages  (floor: >= 300)
+  words: 4282808                          # total words  (floor: >= 60000)
   provenance: data/provenance.md    # source + licence + counts
 
 heldout:
