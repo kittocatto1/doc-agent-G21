@@ -1,7 +1,11 @@
-Name: Debashmita Saha
-Student number: 2105098
+Header
+------------------------------
+Member Name: Debashmita Saha
+Student Number: 2105098 
+Sections Led: 2,3,4,6,7
 
---- FULL CONVERSATION ---
+Full Conversation
+------------------------------
 
 Me: For A2, I will be sending you a series of documents from a "handbooks" folder, one by one. 
 
@@ -5071,7 +5075,7 @@ One thing to double check while you're at it — since we're specifically matchi
 python3 -c "import fitz, ipykernel; print('both found')"
 ```
 If that prints `both found`, you're set — run Cell 1 and paste the output.
-----2nd claude
+
 Me: warning: The `fitz` API is deprecated and will be removed in future. Use `import pymupdf` instead. Issues currently downloaded: 0   TOTAL pages across 0 downloaded issues: 0 Meets 300-page minimum? NO
 
 AI: Two things here — one harmless, one worth fixing.
@@ -5933,7 +5937,7 @@ git push origin main
 ```
 
 Once that's through, let me know if you want to look at what your teammate changed in `vision/ocr.py`/`layout.py` (since that overlaps your area), or move on to your own held-out labels/OCR benchmarking work.
-----3rd claude
+
 
 Me: git log --oneline -5 -- src/doc_agent/vision/ocr.py
 cat src/doc_agent/vision/ocr.py
@@ -7090,7 +7094,6 @@ Me: The output of kaggle for 2 issues is saved in my machine in this location /h
 
 Now tell me what to step by step
 
----continue from here
 
 AI: Good — that gives us real OCR output to work with. Let's go step by step.
 
@@ -9416,4 +9419,797 @@ Everything else in that draft (Rows 0–4, all columns) stands as-is. Confirm yo
 
 Once you confirm, I'll write the completed table to `configs/design_choices.md` and give you the exact `git add`/`commit`/`push` sequence.
 
-Me: 
+Me: Development: Tested the knowledge-base stages incrementally: first layout detection and reading order on individual BYTE pages, then OCR outputs, followed by chunking, embedding, and FAISS indexing on a small subset before processing all valid OCR files on Kaggle. Fits the large corpus because full-corpus experimentation is computationally expensive. Small tests make it possible to catch issues such as incorrect project paths, malformed OCR JSON, embedding dimension mismatches, missing FAISS dependencies, and duplicate issue insertion before processing the complete dataset. The cost is that small samples may not expose every failure mode present across the full corpus.
+
+
+
+Deployment: FAISS HNSW index, persisted as index.faiss with chunks_meta.json; the index is loaded using store.load() for retrieval. The generated vector database is treated as a data artifact rather than source code and is not committed to Git.
+
+Fits the large corpus because the vector index can be generated from the OCR/chunk/embedding pipeline and does not need to be stored in the source repository. Incremental updates allow newly OCR'd issues to be added without rebuilding the existing index. The cost is that the index must be regenerated or transferred when deploying to a new environment. A dedicated artifact/data-versioning system would become useful for production-scale deployment.
+
+
+
+MLOps: data/versioning.py — SHA256-hashes the corpus directory, records a version id + file count + timestamp per snapshot
+
+Fits reproducibility requirements ("which corpus version produced this result"); costs a small amount of hashing time per snapshot; would change to a real tool (DVC) if the team needed branching/rollback across many corpus versions, not just current-state tracking
+
+using this, now prepare the whole design_choices.md file
+
+AI: Good — `data/versioning.py` and `index/store.py` are both confirmed as real stubs in the codebase guide (`versioning.py` = "Data — corpus versioning," `store.py` = "Stage 4 — vector store"). So your Development/Deployment/MLOps content is grounded in real project structure, not invented — thanks for writing this yourself rather than me guessing.
+
+One thing worth flagging before I place this: your text reads as a **pipeline-wide** narrative (spans layout → OCR → chunking → embedding → indexing → versioning all together), but the table wants it broken out **per stage row**. Rather than force-split your paragraph awkwardly across 5 rows and risk losing your actual meaning, I'll place the full, coherent version once at **Row 4 (Index)** — since that's where indexing/versioning/deployment concerns naturally converge — and put a short pointer in the earlier rows (Layout, OCR) noting "see Row 4 for the shared incremental-testing methodology." That keeps your real content intact rather than diluting it. Let me know if you'd rather I actually split it out per-row instead.Drafted — sitting locally, not touching your repo yet. Rows 5–9 are deliberately left blank (A3/A4 scope, not A2's job to fill).
+
+Take a look and let me know if you want any wording changed. Once you confirm, here's exactly what to run on your machine:
+
+```bash
+# Copy this exact content into the file at your real path:
+nano "/home/debashmita/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21/configs/design_choices.md"
+```
+
+Or, if you'd rather not retype it, tell me and I'll give you a single `cat > ... << 'EOF'` heredoc command with the full content baked in, so you can just paste-and-run it directly in your terminal instead of manually editing in nano.
+
+Then, once the file's saved:
+```bash
+cd "/home/debashmita/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21"
+git add configs/design_choices.md
+git commit -m "Fill design_choices.md for A2 stages (ingest through index)"
+git pull origin main
+git push origin main
+```
+
+Want the paste-ready heredoc command instead of nano, and do you want any content changed before finalizing?
+
+Me: do not keep anything blank. give design choices with proper reasoning which we will follow in a3, a4 for row 5-9
+
+AI: Good instinct to plan ahead rather than leave gaps — and this is legitimate, since A1's "agent on paper" section and A2's "plan for A3" section already ask you to design ahead of building. I'll ground these in what's **already decided in `config.yaml`** (real, existing decisions) rather than inventing anything new, and I'll frame Development/Deployment/MLOps as **planned**, not as work already done — since none of it has actually run yet, and claiming otherwise would be the same grounding-gate risk we've been avoiding all night.That's rows 5–9, every cell filled with real reasoning grounded in `config.yaml` values that already exist (k/k_step/k_max/weak_threshold, max_steps, autonomy, budget_usd, rl.algo, serve.batch, deploy.target) — not invented, and clearly framed as **planned**, not completed, in Development/Deployment/MLOps columns. Two honest gaps I flagged rather than papering over:
+
+1. **Row 6 (Agent)** — "model TBD" for the LLM controller, since `config.yaml` has no field pinning which model drives the agent's decisions. Worth deciding this with your team before A3 starts.
+2. **Row 9 (Eval)** — "specific judge model TBD" for the LLM-judge, same reason.
+
+Both are legitimate open decisions, not something I should guess at.
+
+Here's the full file — all 10 rows, ready to review:The complete 10-row table is assembled and ready. Two things before you push it:
+
+1. **Confirm you're OK with "model TBD" showing up in Rows 6 and 9** — these are genuinely open team decisions, not something I should fabricate a name for.
+2. Since this table will get read by a grader looking specifically for grounded, non-fabricated claims, want me to do one more pass checking every specific number I cited (k=10, k_step=10, k_max=40, weak_threshold=0.35, max_steps=8, budget_usd=0.05) against your actual `config.yaml` one more time before you commit? I pulled these from what you pasted earlier in this session, but worth a final verify given how much has changed tonight.
+
+Once you confirm, run this in your terminal to write and push it:
+
+```bash
+cd "/home/debashmita/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21"
+cat configs/config.yaml   # quick final check the values still match before we commit
+```
+
+Paste that output and I'll give you the final paste-ready heredoc command to write the complete file, followed by the commit/push sequence.
+
+Me: cd "/home/debashmita/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21"
+cat configs/config.yaml   # quick final check the values still match before we commit
+# THE place you set models & parameters. Code reads only from here.
+seed: 42
+device: cuda
+enhance:   {enabled: false,  model: "unet_small", type: "diffusion"}   # or "vae" / "none"
+layout:    { model: "doclayout-yolo:docstructbench", model_path: "models/doclayout_yolo_docstructbench_imgsz1024.pt",score_thr: 0.25 }
+ocr:       {model: "Qwen/Qwen2-VL-2B-Instruct", max_new_tokens: 512, finetune: false}    # BASELINE = pretrained OCR
+embed:     {model: "BAAI/bge-small-en-v1.5", dim: 384}
+index:     {type: "faiss:hnsw", chunk_tokens: 256, overlap: 32, hnsw_m: 32, ef_construction: 200, ef_search: 64}
+retrieve:  {k: 10, k_step: 10, k_max: 40, weak_threshold: 0.35, rerank: true, reranker: "cross-encoder/ms-marco-MiniLM-L6-v2"}   # k_step/k_max/weak_threshold drive evidence-gated re-search
+agent:     {max_steps: 8, autonomy: "act-with-approval", budget_usd: 0.05}
+rl:        {algo: "ppo", train_policy: false}                         # bonus: set true
+serve:     {batch: true}
+deploy:    {target: "hf-spaces"}
+
+AI: Stop — before we write anything, there's a real problem: **the embedding model changed again.** `config.yaml` now shows `BAAI/bge-small-en-v1.5, dim: 384` — not Jina, not MiniLM-L6-v2. This is a **third** different value across this session (MiniLM → Jina → now BGE), and it directly contradicts what we just finalized for Section 3 and `design_choices.md` (both currently say Jina v5-text-small, 1024-dim).
+
+This needs to be resolved for real before either document gets written, or you'll submit a form that doesn't match your own repo — exactly the grounding-gate risk we've been careful about all night.
+
+**What I confirmed as accurate and unchanged:**
+- `retrieve`: k=10, k_step=10, k_max=40, weak_threshold=0.35, reranker=`cross-encoder/ms-marco-MiniLM-L6-v2` ✅ matches what I wrote
+- `agent`: max_steps=8, autonomy="act-with-approval", budget_usd=0.05 ✅ matches
+- `rl`: algo="ppo", train_policy=false ✅ matches
+- `serve`/`deploy`: batch=true, target="hf-spaces" ✅ matches
+- **New detail I didn't have before**: `index` now also specifies `hnsw_m: 32, ef_construction: 200, ef_search: 64` — real HNSW tuning parameters worth adding to Row 4's Methods column
+
+**What's broken:** the embedding model, again.
+
+**Before touching either document, find out from Sunanda (or whoever owns `embed.py`/`config.yaml`) directly:**
+1. Is `BAAI/bge-small-en-v1.5` the genuinely current, final choice now?
+2. Why did it change from Jina — was there an actual reason (e.g. Jina failed to load, licensing issue, dimension mismatch with something downstream), or is this another placeholder/in-progress edit?
+3. Has `embed.py`'s code been updated to match, or does its fallback still say Jina (creating the same kind of live code/config mismatch we caught earlier)?Run this now, in your terminal, to check whether the code has caught up with this config change:
+
+```bash
+git pull origin main
+cat src/doc_agent/index/embed.py
+```
+
+Paste the output — if `embed.py`'s fallback still says Jina while `config.yaml` says BGE, that's fine (config wins, since `cfg.get()` only uses the fallback when the key is missing) — but if there's any hardcoded reference to Jina elsewhere that isn't reading from `cfg`, that would be a real bug, not just a stale fallback.
+
+Once we know the current real state, I'll rewrite Section 3's embedding row and `design_choices.md`'s Row 4 with whatever's actually true right now — but I don't want to write it a third time only to have it change again. Worth getting Sunanda's direct confirmation this time before finalizing, given the pattern tonight.
+
+Me: (attachment)
+read the above text to understand what has changed so far and according to that tell me these things 1. ready design_choices.md file 2. what to change in section 2 and 3 of A form 
+
+AI: Good, this clarifies a lot — but before I rewrite anything, **point 4 needs a direct pushback**, because "fill in an approximate previous value" for the index/knowledge-base stats is exactly the kind of thing that could hurt you badly. Let me address that first, then do the two things you asked for.
+
+## On approximating the index/knowledge-base numbers — don't do this
+
+Section 4 of A2 explicitly asks for "concrete numbers proving the index is real" and the walkthrough warns: *"if you claim OCR or retrieval numbers far above what the grader measures on your own files, that gap is flagged as possible result-fabrication."* Making up a chunk count or index size you haven't actually produced is precisely this risk — and unlike a rough estimate, this is a **checkable claim**: the grader can open your actual `index.faiss`/`chunks_meta.json` and see the real numbers directly, so a mismatch isn't subtle, it's immediately visible.
+
+**The honest, safe alternative — report your real partial progress, labeled as partial:**
+> "As of submission, 11/15 issues have completed OCR; the index built from these contains **[real chunk count]** chunks at **384-dim** (BGE-small-en-v1.5), stored via FAISS HNSW. The remaining 4 issues are in progress; final numbers will be higher once OCR completes."
+
+This is completely legitimate — Section 6 of A2 literally asks for "the plan for A3," so an honest "here's where we are, here's what's left" is expected, not penalized. Run whatever you actually have right now through `store.py`/`chunk.py` and report **that real number**, however small — don't round up or invent a number for issues that haven't been processed yet.
+
+---
+
+## 1. Updated `design_choices.md` — Row 4 only (rest unchanged)This replaces only the Row 4 line in the file we drafted earlier — everything else (Rows 0–3, 5–9) stays as-is.
+
+## 2. Section 2 and 3 changes
+
+**Section 2 — no change needed.** It's about page/text structure (multi-column, reading order), not embedding model choice — none of today's edits affect that content.
+
+**Section 3 — Embedding row needs a full rewrite**, and honestly, this new version is **stronger evidence** than what we had before, since it's now grounded in real project constraints rather than just published specs:
+
+| Field | Content |
+|---|---|
+| Options compared | Jina v5-text-small (1024-dim, multilingual) vs. BGE-small-en-v1.5 (384-dim, English-focused) |
+| Our choice + why | BGE-small-en-v1.5 — switched from our initial Jina choice for two concrete reasons: (1) limited Kaggle GPU time made Jina's larger size (0.6B) an unnecessary cost; (2) Jina's multilingual capability is wasted since our corpus is entirely English, so a lighter English-focused model is a strictly better fit for both our compute constraint and actual data |
+| Reproduced? | **Yes** — real pretrained checkpoint, run zero-shot |
+
+This is genuinely a better row than before — it shows real iteration (tried Jina, hit a real constraint, made an evidence-based switch) rather than a single upfront spec comparison.
+
+---
+
+**Before you finalize anything** — go run whatever real chunk/index numbers you currently have (even partial, even just from the issues that have completed so far) and paste them here, so I can write Section 4/5's actual numbers correctly rather than leaving that for later. What does this give you right now?
+
+```bash
+python3 -c "
+import sys
+sys.path.insert(0, 'src')
+from doc_agent.index import store
+idx = store.load()
+print('Chunks in index:', idx.ntotal if hasattr(idx, 'ntotal') else 'check store.py for the right attribute')
+"
+```
+(If `store.load()`'s return type doesn't have `.ntotal`, paste `store.py`'s actual `load()` function and I'll adjust the check.)
+
+Me:  python3 -c "
+import sys
+sys.path.insert(0, 'src')
+from doc_agent.index import store
+idx = store.load()
+print('Chunks in index:', idx.ntotal if hasattr(idx, 'ntotal') else 'check store.py for the right attribute')
+"
+Traceback (most recent call last):
+  File "<string>", line 5, in <module>
+TypeError: load() missing 1 required positional argument: 'cfg'
+
+AI: Same pattern as `layout.detect()` earlier — needs `cfg` passed in. Let's check `store.py`'s actual signature before guessing further.```bash
+cat src/doc_agent/index/store.py
+```
+
+Paste that — once I see the real `load()` signature and what it returns (a raw FAISS index object, a wrapper class, etc.), I'll give you the exact correct call to get real chunk/index numbers.
+
+Me: cat src/doc_agent/index/store.py
+"""Stage 4 — vector store"""
+from __future__ import annotations
+import json
+from pathlib import Path
+import numpy as np
+import faiss
+from ..contracts import Chunk
+
+INDEX_DIR = Path("data/index")
+
+
+def build(chunks: list[Chunk], vectors: np.ndarray, cfg: dict) -> None:
+    """Incrementally add new vectors to the existing HNSW index.
+
+    New issues are appended to the existing FAISS index instead of rebuilding
+    the entire vector database.
+
+    Safety checks:
+    1. Number of chunks must equal number of vectors.
+    2. A document/issue (doc_id) must not already exist in the index.
+       This prevents accidental duplicate indexing if the same issue is
+       processed twice.
+    """
+
+    index_cfg = cfg.get("index", {})
+
+    INDEX_DIR.mkdir(parents=True, exist_ok=True)
+
+    index_path = INDEX_DIR / "index.faiss"
+    meta_path = INDEX_DIR / "chunks_meta.json"
+
+    # ---------------------------------------------------------
+    # 1. Basic chunk/vector consistency check
+    # ---------------------------------------------------------
+    #
+    # FAISS assigns vector IDs based on their position:
+    #
+    #   FAISS ID 0 -> chunks_meta[0]
+    #   FAISS ID 1 -> chunks_meta[1]
+    #   ...
+    #
+    # Therefore these two lists MUST have the same length.
+    # ---------------------------------------------------------
+    if len(chunks) != len(vectors):
+        raise ValueError(
+            f"Chunk/vector mismatch: "
+            f"{len(chunks)} chunks but {len(vectors)} vectors."
+        )
+
+    if len(chunks) == 0:
+        print("No chunks supplied. Nothing to add.")
+        return
+
+    vectors = np.ascontiguousarray(vectors.astype("float32"))
+    dim = vectors.shape[1]
+
+    # ---------------------------------------------------------
+    # 2. Load existing metadata and detect duplicate issues
+    # ---------------------------------------------------------
+    #
+    # chunks_meta.json contains the metadata for every vector
+    # currently stored in FAISS.
+    #
+    # We use doc_id to determine whether an entire issue has
+    # already been indexed.
+    # ---------------------------------------------------------
+    if meta_path.exists():
+        with meta_path.open("r", encoding="utf-8") as f:
+            existing_metadata = json.load(f)
+    else:
+        existing_metadata = []
+
+    existing_doc_ids = {
+        item["doc_id"]
+        for item in existing_metadata
+    }
+
+    new_doc_ids = {
+        c.doc_id
+        for c in chunks
+    }
+
+    duplicate_doc_ids = new_doc_ids & existing_doc_ids
+
+    if duplicate_doc_ids:
+        raise ValueError(
+            "\n❌ Duplicate issue detected!\n"
+            f"The following doc_id(s) are already indexed:\n"
+            + "\n".join(
+                f"  - {doc_id}"
+                for doc_id in sorted(duplicate_doc_ids)
+            )
+            + "\n\nRefusing to modify the FAISS index."
+            "\nThis prevents accidental duplicate indexing."
+        )
+
+    # ---------------------------------------------------------
+    # 3. Load existing FAISS index OR create a new one
+    # ---------------------------------------------------------
+    m = index_cfg.get("hnsw_m", 32)
+    ef_construction = index_cfg.get("ef_construction", 200)
+    ef_search = index_cfg.get("ef_search", 64)
+
+    if index_path.exists():
+
+        print(f"Loading existing FAISS index from {index_path}")
+
+        index = faiss.read_index(str(index_path))
+
+        # The embedding model must produce the same dimensionality
+        # as the vectors already stored in the index.
+        if index.d != dim:
+            raise ValueError(
+                f"Embedding dimension mismatch: "
+                f"existing index has dim={index.d}, "
+                f"but new vectors have dim={dim}."
+            )
+
+        print(
+            f"Existing index contains {index.ntotal} vectors."
+        )
+        print(
+            f"Adding {len(vectors)} vectors from "
+            f"{len(new_doc_ids)} new issue(s)."
+        )
+
+    else:
+
+        print(
+            "No existing FAISS index found. "
+            "Creating a new HNSW index."
+        )
+
+        index = faiss.IndexHNSWFlat(
+            dim,
+            m,
+            faiss.METRIC_INNER_PRODUCT,
+        )
+
+        # Controls how thoroughly HNSW searches for good neighbors
+        # while constructing the graph.
+        index.hnsw.efConstruction = ef_construction
+
+    # efSearch controls search effort at query time.
+    index.hnsw.efSearch = ef_search
+
+    # ---------------------------------------------------------
+    # 4. Add ONLY the new vectors
+    # ---------------------------------------------------------
+    #
+    # Existing vectors remain untouched.
+    #
+    # Example:
+    #
+    # First run:
+    #   FAISS = Issue A
+    #
+    # Second run:
+    #   FAISS = Issue A + Issue B
+    #
+    # Third run:
+    #   FAISS = Issue A + Issue B + Issue C
+    # ---------------------------------------------------------
+    index.add(vectors)
+
+    # ---------------------------------------------------------
+    # 5. Save the updated FAISS index
+    # ---------------------------------------------------------
+    faiss.write_index(index, str(index_path))
+
+    # ---------------------------------------------------------
+    # 6. Append metadata for the newly indexed chunks
+    # ---------------------------------------------------------
+    #
+    # The order here MUST match the order in which vectors were
+    # added to FAISS.
+    # ---------------------------------------------------------
+    existing_metadata.extend(
+        c.model_dump()
+        for c in chunks
+    )
+
+    with meta_path.open("w", encoding="utf-8") as f:
+        json.dump(
+            existing_metadata,
+            f,
+            ensure_ascii=False,
+            indent=2,
+        )
+
+    # ---------------------------------------------------------
+    # 7. Report final index status
+    # ---------------------------------------------------------
+    size_mb = index_path.stat().st_size / (1024 ** 2)
+
+    print(
+        f"\n✅ Successfully updated HNSW index."
+        f"\n   Added chunks : {len(chunks)}"
+        f"\n   Total vectors: {index.ntotal}"
+        f"\n   Dimensions   : {dim}"
+        f"\n   HNSW M       : {m}"
+        f"\n   Index size   : {size_mb:.2f} MB"
+        f"\n   Index path   : {index_path}"
+    )
+
+def load(cfg: dict):
+    """Load the persisted index + its chunk metadata."""
+    index_path = INDEX_DIR / "index.faiss"
+    meta_path = INDEX_DIR / "chunks_meta.json"
+
+    if not index_path.exists():
+        raise FileNotFoundError(f"No index found at {index_path} — run build() first.")
+
+    index = faiss.read_index(str(index_path))
+
+    # efSearch doesn't get saved with the index — reset it here in case
+    # something changed in cfg since build() ran.
+    index_cfg = cfg.get("index", {})
+    index.hnsw.efSearch = index_cfg.get("ef_search", 64)
+
+    with open(meta_path, "r", encoding="utf-8") as f:
+        chunk_dicts = json.load(f)
+
+    chunks = [Chunk(**d) for d in chunk_dicts]
+
+    print(f"Loaded index: {index.ntotal} vectors, dim={index.d}")
+    return index, chunksdebashmita@debashmita-HP:~/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21$ 
+
+
+AI: Good — this is genuinely solid, well-documented code (real duplicate-detection, dimension-mismatch checks, proper incremental append logic). `load()` needs `cfg` and returns `(index, chunks)`, and it already prints the vector count itself. Let's call it correctly:```bash
+python3 -c "
+import sys, yaml
+sys.path.insert(0, 'src')
+from doc_agent.index import store
+
+with open('configs/config.yaml') as f:
+    cfg = yaml.safe_load(f)
+
+index, chunks = store.load(cfg)
+print()
+print('Total vectors in index:', index.ntotal)
+print('Embedding dimension:', index.d)
+print('Total chunk metadata entries:', len(chunks))
+
+doc_ids = sorted(set(c.doc_id for c in chunks))
+print(f'Issues represented ({len(doc_ids)}):')
+for d in doc_ids:
+    count = sum(1 for c in chunks if c.doc_id == d)
+    print(f'  {d}: {count} chunks')
+
+import os
+size_mb = os.path.getsize('data/index/index.faiss') / (1024**2)
+print(f'\\nIndex file size: {size_mb:.2f} MB')
+"
+```
+
+Run this — if `data/index/index.faiss` doesn't exist yet (i.e. `build()` has never actually run), it'll raise the `FileNotFoundError` from line in `load()`, which itself is useful information: it tells us the index genuinely doesn't exist yet locally, and we'd need to either run `build()` with whatever chunks/vectors you have, or check whether the index exists on a teammate's machine/Kaggle instead. Paste whatever it outputs, error or real numbers — either way it's the truth we need for Section 4/5, not a guess.
+
+Me: "
+Traceback (most recent call last):
+  File "<string>", line 9, in <module>
+  File "/home/debashmita/Documents/4-1/CSE 429 - Deep Learning/doc-agent-G21/src/doc_agent/index/store.py", line 212, in load
+    raise FileNotFoundError(f"No index found at {index_path} — run build() first.")
+FileNotFoundError: No index found at data/index/index.faiss — run build() first.
+
+AI: That confirms it plainly: **no FAISS index exists locally on your machine right now.** `build()` has genuinely never run here — this isn't a bug, it's just the honest current state. Which means we now know for certain: there is currently **no real number to report** for Section 4/5's index stats. Good thing we checked before writing anything in.
+
+**Two real options, and this is a genuine team decision, not something to guess your way past:**
+
+**Option A — check if the index exists somewhere else** (Sunanda's machine, since she built `store.py`, or a Kaggle session):
+```bash
+git pull origin main
+find . -iname "index.faiss" -o -iname "chunks_meta.json" 2>/dev/null
+```
+If she's run `build()` locally or on Kaggle but the output (correctly) wasn't committed — since per your `.gitignore` pattern, index artifacts like this should stay untracked, similar to `data/interim/` — then the real numbers exist, just not on your machine. Worth asking her directly for the printed output from her last successful `build()` run (it prints exactly what we need: total vectors, dimensions, index size).
+
+**Option B — build it yourself right now, even partial**, using whatever chunked+embedded data you actually have locally. This requires chunks and vectors already produced by `chunk.py`/`embed.py` — do you have those?
+```bash
+find data/interim -iname "*.json" -path "*chunk*" 2>/dev/null
+find data/interim -iname "*.npy" -path "*embed*" 2>/dev/null
+```
+
+Run both checks and paste the output — this tells us whether real numbers exist somewhere accessible right now (best case), or whether you need to actually run the pipeline on real data before Section 4/5 can be written with anything concrete.
+
+Me: find data/interim -iname "*.json" -path "*chunk*" 2>/dev/null
+find data/interim -iname "*.npy" -path "*embed*" 2>/dev/null
+debashmita@debash
+
+AI: Both empty — confirms nothing's been chunked or embedded locally either. So right now, truly nothing exists on your machine past raw OCR chunks.
+
+**But you actually do have real data to build from** — the two recovered OCR files (`81-05_recovered.json`, `83-12_recovered.json`) sitting in `data/interim/ocr/`. You can run the rest of the pipeline yourself, right now, on real data you already trust (the same 2 issues you computed genuine F1 scores against earlier). This gives you a real, if small, index — honest partial evidence, not a placeholder.
+
+**Step 1 — check what's needed is installed:**
+```bash
+python3 -c "import faiss, sentence_transformers; print('both available')"
+```
+If this fails, install:
+```bash
+pip install faiss-cpu sentence-transformers --break-system-packages
+```
+
+**Step 2 — run chunk → embed → store, using your 2 real OCR files:**
+```bash
+python3 << 'EOF'
+import sys, json, yaml
+sys.path.insert(0, 'src')
+from doc_agent.index import chunk, embed, store
+from doc_agent.contracts import Chunk
+
+with open('configs/config.yaml') as f:
+    cfg = yaml.safe_load(f)
+
+all_chunks = []
+for path in ['data/interim/ocr/81-05_recovered.json', 'data/interim/ocr/83-12_recovered.json']:
+    with open(path) as f:
+        raw = json.load(f)
+    all_chunks.extend(Chunk(**item) for item in raw)
+
+print(f"Loaded {len(all_chunks)} raw OCR region-chunks")
+
+final_chunks = chunk.split(all_chunks, cfg)
+print(f"After chunking: {len(final_chunks)} final chunks")
+
+vectors = embed.encode(final_chunks, cfg)
+print(f"Embedded: {vectors.shape}")
+
+store.build(final_chunks, vectors, cfg)
+EOF
+```
+
+This will actually run `chunk.split()`, `embed.encode()` (downloading BGE-small-en-v1.5 if not cached — small model, should be fast even on CPU), and `store.build()` — and `store.build()` already prints exactly the stats Section 4 needs (total vectors, dimensions, HNSW M, index size) as part of its own success message.
+
+Run it and paste the full output — that becomes your real, honest Section 4 evidence: built from 2 of your 15 issues, clearly labeled as partial, with numbers that will actually match what's sitting in your repo if a grader checks.
+
+Me: I need to complete **Section 4 — The Knowledge Base We Built** of `A2_form.docx` for our Deep Learning  project.
+
+ Guide me through completing Section 4 step by step so our table entries directly reflect our implementation in `src/doc_agent/` and configurations in `configs/config.yaml`.
+
+### Please provide:
+
+1. **Source File Mapping:**
+
+   - List the exact repository files (e.g., `configs/config.yaml`, `src/doc_agent/vision/ocr.py`, `src/doc_agent/index/store.py`) where parameters for each stage live.
+
+2. **Stage-by-Stage Breakdown:**
+
+   - Help me fill out the 3 columns (**Model / checkpoint**, **Key parameters**, and **Pretrained / fine-tuned / scratch**) for each of the 6 stages:
+
+     1. Ingest + enhance[cite: 2]
+
+     2. Layout[cite: 2]
+
+     3. OCR / HTR[cite: 2]
+
+     4. Chunk[cite: 2]
+
+     5. Embed[cite: 2]
+
+     6. Index[cite: 2]
+
+3. **The One-Line Pipeline Summary:**
+
+   - Draft a clear, compliant single-line pipeline string matching `pages → clean → (enhance) → layout → OCR → chunk → embed → store` and call out any specific custom tweaks we made[cite: 2].
+   
+AI: ## 1. Source File Mapping
+
+| Stage | File(s) where parameters live |
+|---|---|
+| Ingest + enhance | `configs/config.yaml` (`enhance:` block) — no dedicated code file confirmed to me yet for ingest itself |
+| Layout | `configs/config.yaml` (`layout:` block) + `src/doc_agent/vision/layout.py` |
+| OCR / HTR | `configs/config.yaml` (`ocr:` block) + `src/doc_agent/vision/ocr.py` |
+| Chunk | `configs/config.yaml` (`index:` block, `chunk_tokens`/`overlap`) + `src/doc_agent/index/chunk.py` |
+| Embed | `configs/config.yaml` (`embed:` block) + `src/doc_agent/index/embed.py` |
+| Index | `configs/config.yaml` (`index:` block) + `src/doc_agent/index/store.py` |
+
+## 2. Stage-by-stage table
+
+| Stage | Model / checkpoint | Key parameters | Pretrained / fine-tuned / scratch |
+|---|---|---|---|
+| Ingest + enhance | N/A — enhancement not implemented | `enhance: {enabled: false, model: "unet_small", type: "diffusion"}` (config'd but unused since disabled) | N/A |
+| Layout | DocLayout-YOLO, DocStructBench checkpoint (`doclayout_yolo_docstructbench_imgsz1024.pt`) | `score_thr: 0.25` | **Pretrained** — zero-shot, no fine-tuning (no `finetune` flag exists for this stage, confirming it's used as-is) |
+| OCR / HTR | Qwen2-VL-2B-Instruct | `max_new_tokens: 512`, `finetune: false` | **Pretrained** — zero-shot, explicitly `finetune: false` |
+| Chunk | N/A — rule-based code, not a model | `chunk_tokens: 256`, `overlap: 32` | N/A |
+| Embed | BAAI/bge-small-en-v1.5 | `dim: 384` | **Pretrained** — zero-shot |
+| Index | FAISS HNSW (library, not a trained model) | `hnsw_m: 32`, `ef_construction: 200`, `ef_search: 64` | N/A |
+
+## 3. One-line pipeline summary
+
+> `pages → clean (fitz/PyMuPDF render) → (enhance: disabled) → layout (DocLayout-YOLO, region+reading-order detection) → OCR (Qwen2-VL-2B-Instruct, region-kind-specific prompts) → chunk (256 words, 32-word overlap, reading order preserved) → embed (BGE-small-en-v1.5, 384-dim) → store (FAISS HNSW, incremental append)`
+
+**Custom tweaks worth calling out specifically:**
+- **Enhance is entirely skipped**, not just a no-op default — a deliberate trade against our scalability NFR
+- **Chunking never re-sorts** — it trusts layout's reading order completely, by design (`chunk.py`'s own docstring states this explicitly)
+- **Indexing is incremental, not batch-rebuild** — `store.py`'s `build()` appends new-issue vectors to an existing index and refuses duplicate `doc_id`s, supporting your issue-by-issue OCR completion plan
+
+**One gap to flag before you finalize this:** I have no confirmed file for the actual **ingest** stage itself (only `configs/config.yaml`'s enhance block) — is there an `ingest/loader.py` or similar with parameters worth citing (e.g. DPI used for rendering, page-numbering logic)? If it exists and you can paste it, I'll add real detail to that row instead of leaving it thin.
+
+Me: """Stage 1 — load scanned page-images."""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+from pdf2image import convert_from_path
+
+from ..contracts import Page
+
+RAW_DIR = Path("data/raw")
+
+PAGE_DIR = Path("data/interim/pages")
+
+def load_pages(cfg: dict) -> list[Page]:
+
+    """Read data/raw/ and return scanned pages as Page objects."""
+
+    pdf_files = sorted(RAW_DIR.glob("*.pdf"))
+
+    if not pdf_files:
+
+        raise FileNotFoundError(
+
+            f"No PDF files found in {RAW_DIR.resolve()}"
+
+        )
+
+    if len(pdf_files) > 1:
+
+        raise ValueError(
+
+            f"Expected one PDF in {RAW_DIR}, "
+
+            f"but found {len(pdf_files)}. "
+
+            "Process one issue at a time."
+
+        )
+
+    pdf_path = pdf_files[0]
+
+    doc_id = pdf_path.stem
+
+    output_dir = PAGE_DIR / doc_id
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    pages: list[Page] = []
+
+    page_number = 1
+
+    while True:
+
+        image_path = output_dir / f"page_{page_number:04d}.png"
+
+        # Reuse an already-converted page if it exists.
+
+        if image_path.exists():
+
+            pages.append(
+
+                Page(
+
+                    id=f"{doc_id}_p{page_number:04d}",
+
+                    image_path=str(image_path),
+
+                    doc_id=doc_id,
+
+                )
+
+            )
+
+            page_number += 1
+
+            continue
+
+        try:
+
+            images = convert_from_path(
+
+                str(pdf_path),
+
+                dpi=150,
+
+                first_page=page_number,
+
+                last_page=page_number,
+
+                fmt="png",
+
+            )
+
+        except Exception as exc:
+
+            if page_number == 1:
+
+                raise RuntimeError(
+
+                    f"Failed to convert the first page of {pdf_path}"
+
+                ) from exc
+
+            break
+
+        # No image means we have reached the end of the PDF.
+
+        if not images:
+
+            break
+
+        images[0].save(image_path, "PNG")
+
+        pages.append(
+
+            Page(
+
+                id=f"{doc_id}_p{page_number:04d}",
+
+                image_path=str(image_path),
+
+                doc_id=doc_id,
+
+            )
+
+        )
+
+        page_number += 1
+
+    return pages
+
+this is loader.py
+
+AI: Good — real code, and there's something in here worth flagging before I fill the row: **`load_pages()` will raise a `ValueError` if `data/raw/` contains more than one PDF** (*"Expected one PDF in data/raw, but found N... Process one issue at a time"*). Since your `data/raw/` currently has all 15 issues sitting in it, this function can't be run as-is against your current corpus folder — it's built to process **one issue at a time**, meaning some orchestration (a loop that stages one PDF at a time, or per-issue Kaggle sessions) is expected around it. This actually lines up with how your team's OCR work has been split — issue-by-issue across teammates — so it's likely intentional design, not a bug, but worth confirming with whoever wrote it that this is the real intended usage pattern rather than an oversight nobody's hit yet.
+
+**One other useful thing this confirms:** pages are 1-indexed starting from the PDF's actual page 1 (`page_number = 1`, `page_0001.png`) — no off-by-one built into the loader itself. That's consistent with the `1983-12` offset bug we diagnosed earlier being a hand-transcription counting difference, not a loader bug.
+
+## Updated Ingest + enhance row
+
+| Stage | Model / checkpoint | Key parameters | Pretrained / fine-tuned / scratch |
+|---|---|---|---|
+| Ingest + enhance | N/A — `pdf2image` (Poppler-based PDF-to-image conversion), no ML model; enhancement not implemented | `dpi=150`; processes **one PDF (issue) at a time** from `data/raw/` — raises `ValueError` if more than one is present; 1-indexed page numbering (`page_0001.png` = physical page 1); resumes/reuses already-converted page images if found, avoiding redundant re-conversion; `enhance: {enabled: false}` | N/A (no model — enhancement disabled) |
+
+**Worth adding a note in Section 4's "the pipeline, in one honest paragraph"** about the one-issue-at-a-time constraint, since it directly explains *why* your team processed issues individually on separate Kaggle sessions rather than running one batch job over all 15 — it's not just a workflow choice, it's how `loader.py` is actually built.
+
+
+Me: I need to complete **Section 6 — The Plan for A3** of `A2_form.docx` for our Deep Learning  project.
+
+
+
+Act as our Lead AI Architect. Help me draft a concrete, technically sound plan for Section 6 that prepares our system for Milestone 3 and aligns with all grading criteria.
+
+### Please guide me through completing the three components of Section 6:
+
+1. **What We'll Build Next:**
+
+   - Help me structure our plan for retrieval + reranking, the agent loop + tools (`src/doc_agent/agent/`), guardrails, grounding, and evaluation.
+
+   - **Mandatory Feature:** Explicitly detail how we will implement **evidence-gated re-search** (widening $k$ on weak retrieval confidence, abstaining at $k_{\text{max}}$) to meet the fail-closed requirement.
+
+2. **Our Evaluation Set (`tasks.jsonl` Design):**
+
+   - Provide a strategy for authoring domain-specific query-answer pairs in `grading_kit/tasks.jsonl`[cite: 2].
+
+   - Explain how we will balance checkable/verifiable items with unanswerable (abstention) edge cases to properly test our agent[cite: 2].
+
+3. **Biggest Risk / Unknown & Mitigation:**
+
+   - Identify the primary failure mode or technical risk for our specific domain in A3 (e.g., hallucinated citations, infinite tool loops, or OCR noise propagating to retrieval)[cite: 2].
+
+   - Outline a concrete fallback/mitigation strategy for this risk[cite: 2].
+   
+AI: ## 1. What We'll Build Next
+
+**Retrieval + reranking:** implement `retrieve.py` around the exact config already committed — `k=10` default, `cross-encoder/ms-marco-MiniLM-L6-v2` reranker, querying the FAISS HNSW index built in A2 (Row 4). Nothing here needs new design decisions; A3's job is to actually wire the already-configured parameters into working code.
+
+**Agent loop + tools (`agent/`):** an LLM controller (model still to be chosen) operating over the 9 fixed tools (`retrieve`, `rerank`, `read_page`, `enhance_page`, `extract`, `aggregate`, `cite`, `calculator`, `escalate_to_human`), bounded by `max_steps=8` and `budget_usd=0.05`/query, with `autonomy: "act-with-approval"` gating higher-stakes actions.
+
+**Evidence-gated re-search — the mandatory fail-closed behavior, concretely:**
+1. Call `retrieve` with `k=10`.
+2. Check the top result's score against `weak_threshold=0.35`.
+3. If below threshold, widen: `k += k_step (10)`, re-retrieve, repeat.
+4. If still weak once `k` reaches `k_max=40`, **abstain** — return "not enough evidence" rather than guessing.
+
+This isn't a new design — it's already fully specified in `config.yaml`'s `retrieve` block. A3's task is implementing the loop exactly as configured, plus a unit test proving abstention actually fires at `k_max` on a genuinely out-of-corpus question (not just on paper).
+
+**Guardrails/grounding:** every answer must cite a real page (`cite` tool); prompt-injection defense sanitizes page text so it's never treated as an instruction; grounding attaches immediately before the final answer is returned, not earlier in the loop.
+
+**Evaluation:** implement the remaining `eval/metrics.py` stubs (`recall_at_k`, `groundedness`, `citation_accuracy`, `ece`, `subgroup_gap`) the same way `ocr_f1()` was built — synthetic known-input tests before running against real pipeline output.
+
+## 2. `tasks.jsonl` design strategy
+
+- **Gold answers sourced from `labels.jsonl`** — your 15 hand-transcribed held-out pages already have verified ground truth, so verifiable questions can be authored directly against known facts on those specific pages (dates, names, numbers explicitly stated in the transcribed text).
+- **Balance**, per the walkthrough's own example ratio (Team G07: 20 verifiable / 6 judged / 4 out-of-corpus out of 30): aim for roughly **60–70% verifiable** (exact-match, cheap and objective to grade), **20–25% judged** (multi-step reasoning across a page, scored by LLM-judge with a stated rubric), and **10–15% out-of-corpus** (questions about topics BYTE never covered, or specific issues outside your 15 — correct answer is abstention).
+- **Out-of-corpus questions specifically should be adversarial-ish**, not obviously irrelevant — e.g. a plausible-sounding question about a real 1980s computing topic that just isn't covered by your specific 15 issues, so abstention is actually being tested, not just triggered by an obviously nonsensical prompt.
+
+## 3. Biggest risk — grounded in what you already found tonight
+
+**OCR/layout noise propagating silently into retrieval and grounding.** This isn't hypothetical — you already have direct evidence of it:
+- The `1983-12_p019` page-indexing offset (verified: gold text for "p019" actually matches OCR output labeled "p020") shows page-id mismatches can happen and produce a confidently-wrong-looking low score that's actually a bookkeeping bug, not a real failure.
+- The duplicate near-identical bounding boxes seen in your own `layout.py` output (page 110: `heading (673,1442,1011,1467)` appearing twice) suggest occasional double-detection, which could double-count or muddy a chunk's embedded meaning.
+- Two of your OCR JSON files arrived **truncated** from Kaggle session death — if this happens on a batch run without you noticing (unlike tonight's careful recovery), silently incomplete text would feed the index without any error.
+
+**Mitigation:** 
+1. Add a validation step after chunking that flags any chunk whose source page_id doesn't appear in `labels.jsonl` (for held-out pages) as a sanity check before trusting retrieval scores on those pages.
+2. Extend `store.py`'s existing duplicate-`doc_id` detection logic (already built, tested) with duplicate-region detection at the layout stage, using IoU (bounding box overlap) to catch double-detections before they reach OCR.
+3. Keep the checkpoint-and-resume pattern (already proven in `ocr.py`) as the standard for every future long-running Kaggle stage, specifically to avoid repeating tonight's truncated-file recovery scramble.
+
+
+A short reflection
+------------------------------
+
+Accepted, with verification:
+
+I accepted most technical fixes (kernel/`ipykernel` setup, notebook working-directory path bugs, merge/pull workflow) directly, since these were mechanical and easy to verify by running the command and checking the output. I also accepted the AI's diagnosis of the `1983-12_p019` page-indexing offset — but only after it showed me the actual matching sentences between gold text and OCR output at a different page number, rather than just asserting a bug existed. Similarly, when a teammate's answer about our embedding model choice looked like it had been generated by an AI rather than written by her directly, I didn't accept it at face value — I asked her to confirm she'd actually verified it herself before treating it as settled.
+
+Rejected:
+-> the AI's own fabricated content:
+
+Twice, the AI presented plausible-sounding "options compared" for our design table (Tesseract vs. our OCR model; a heuristic column-splitter vs. our layout model) that turned out to be invented — no such comparison ever happened on our team. When I asked directly whether these were concrete or assumed, the AI admitted they were unverified guesses and rewrote both rows honestly, either removing the false comparison or checking our actual transcript for evidence first. I also caught the AI creating a new, unauthorized folder (`grading_kit/ocr_samples/`) to store evidence files, which directly violated our project's fixed file-structure rule — I flagged it, and we reverted it and moved the evidence into the form text instead.
+
+-> Generic Text Outputs: I rejected high-level, generic summaries generated for form sections. Whenever the AI suggested boilerplate descriptions, I required it to map the answers directly to our actual repository paths (e.g., configs/config.yaml, notebooks/kb_demo.ipynb, grading_kit/labels.jsonl) and our team's specific corpus specialty.  Unverified Assumptions: I rejected any implicit assumptions about our dataset's exact noise characteristics or model choices, insisting that missing parameters be verified against our actual EDA notebook before finalized.
+
+Changed through iteration:
+Our embedding model choice changed three times over the session (MiniLM → Jina → BGE) as our actual config.yaml evolved with real constraints (limited Kaggle GPU time, corpus being English-only). Each time, I had the AI re-verify against the current file state rather than trust what it had written earlier in the same conversation — this caught a real risk of submitting a form that no longer matched our code.
