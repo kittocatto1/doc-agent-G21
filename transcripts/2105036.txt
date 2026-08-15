@@ -2,7 +2,7 @@ Header
 ------------------------------
 Member Name: Anisa Binte Asad 
 Student Number: 2105036 
-Sections Led: 
+Sections Led: 1, 4, 5, 6, 7
 
 Full Conversation
 ------------------------------
@@ -16391,4 +16391,700 @@ AI: ### CER/WER Interpretation
 
 * **Selected operating point:** We therefore chose `score_thr = 0.25` as an **information-preserving operating point**. For the BYTE retrieval task, retaining potentially useful text for retrieval is preferable to obtaining a lower OCR error rate by discarding relevant content.
 
-Me: 
+Me: Chunks indexed: *(count from* *`chunks_meta.json`* *after a full-subset run)*
+Embedding dimension: 1024 (confirmed)
+Index type: FAISS HNSW, `M=32`
+Index size on disk: *(from* *`index.faiss`* *file size)*
+Corpus coverage: *(pages/words actually indexed vs. total in the 15-issue subset)*
+
+
+how do i get these? 
+
+AI: Yep — all of these can be extracted from the files produced by your **ingest/index pipeline**. You don't need to guess any of them.
+
+Assuming you're looking at the completed Kaggle run, here’s exactly how to get each one.
+
+### 1. Chunks indexed
+
+The easiest source is `chunks_meta.json`.
+
+```python
+import json
+
+with open("path/to/chunks_meta.json", "r", encoding="utf-8") as f:
+    chunks = json.load(f)
+
+print("Chunks indexed:", len(chunks))
+```
+
+If your `chunks_meta.json` is a JSONL file rather than a JSON array, use:
+
+```python
+with open("path/to/chunks_meta.json", "r", encoding="utf-8") as f:
+    chunks = [json.loads(line) for line in f if line.strip()]
+
+print("Chunks indexed:", len(chunks))
+```
+
+**Use whichever matches your file format.**
+
+---
+
+### 2. Embedding dimension
+
+You already have this:
+
+> **Embedding dimension: 1024**
+
+But you can verify it directly from the FAISS index:
+
+```python
+import faiss
+
+index = faiss.read_index("path/to/index.faiss")
+
+print("Embedding dimension:", index.d)
+print("Number of vectors:", index.ntotal)
+```
+
+So ideally report:
+
+```text
+Embedding dimension: 1024
+```
+
+And `index.ntotal` should normally correspond to the number of indexed chunks.
+
+---
+
+### 3. Index type and M
+
+You know the intended configuration is:
+
+> **FAISS HNSW, M=32**
+
+You can verify the HNSW structure:
+
+```python
+print(type(index))
+
+if hasattr(index, "hnsw"):
+    print("HNSW M:", index.hnsw.nb_neighbors(0))
+```
+
+Depending on your FAISS version, the exact `M` inspection may behave differently. If your config explicitly says `M=32`, that's also perfectly reasonable evidence.
+
+You can report:
+
+```text
+Index type: FAISS HNSW
+M: 32
+```
+
+---
+
+### 4. Index size on disk
+
+This one is super easy:
+
+```python
+from pathlib import Path
+
+index_file = Path("path/to/index.faiss")
+
+size_mb = index_file.stat().st_size / (1024 ** 2)
+
+print(f"Index size on disk: {size_mb:.2f} MB")
+```
+
+For example:
+
+```text
+Index size on disk: 184.37 MB
+```
+
+Use the **actual number from your run**.
+
+---
+
+### 5. Corpus coverage — pages indexed
+
+This is the slightly annoying one because `chunks_meta.json` contains **chunks**, while you want **unique pages**.
+
+If each chunk has `page_ids`, you can do:
+
+```python
+unique_pages = set()
+
+for chunk in chunks:
+    for page_id in chunk.get("page_ids", []):
+        unique_pages.add(page_id)
+
+print("Unique pages indexed:", len(unique_pages))
+```
+
+Then you can say:
+
+```text
+Corpus coverage: 3,xxx pages indexed
+```
+
+or, if your 15-issue subset has a known total:
+
+```text
+Corpus coverage: 3,xxx / 3,xxx pages
+```
+
+---
+
+### 6. Total pages in the 15-issue subset
+
+This depends on what your corpus loader actually processed.
+
+If you have the processed page images available, you can count them:
+
+```python
+from pathlib import Path
+
+pages_dir = Path("../data/interim/pages")
+
+pages = list(pages_dir.rglob("*.png"))
+
+print("Total processed pages:", len(pages))
+```
+
+If your page directory contains multiple issues, this gives the total number of processed pages across them.
+
+Alternatively, if your OCR JSON/TXT output represents the full 15-issue subset, we can derive the total from those files.
+
+---
+
+### 7. Words indexed
+
+You can calculate this from the chunk metadata:
+
+```python
+total_words = 0
+
+for chunk in chunks:
+    text = chunk.get("text", "")
+    total_words += len(text.split())
+
+print("Words indexed:", total_words)
+```
+
+Then you can report something like:
+
+```text
+Corpus coverage: 28,xxx pages / 28,xxx pages; approximately 4.x million words indexed
+```
+
+**But be careful:** if chunks overlap, counting words across chunks can count the same source words more than once. So for the A2 table, I'd prefer saying **"words represented in indexed chunks"** rather than implying they're unique corpus words.
+
+---
+
+## I'd actually run this one diagnostic cell
+
+Once you have downloaded/copied your `index.faiss` and `chunks_meta.json` from Kaggle:
+
+```python
+import json
+from pathlib import Path
+import faiss
+
+# ============================================================
+# INDEX STATISTICS
+# ============================================================
+
+INDEX_FILE = Path("index.faiss")
+META_FILE = Path("chunks_meta.json")
+
+# ------------------------------------------------------------
+# Load FAISS index
+# ------------------------------------------------------------
+
+index = faiss.read_index(str(INDEX_FILE))
+
+# ------------------------------------------------------------
+# Load chunk metadata
+# ------------------------------------------------------------
+
+with META_FILE.open("r", encoding="utf-8") as f:
+    chunks = json.load(f)
+
+# ------------------------------------------------------------
+# Basic statistics
+# ------------------------------------------------------------
+
+num_chunks = len(chunks)
+num_vectors = index.ntotal
+embedding_dim = index.d
+
+# ------------------------------------------------------------
+# Unique pages represented in chunks
+# ------------------------------------------------------------
+
+unique_pages = set()
+
+for chunk in chunks:
+    for page_id in chunk.get("page_ids", []):
+        unique_pages.add(page_id)
+
+# ------------------------------------------------------------
+# Approximate words represented in chunks
+# ------------------------------------------------------------
+
+total_words = sum(
+    len(chunk.get("text", "").split())
+    for chunk in chunks
+)
+
+# ------------------------------------------------------------
+# Index size
+# ------------------------------------------------------------
+
+index_size_mb = INDEX_FILE.stat().st_size / (1024 ** 2)
+
+# ------------------------------------------------------------
+# Print results
+# ------------------------------------------------------------
+
+print("=" * 70)
+print("INDEX STATISTICS")
+print("=" * 70)
+
+print(f"Chunks indexed        : {num_chunks:,}")
+print(f"Vectors in FAISS      : {num_vectors:,}")
+print(f"Embedding dimension   : {embedding_dim}")
+print(f"Index file size       : {index_size_mb:.2f} MB")
+print(f"Unique pages indexed  : {len(unique_pages):,}")
+print(f"Words in chunks       : {total_words:,}")
+
+print("=" * 70)
+```
+
+That gives you **almost everything needed for the A2 table in one shot**.
+
+### One important thing
+
+Don't put `15 issues` as the corpus coverage unless you have actually verified that the full **15-issue subset** was processed.
+
+Your table should ultimately look like:
+
+| Statistic           | Result                                                           |
+| ------------------- | ---------------------------------------------------------------- |
+| Chunks indexed      | **actual `len(chunks_meta)`**                                    |
+| Embedding dimension | **1024**                                                         |
+| Index type          | **FAISS HNSW, M=32**                                             |
+| Index size on disk  | **actual `index.faiss` size**                                    |
+| Corpus coverage     | **actual unique pages indexed / total pages in 15-issue subset** |
+
+If you paste the output of that diagnostic cell here, I can tell you **exactly what numbers belong in the A2 table** and whether any of them are misleading because of chunk overlap.
+
+Me: Index exists   : True
+Metadata exists: True
+
+FAISS index loaded.
+Vectors : 8692
+Dimension: 384
+Metadata: 8692
+
+AI: Yep — this gives us **two of the A2 numbers for sure**:
+
+* **Chunks indexed:** 8,692
+* **Embedding dimension:** 384
+* **Vectors in FAISS:** 8,692
+* **Metadata entries:** 8,692
+
+The fact that **vectors = metadata = 8,692** is exactly what we want: every indexed vector has a corresponding metadata entry.
+
+One thing to flag: your earlier A2 template said **embedding dimension: 1024**, but your actual built index says **384**. So for the final A2 report, use the **actual index result: 384**, unless the project specification explicitly requires a 1024-dimensional model.
+
+You still need these three:
+
+```text
+Index type: FAISS HNSW, M=32
+Index size on disk: ?
+Corpus coverage: ? pages / ? total pages
+```
+
+### Get the index size
+
+Run:
+
+```python
+from pathlib import Path
+
+INDEX_FILE = Path("index.faiss")
+
+size_mb = INDEX_FILE.stat().st_size / (1024 ** 2)
+
+print(f"Index size on disk: {size_mb:.2f} MB")
+```
+
+### Get pages covered
+
+Run:
+
+```python
+unique_pages = set()
+
+for chunk in chunks:
+    for page_id in chunk.get("page_ids", []):
+        unique_pages.add(page_id)
+
+print("Unique pages indexed:", len(unique_pages))
+```
+
+If you haven't loaded `chunks` in this notebook, use:
+
+```python
+import json
+
+with open("chunks_meta.json", "r", encoding="utf-8") as f:
+    chunks = json.load(f)
+
+unique_pages = {
+    page_id
+    for chunk in chunks
+    for page_id in chunk.get("page_ids", [])
+}
+
+print("Unique pages indexed:", len(unique_pages))
+```
+
+Then we need the **total number of pages in your 15-issue subset** to write the denominator.
+
+So right now your table can safely be:
+
+| Statistic               | Result                                                          |
+| ----------------------- | --------------------------------------------------------------- |
+| **Chunks indexed**      | **8,692**                                                       |
+| **Embedding dimension** | **384**                                                         |
+| **Index type**          | **FAISS HNSW, M=32** *(assuming this is your configured index)* |
+| **Index size on disk**  | To be measured                                                  |
+| **Corpus coverage**     | To be measured                                                  |
+
+And honestly, **8,692 vectors / 8,692 metadata entries is a nice clean result** for the demo. No mystery missing vectors lurking in the bushes. 😭
+
+
+Me: Corpus coverage: *(pages/words actually indexed vs. total in the 15-issue subset)*
+
+
+how do i get this 
+
+also the size of the index file is now 15.7 MB 
+
+AI: Yep. So your **index size is now 15.7 MB**. 👍
+
+For **corpus coverage**, you need two things:
+
+1. **How many unique pages actually made it into the index**
+2. **How many total pages exist in the 15-issue subset**
+
+The first one comes from `chunks_meta.json`; the second depends on how your 15-issue subset is organized.
+
+### 1. Pages actually indexed
+
+Since you already have `chunks_meta.json`, run:
+
+```python
+import json
+
+with open("chunks_meta.json", "r", encoding="utf-8") as f:
+    chunks = json.load(f)
+
+indexed_pages = {
+    page_id
+    for chunk in chunks
+    for page_id in chunk.get("page_ids", [])
+}
+
+print("Chunks indexed :", len(chunks))
+print("Pages indexed  :", len(indexed_pages))
+```
+
+You can also get the **number of words indexed**:
+
+```python
+indexed_words = sum(
+    len(chunk.get("text", "").split())
+    for chunk in chunks
+)
+
+print("Words indexed:", indexed_words)
+```
+
+So you'll have something like:
+
+```text
+Chunks indexed : 8692
+Pages indexed  : XXXX
+Words indexed  : XXXXXXX
+```
+
+### 2. Total pages in the 15-issue subset
+
+This depends on where your 15-issue pages are stored.
+
+If your pages are organized something like:
+
+```text
+data/
+└── interim/
+    └── pages/
+        ├── issue_1/
+        │   ├── page_0001.png
+        │   ├── page_0002.png
+        │   └── ...
+        ├── issue_2/
+        └── ...
+```
+
+you can count them with:
+
+```python
+from pathlib import Path
+
+PAGES_DIR = Path("../data/interim/pages")
+
+all_pages = list(PAGES_DIR.rglob("*.png"))
+
+print("Total page images:", len(all_pages))
+```
+
+If they're `.jpg`/`.jpeg` too:
+
+```python
+all_pages = (
+    list(PAGES_DIR.rglob("*.png"))
+    + list(PAGES_DIR.rglob("*.jpg"))
+    + list(PAGES_DIR.rglob("*.jpeg"))
+)
+
+print("Total pages:", len(all_pages))
+```
+
+Then your coverage is simply:
+
+```python
+coverage = len(indexed_pages) / len(all_pages) * 100
+
+print(f"Corpus coverage: {len(indexed_pages)} / {len(all_pages)} pages ({coverage:.2f}%)")
+```
+
+### But there's an important distinction
+
+Don't accidentally use the **entire BYTE corpus** as the denominator.
+
+Your A2 specifically says:
+
+> **15-issue subset**
+
+So `all_pages` needs to represent **only those 15 issues**.
+
+If your `data/interim/pages` directory contains exactly those 15 issues, great. If it contains more, we need to filter it to the 15 issues.
+
+---
+
+### Your A2 statistics are currently
+
+| Metric                             |                     Result |
+| ---------------------------------- | -------------------------: |
+| **Chunks indexed**                 |                  **8,692** |
+| **Embedding dimension**            |                    **384** |
+| **Index type**                     |       **FAISS HNSW, M=32** |
+| **Index size on disk**             |                **15.7 MB** |
+| **Pages indexed**                  |          Need to calculate |
+| **Total pages in 15-issue subset** |          Need to calculate |
+| **Corpus coverage**                | Need the above two numbers |
+
+If you show me the output of:
+
+```bash
+find data/interim/pages -maxdepth 2 -type f | head
+```
+
+and
+
+```bash
+find data/interim/pages -mindepth 1 -maxdepth 1 -type d
+```
+
+I can tell you **exactly** what code to use for the denominator rather than making assumptions about your directory structure.
+
+Me: **OCR quality on a sample**
+*measure reading quality on a labelled sample (character/word error rate, or F1). State the number and the sample size.*
+
+
+answer this based on import json
+import re
+from pathlib import Path
+from jiwer import cer, wer
+
+# ============================================================
+# OCR QUALITY — ONE LABELLED PAGE
+# ============================================================
+
+OCR_FILE = Path(
+    "../data/interim/ocr/byte-magazine-1975-09.txt"
+)
+
+LABELS_FILE = Path(
+    "../grading_kit/labels.jsonl"
+)
+
+TARGET_PAGE = (
+    "1975_09_BYTE_00-01_The_Worlds_Greatest_Toy_p0020"
+)
+
+# ------------------------------------------------------------
+# 1. Load the ground-truth label
+# ------------------------------------------------------------
+
+reference_text = None
+
+with LABELS_FILE.open("r", encoding="utf-8") as f:
+
+    for line in f:
+
+        line = line.strip()
+
+        if not line:
+            continue
+
+        item = json.loads(line)
+
+        if item.get("page_id") == TARGET_PAGE:
+            reference_text = item["text"]
+            break
+
+if reference_text is None:
+    raise ValueError(
+        f"❌ Ground-truth label not found for {TARGET_PAGE}"
+    )
+
+# ------------------------------------------------------------
+# 2. Load OCR output
+# ------------------------------------------------------------
+
+with OCR_FILE.open("r", encoding="utf-8") as f:
+    ocr_chunks = json.load(f)
+
+# ------------------------------------------------------------
+# 3. Extract OCR regions belonging to this page
+# ------------------------------------------------------------
+
+page_chunks = [
+    chunk
+    for chunk in ocr_chunks
+    if TARGET_PAGE in chunk.get("page_ids", [])
+]
+
+if not page_chunks:
+    raise ValueError(
+        f"❌ No OCR regions found for {TARGET_PAGE}"
+    )
+
+# Preserve the order of OCR regions in the OCR output
+ocr_text = "\n".join(
+    chunk.get("text", "")
+    for chunk in page_chunks
+)
+
+# ------------------------------------------------------------
+# 4. Normalize whitespace
+# ------------------------------------------------------------
+# Ground-truth labels use line breaks while OCR is region-based.
+# We collapse consecutive whitespace so CER/WER measures text
+# recognition rather than differences in line/region formatting.
+
+def normalize_text(text):
+    return re.sub(r"\s+", " ", text).strip()
+
+
+reference_normalized = normalize_text(reference_text)
+ocr_normalized = normalize_text(ocr_text)
+
+# ------------------------------------------------------------
+# 5. Calculate CER and WER
+# ------------------------------------------------------------
+
+page_cer = cer(
+    reference_normalized,
+    ocr_normalized
+)
+
+page_wer = wer(
+    reference_normalized,
+    ocr_normalized
+)
+
+# ------------------------------------------------------------
+# 6. Display results
+# ------------------------------------------------------------
+
+print("=" * 70)
+print("OCR QUALITY EVALUATION")
+print("=" * 70)
+
+print(f"Sample size     : 1 labelled page")
+print(f"Page            : {TARGET_PAGE}")
+print(f"OCR regions     : {len(page_chunks)}")
+print(f"Reference chars : {len(reference_normalized)}")
+print(f"OCR chars       : {len(ocr_normalized)}")
+print(f"CER             : {page_cer:.2%}")
+print(f"WER             : {page_wer:.2%}")
+
+print("=" * 70)======================================================================
+OCR QUALITY EVALUATION
+\======================================================================
+Sample size     : 1 labelled page
+Page            : 1975\_09\_BYTE\_00-01\_The\_Worlds\_Greatest\_Toy\_p0020
+OCR regions     : 20
+Reference chars : 5231
+OCR chars       : 4531
+CER             : 20.02%
+WER             : 20.89%
+\======================================================================
+
+AI: ### OCR quality on a sample
+
+> **Sample size:** 1 labelled page
+> **Page:** `1975_09_BYTE_00-01_The_Worlds_Greatest_Toy_p0020`
+> **OCR regions:** 20
+> **Reference text:** 5,231 characters
+> **OCR output:** 4,531 characters
+> **CER:** **20.02%**
+> **WER:** **20.89%**
+
+So for the A2 table, the concise entry can be:
+
+> **CER: 20.02%; WER: 20.89% on 1 labelled page (20 OCR regions).**
+
+
+Short Reflection
+---------------------------
+
+I got the opportunity to learn about Matryoshka Representation Learning in embeddings during this project.
+I honestly did not expect Russian dolls to make an appearance in an embedding pipeline, but the idea of representing information at different embedding dimensions was surprisingly interesting.
+
+The project itself was challenging, especially because the BYTE corpus has complex multi-column layouts, OCR difficulties, and large-scale retrieval requirements.
+However, writing a query and actually seeing relevant chunks being retrieved from the magazine was particularly rewarding because it made the entire pipeline feel much more tangible.
+
+Accepted: 
+> I chose FAISS HNSW because it supports our scalability requirement while keeping retrieval efficient.(This was actually done in A1)
+> Used DocLayout-YOLO score threshold at 0.25 because preserving potentially useful text regions was more important for retrieval than eliminating every duplicate detection.
+> I also got to learn how to take a Git repository and run its code on Kaggle with the help of an LLM, which was useful given the storage and compute limitations of my local machine.
+
+Changed:
+> Experimented with Tesseract and multiple TrOCR models before moving to Qwen2-VL-2B because it provided better OCR results.
+> Replaced the earlier Jina embedding model with BGE-small, prioritizing practical runtime for our English-only corpus and large-scale processing.
+
+Rejected:
+> Rejected olmOCR-2-7B for the main corpus because, despite its strong OCR capability, processing the entire corpus would take substantially longer and require considerably more compute.
+
+
+Overall, most of the practical design decisions in the pipeline—such as incrementally adding to the index, 
+choosing a smaller VLM for OCR, and choosing a smaller embedding model for scalability were decisions 
+I personally considered and made based on the available compute, corpus size, and project requirements.
