@@ -2,8 +2,9 @@ Header
 ------------------------------
 Member Name: Sunanda Chowdhury
 Student Number: 2105173 
-AI used : Claude Sonnet 5 Medium
 Sections Led: 1, 3, 4, 5, 7
+
+AI used : Claude Sonnet 5 Medium
 
 Full Conversation
 ------------------------------
