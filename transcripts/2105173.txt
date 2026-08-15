@@ -2,8 +2,9 @@ Header
 ------------------------------
 Member Name: Sunanda Chowdhury
 Student Number: 2105173 
+Sections Led: 1, 3, 4, 5, 7
+
 AI used : Claude Sonnet 5 Medium
-Sections Led: 
 
 Full Conversation
 ------------------------------
@@ -4102,3 +4103,14 @@ If `embed.py`'s `encode()` ever internally does something like sorting, deduplic
 
 ## In your standalone Kaggle test
 This is also why the test script passed `final_chunks` into both `encode(final_chunks, ...)` *and* would pass into `store.build(final_chunks, vectors, ...)` — same principle, just done manually in one notebook instead of via `pipeline.py`'s automatic wiring.
+
+
+Short Reflection:
+
+Working with Claude, I started from a base store.py implementation that rebuilt the FAISS index from scratch on every run. I accepted its overall structure (HNSW index + a matched JSON metadata file, since FAISS itself has no concept of chunk text) but changed it significantly: I added incremental indexing so new issues get appended to the existing index instead of rebuilding everything, plus a duplicate-doc_id safety check to prevent accidentally indexing the same issue twice. I also switched the FAISS metric to inner product, which I still need to confirm is paired with normalized embeddings for correctness.
+
+For the embedding model, Claude's original suggestion was jinaai/jina-embeddings-v5-text-small, reasoned mainly from published model specs rather than an actual benchmark on our data. I rejected this in practice as Kaggle's GPU time is limited, and Jina's multilingual capability is wasted on an English-only corpus and switched to the lighter BAAI/bge-small-en-v1.5 instead. This is a deviation from what our A1 form proposed (Jina vs Qwen3-Embedding-4B), which I'm noting honestly in the A2 form rather than pretending the original plan held.
+
+For chunk.py, I accepted the core re-chunking logic as-is but fixed a path-resolution bug that broke when running locally versus on Kaggle, by adding a project-root finder instead of a hardcoded relative path.
+
+For versioning.py and validate.py, I accepted Claude's code after understanding them. My transcript has all the chats related to these.

@@ -4,16 +4,30 @@ import json
 from pathlib import Path
 from ..contracts import Chunk
 
-CHUNK_DIR = Path("data/interim/chunks")
+from pathlib import Path
+
+from pathlib import Path
 
 
-def _token_count(text: str) -> int:
-    return len(text.split())
+def _find_project_root() -> Path:
+    current = Path(__file__).resolve()
 
+    for parent in current.parents:
+        if (
+            (parent / "src").is_dir()
+            and (parent / "data").is_dir()
+        ):
+            return parent
+
+    raise RuntimeError(
+        "Could not find project root containing both 'src' and 'data'."
+    )
+
+PROJECT_ROOT = _find_project_root()
+CHUNK_DIR = PROJECT_ROOT / "data" / "interim" / "chunks"
 
 def split(chunks: list[Chunk], cfg: dict) -> list[Chunk]:
     """Re-chunk raw per-region OCR chunks to cfg['index'] size/overlap.
-
     Input: small, region-sized Chunks from ocr.transcribe() (one per detected
     region — text/table/heading blocks), already in correct multi-column
     reading order from layout.py. This function regroups them, never reorders.
@@ -67,7 +81,15 @@ def split(chunks: list[Chunk], cfg: dict) -> list[Chunk]:
     # Checkpoint, matching layout.py/ocr.py's pattern — lets embed.py (or you,
     # re-running this notebook later) reload without recomputing.
     CHUNK_DIR.mkdir(parents=True, exist_ok=True)
-    out_path = CHUNK_DIR / "chunks.json"
+    doc_ids = {c.doc_id for c in chunks}
+
+    if len(doc_ids) == 1:
+        doc_id = next(iter(doc_ids))
+        output_name = f"{doc_id}.json"
+    else:
+        output_name = "chks.json"
+
+    out_path = CHUNK_DIR / output_name
     with out_path.open("w", encoding="utf-8") as f:
         json.dump([c.model_dump() for c in output], f, indent=2, ensure_ascii=False)
     print(f"Saved {len(output)} final chunks to {out_path}")

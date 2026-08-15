@@ -5,6 +5,7 @@ from pathlib import Path
 import numpy as np
 from ..contracts import Chunk
 
+
 EMBED_DIR = Path("data/interim/embed")
 _model = None
 
@@ -14,7 +15,7 @@ def _get_model(cfg: dict):
     if _model is not None:
         return _model
     from sentence_transformers import SentenceTransformer
-    model_name = cfg.get("embed", {}).get("model", "jinaai/jina-embeddings-v5-text-small")
+    model_name = cfg.get("embed", {}).get("model", "BAAI/bge-small-en-v1.5") # changed from jinaai/jina-embeddings-v5-text-small
     _model = SentenceTransformer(model_name, trust_remote_code=True)
     return _model
 
@@ -29,6 +30,7 @@ def encode(chunks: list[Chunk], cfg: dict) -> np.ndarray:
         batch_size=32,
         show_progress_bar=True,
         convert_to_numpy=True,
+        normalize_embeddings=True,
     )
 
     expected_dim = cfg.get("embed", {}).get("dim")
